@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/store/cartStore'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils'
-import Script from 'next/script'
 import Image from 'next/image'
 
 export default function CheckoutPage() {
@@ -79,36 +78,8 @@ export default function CheckoutPage() {
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'Failed to create order')
 
-            // 2. Open Razorpay
-            const options = {
-                key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-                amount: data.amount, // in paise
-                currency: "INR",
-                name: "Savika Premium Spices",
-                description: "Purchase of premium spices",
-                image: "/logo.png",
-                order_id: data.razorpay_order_id,
-                handler: function (response: any) {
-                    // Payment successful (webhook handles actual DB update)
-                    clearCart()
-                    router.push(`/account/orders?success=true&order=${data.orderId}`)
-                },
-                prefill: {
-                    name: profile?.full_name || '',
-                    email: profile?.email || '',
-                    contact: profile?.mobile || ''
-                },
-                theme: {
-                    color: "#C47F17"
-                }
-            }
-
-            const rzp = new (window as any).Razorpay(options)
-            rzp.on('payment.failed', function (response: any) {
-                setError(response.error.description || 'Payment failed')
-                setLoading(false)
-            })
-            rzp.open()
+            clearCart()
+            router.push(`/account/orders?success=true&order=${data.orderId}`)
             
         } catch (err: any) {
             setError(err.message)
@@ -120,7 +91,6 @@ export default function CheckoutPage() {
 
     return (
         <div className="min-h-screen bg-[#F9F4EE]">
-            <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
             <div className="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-8">
                 
                 {/* Shipping Form */}

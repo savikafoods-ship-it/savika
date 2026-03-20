@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { razorpay } from '@/lib/razorpay'
 
 export async function POST(req: Request) {
     try {
@@ -11,11 +10,7 @@ export async function POST(req: Request) {
         const body = await req.json()
         const { items, shipping_address, subtotal, shipping, total, coupon_code } = body
 
-        const rzpOrder = await razorpay.orders.create({
-            amount: Math.round(total * 100),
-            currency: 'INR',
-            receipt: `rcpt_${Date.now()}`
-        })
+        const { data: profile } = await supabase.from('profiles').select('full_name, email').eq('id', user.id).single()
 
         const { data, error } = await supabase.from('orders').insert({
             user_id: user.id,
@@ -25,16 +20,26 @@ export async function POST(req: Request) {
             discount: 0,
             total,
             coupon_code: coupon_code || null,
-            status: 'pending',
-            razorpay_order_id: rzpOrder.id
+            status: 'processing'
         }).select().single()
 
         if (error) throw error
 
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+        fetch(`${appUrl}/api/notify/order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                orderId: data.id,
+                total: data.total,
+                userName: profile?.full_name || 'Customer',
+                userEmail: profile?.email,
+                items: data.items
+            })
+        }).catch(console.error)
+
         return NextResponse.json({
-            orderId: data.id,
-            razorpay_order_id: rzpOrder.id,
-            amount: rzpOrder.amount
+            orderId: data.id
         })
     } catch (e: any) {
         return NextResponse.json({ error: e.message }, { status: 500 })
