@@ -45,7 +45,7 @@ export default function HeroSection() {
 
                         {/* Sub */}
                         <p style={{ color: '#5a4a3a', fontSize: '1rem', lineHeight: 1.7, marginBottom: '2rem', maxWidth: '460px' }}>
-                            Hand-picked from India&apos;s finest spice gardens — Rajasthan, Kerala &amp; the Northeast.
+                            Hand-picked from India&apos;s finest spice gardens - Rajasthan, Kerala &amp; the Northeast.
                             Freshly ground, artisan-blended, and delivered straight to your door.{' '}
                             <strong style={{ color: '#2E2E2E' }}>Taste real purity.</strong>
                         </p>
@@ -98,7 +98,7 @@ export default function HeroSection() {
                                 <p style={{ fontSize: '0.75rem', color: '#8E562E' }}>Whole · Single Origin</p>
                             </div>
 
-                            {/* Floating badge — top right */}
+                            {/* Floating badge - top right */}
                             <div style={{
                                 position: 'absolute', top: '-10px', right: '-10px',
                                 background: '#fff', borderRadius: '14px',
@@ -115,7 +115,7 @@ export default function HeroSection() {
                                 </div>
                             </div>
 
-                            {/* Floating badge — bottom left */}
+                            {/* Floating badge - bottom left */}
                             <div style={{
                                 position: 'absolute', bottom: '10px', left: '-20px',
                                 background: '#fff', borderRadius: '14px',

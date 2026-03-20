@@ -10,14 +10,18 @@
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
 
-  --color-gold: #C47F17;
-  --color-gold-dark: #a86c12;
-  --color-brown: #8E562E;
-  --color-cream: #FFF8F0;
-  --color-cream-mid: #FFF0DC;
+  --color-amber-500: #F59E0B;
+  --color-amber-700: #C17F24;
+  --color-amber-800: #8B5E16;
+  --color-stone-100: #F5F0E8;
+  --color-gray-950: #111111;
+  --color-gray-700: #444444;
+  --color-gray-500: #888888;
+  --color-gray-300: #DDDDDD;
+  --color-green-800: #1A6B3C;
+  --color-red-700: #B91C1C;
 
   --font-sans: var(--font-poppins), 'Poppins', system-ui, sans-serif;
-  --font-display: var(--font-playfair), 'Playfair Display', Georgia, serif;
 }
 
 /* ════════════════════════════════════════════════

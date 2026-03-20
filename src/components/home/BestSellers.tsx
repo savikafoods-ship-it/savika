@@ -3,10 +3,10 @@ import ProductCard from '@/components/product/ProductCard'
 import type { Product } from '@/types/database'
 
 const BESTSELLERS: Product[] = [
-    { id: 'bs1', slug: 'star-anise-whole', name: 'Star Anise — Premium Whole', description: '', price: 399, sale_price: 299, stock: 40, category_id: 'cat1', images: [], is_featured: true, is_active: true, created_at: '', category: { id: 'cat1', slug: 'whole-spices', name: 'Whole Spices', created_at: '' } },
-    { id: 'bs2', slug: 'coriander-powder', name: 'Coriander Powder — Freshly Ground', description: '', price: 189, sale_price: undefined, stock: 90, category_id: 'cat2', images: [], is_featured: true, is_active: true, created_at: '', category: { id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', created_at: '' } },
+    { id: 'bs1', slug: 'star-anise-whole', name: 'Star Anise - Premium Whole', description: '', price: 399, sale_price: 299, stock: 40, category_id: 'cat1', images: [], is_featured: true, is_active: true, created_at: '', category: { id: 'cat1', slug: 'whole-spices', name: 'Whole Spices', created_at: '' } },
+    { id: 'bs2', slug: 'coriander-powder', name: 'Coriander Powder - Freshly Ground', description: '', price: 189, sale_price: undefined, stock: 90, category_id: 'cat2', images: [], is_featured: true, is_active: true, created_at: '', category: { id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', created_at: '' } },
     { id: 'bs3', slug: 'biryani-masala', name: 'Royal Biryani Masala', description: '', price: 449, sale_price: 349, stock: 25, category_id: 'cat3', images: [], is_featured: true, is_active: true, created_at: '', category: { id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', created_at: '' } },
-    { id: 'bs4', slug: 'saffron-premium', name: 'Kashmiri Saffron — Grade A', description: '', price: 1299, sale_price: undefined, stock: 15, category_id: 'cat5', images: [], is_featured: true, is_active: true, created_at: '', category: { id: 'cat5', slug: 'exotics-rare', name: 'Exotics & Rare', created_at: '' } },
+    { id: 'bs4', slug: 'saffron-premium', name: 'Kashmiri Saffron - Grade A', description: '', price: 1299, sale_price: undefined, stock: 15, category_id: 'cat5', images: [], is_featured: true, is_active: true, created_at: '', category: { id: 'cat5', slug: 'exotics-rare', name: 'Exotics & Rare', created_at: '' } },
 ]
 
 export default function BestSellers() {

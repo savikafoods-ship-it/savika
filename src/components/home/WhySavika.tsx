@@ -1,9 +1,9 @@
 import Link from 'next/link'
 
 const reasons = [
-    { icon: 'fa-seedling', title: 'Farm-to-Pack Freshness', desc: 'Direct from farmers across Rajasthan, Kerala & the Northeast — no middlemen.', color: '#D4EDDA', iconColor: '#28A745' },
+    { icon: 'fa-seedling', title: 'Farm-to-Pack Freshness', desc: 'Direct from farmers across Rajasthan, Kerala & the Northeast - no middlemen.', color: '#D4EDDA', iconColor: '#28A745' },
     { icon: 'fa-flask', title: 'Lab-Tested Quality', desc: 'Every batch tested for purity & adulteration. 100% clean guarantee.', color: '#CCE5FF', iconColor: '#007BFF' },
-    { icon: 'fa-boxes-stacked', title: 'Eco-Friendly Packaging', desc: 'Resealable, airtight, recyclable packs — freshness guaranteed longer.', color: '#FFF3CD', iconColor: '#C47F17' },
+    { icon: 'fa-boxes-stacked', title: 'Eco-Friendly Packaging', desc: 'Resealable, airtight, recyclable packs - freshness guaranteed longer.', color: '#FFF3CD', iconColor: '#C47F17' },
     { icon: 'fa-hand-holding-heart', title: 'Fair Trade Sourcing', desc: 'Fair prices to farmers, ethical conditions across our supply chain.', color: '#F8D7DA', iconColor: '#DC3545' },
 ]
 
@@ -23,7 +23,7 @@ export default function WhySavika() {
                         Quality That <em style={{ color: '#FFE0A0' }}>Loves</em> Your Kitchen Back
                     </h2>
                     <p style={{ color: 'rgba(255,255,255,.8)', fontSize: '1rem', marginBottom: '2rem' }}>
-                        We are redefining spice with clean, conscious quality — from source to your shelf.
+                        We are redefining spice with clean, conscious quality - from source to your shelf.
                     </p>
                     <Link href="/shop" className="btn-gold" style={{ display: 'inline-flex' }}>
                         <i className="fa-solid fa-store" />

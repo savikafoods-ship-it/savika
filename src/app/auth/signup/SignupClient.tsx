@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client'
+
 export default function SignupClient() {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
@@ -15,9 +17,19 @@ export default function SignupClient() {
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
-        setError('')
-        // Mock signup
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const supabase = createClient()
+        const { error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { full_name: name, email }
+            }
+        })
+        if (error) {
+            setError(error.message)
+            setLoading(false)
+            return
+        }
         setSuccess(true)
         setLoading(false)
     }

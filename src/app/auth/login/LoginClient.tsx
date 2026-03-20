@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginClient() {
     const [email, setEmail] = useState('')
@@ -16,10 +17,15 @@ export default function LoginClient() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
-        setError('')
-        // Mock login
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const supabase = createClient()
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) {
+            setError(error.message)
+            setLoading(false)
+            return
+        }
         router.push('/account/orders')
+        router.refresh()
     }
 
     return (

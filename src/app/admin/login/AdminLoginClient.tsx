@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client'
 
 export default function AdminLoginClient() {
     const [email, setEmail] = useState('')
@@ -21,15 +22,26 @@ export default function AdminLoginClient() {
         e.preventDefault()
         setLoading(true)
         setError('')
+        const supabase = createClient()
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+        
+        if (signInError) {
+            setError(signInError.message)
+            setLoading(false)
+            return
+        }
 
-        // Mock admin login
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        if (email === 'admin@savika.in') {
-            router.push('/admin/dashboard')
-        } else {
+        const { data: adminData } = await supabase.from('admins').select('role').eq('id', data.user.id).single()
+        
+        if (!adminData || adminData.role !== 'admin') {
+            await supabase.auth.signOut()
             setError('Access Denied. This portal is for administrators only.')
             setLoading(false)
+            return
         }
+
+        router.push('/admin/dashboard')
+        router.refresh()
     }
 
     return (

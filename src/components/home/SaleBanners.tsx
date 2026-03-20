@@ -1,98 +1,99 @@
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
 
-const banners = [
-    {
-        bg: 'linear-gradient(135deg, #7a4824 0%, #C47F17 100%)',
-        badge: 'Limited Time', badgeIcon: 'fa-fire',
-        title: '50%', titleSub: 'OFF',
-        sub: 'On all masala blends',
-        desc: 'Use code SPICE50 at checkout',
-        cta: { label: 'Buy Now', href: '/shop?sale=masala' },
-        icon: 'fa-jar',
-    },
-    {
-        bg: 'linear-gradient(135deg, #C47F17 0%, #E6A020 100%)',
-        badge: 'Fan Favourite', badgeIcon: 'fa-star',
-        title: '50%', titleSub: 'OFF',
-        sub: 'Exotic & Rare spices',
-        desc: 'Desi. Vegan. Powerful.',
-        cta: { label: 'Buy Now', href: '/category/exotics-rare' },
-        icon: 'fa-gem',
-    },
-]
+interface PromoCard {
+    badge: string
+    headline: string
+    subheading: string
+    body: string
+    button_label: string
+    button_url: string
+    bg_image: string | null
+    icon: string
+}
 
-export default function SaleBanners() {
+export default async function SaleBanners() {
+    const supabase = await createClient()
+
+    // Fetch the two promo cards from site_content
+    const { data: promo1Data } = await supabase.from('site_content').select('value').eq('key', 'promo_card_1').single()
+    const { data: promo2Data } = await supabase.from('site_content').select('value').eq('key', 'promo_card_2').single()
+
+    // Fallbacks matching the original static content in case DB is empty yet
+    const promo1: PromoCard = promo1Data?.value || {
+        badge: 'Limited Time', headline: '50% OFF', subheading: 'On all masala blends', body: 'Use code SPICE50 at checkout', button_label: 'Buy Now', button_url: '/shop?sale=masala', bg_image: null, icon: 'jar'
+    }
+    const promo2: PromoCard = promo2Data?.value || {
+        badge: 'Fan Favourite', headline: '50% OFF', subheading: 'Exotic & Rare spices', body: 'Desi. Vegan. Powerful.', button_label: 'Buy Now', button_url: '/category/exotics-rare', bg_image: null, icon: 'gem'
+    }
+
+    const renderCard = (b: PromoCard, fallbackBg: string, badgeIcon: string) => {
+        const headlineParts = b.headline.split(' ')
+        const mainStat = headlineParts[0] || ''
+        const subStat = headlineParts.slice(1).join(' ') || ''
+
+        const bgStyle = b.bg_image ? `url(${b.bg_image}) center/cover no-repeat` : fallbackBg
+
+        // "Icon circle: absolute right-side, semi-transparent white circle, 80px diameter, icon centred"
+        return (
+            <div
+                style={{
+                    background: bgStyle,
+                    borderRadius: '1.5rem',
+                    padding: '2rem 2rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    minHeight: '220px',
+                }}
+                className="min-h-[220px] md:min-h-[280px] shadow-sm hover:scale-105 transition-transform duration-300"
+            >
+                {/* Decorative circles */}
+                <div style={{ position: 'absolute', right: '-2rem', top: '-2rem', width: '140px', height: '140px', borderRadius: '50%', background: 'rgba(255,255,255,.12)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', right: '-0.5rem', bottom: '-1.5rem', width: '90px', height: '90px', borderRadius: '50%', background: 'rgba(255,255,255,.08)', pointerEvents: 'none' }} />
+
+                {/* Text side */}
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                    <span 
+                        className="inline-flex items-center gap-1.5 bg-black/30 text-white text-xs font-semibold px-3 py-1 rounded-full mb-3"
+                    >
+                        <i className={`fa-solid ${badgeIcon} text-[10px]`} />
+                        {b.badge}
+                    </span>
+                    <div className="flex items-baseline gap-1 mb-1">
+                        <span className="font-bold text-5xl text-white font-[var(--font-poppins)]">
+                            {mainStat}
+                        </span>
+                        {subStat && <span className="text-2xl font-bold text-white">{subStat}</span>}
+                    </div>
+                    <p className="text-base font-bold text-white/95 mb-1">{b.subheading}</p>
+                    <p className="text-sm text-white/80 mb-5">{b.body}</p>
+                    
+                    <Link
+                        href={b.button_url}
+                        className="inline-flex items-center gap-2 bg-white text-[#C17F24] font-semibold text-sm px-6 py-3 rounded-full hover:scale-105 transition-transform duration-300"
+                    >
+                        <i className="fa-solid fa-bolt text-[12px]" />
+                        {b.button_label}
+                    </Link>
+                </div>
+
+                {/* Icon side */}
+                <div className="w-[80px] h-[80px] rounded-full shrink-0 bg-white/15 flex items-center justify-center relative z-10 hidden sm:flex">
+                    <i className={`fa-solid fa-${b.icon || 'star'} text-3xl text-white`} />
+                </div>
+            </div>
+        )
+    }
+
     return (
-        <section style={{ padding: '2.5rem 1rem', background: '#F9F4EE' }}>
-            <div className="section-wrap">
-                <div className="grid-2">
-                    {banners.map((b, i) => (
-                        <div
-                            key={i}
-                            style={{
-                                background: b.bg,
-                                borderRadius: '1.25rem',
-                                padding: '2rem 2rem',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                position: 'relative',
-                                overflow: 'hidden',
-                                minHeight: '200px',
-                            }}
-                        >
-                            {/* Decorative circles */}
-                            <div style={{ position: 'absolute', right: '-2rem', top: '-2rem', width: '140px', height: '140px', borderRadius: '50%', background: 'rgba(255,255,255,.12)', pointerEvents: 'none' }} />
-                            <div style={{ position: 'absolute', right: '-0.5rem', bottom: '-1.5rem', width: '90px', height: '90px', borderRadius: '50%', background: 'rgba(255,255,255,.08)', pointerEvents: 'none' }} />
-
-                            {/* Text side */}
-                            <div style={{ position: 'relative', zIndex: 1 }}>
-                                <span style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                                    background: 'rgba(255,255,255,.25)', color: '#fff',
-                                    fontSize: '11px', fontWeight: 700,
-                                    padding: '0.25rem 0.75rem', borderRadius: '9999px',
-                                    marginBottom: '0.75rem'
-                                }}>
-                                    <i className={`fa-solid ${b.badgeIcon}`} style={{ fontSize: '10px' }} />
-                                    {b.badge}
-                                </span>
-                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px', marginBottom: '0.25rem' }}>
-                                    <span style={{
-                                        fontSize: 'clamp(2.5rem, 6vw, 4rem)',
-                                        fontWeight: 800, lineHeight: 1, color: '#fff',
-                                        fontFamily: 'var(--font-playfair, Georgia)'
-                                    }}>{b.title}</span>
-                                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff' }}>{b.titleSub}</span>
-                                </div>
-                                <p style={{ fontSize: '1rem', fontWeight: 700, color: 'rgba(255,255,255,.95)', marginBottom: '0.25rem' }}>{b.sub}</p>
-                                <p style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,.7)', marginBottom: '1.25rem' }}>{b.desc}</p>
-                                <Link
-                                    href={b.cta.href}
-                                    style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                                        background: '#fff', color: '#8E562E',
-                                        fontWeight: 700, fontSize: '0.8125rem',
-                                        padding: '0.6rem 1.25rem', borderRadius: '9999px',
-                                        textDecoration: 'none', transition: 'background 200ms, color 200ms'
-                                    }}
-                                >
-                                    <i className="fa-solid fa-bolt" style={{ fontSize: '10px' }} />
-                                    {b.cta.label}
-                                </Link>
-                            </div>
-
-                            {/* Icon side */}
-                            <div style={{
-                                width: '80px', height: '80px', borderRadius: '50%', flexShrink: 0,
-                                background: 'rgba(255,255,255,.15)', display: 'flex',
-                                alignItems: 'center', justifyContent: 'center',
-                                position: 'relative', zIndex: 1
-                            }}>
-                                <i className={`fa-solid ${b.icon}`} style={{ fontSize: '2rem', color: '#fff' }} />
-                            </div>
-                        </div>
-                    ))}
+        <section className="py-12 md:py-20 bg-[#F5F0E8]">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {renderCard(promo1, 'linear-gradient(135deg, #7a4824 0%, #C17F24 100%)', 'fa-fire')}
+                    {renderCard(promo2, 'linear-gradient(135deg, #C17F24 0%, #E6A020 100%)', 'fa-star')}
                 </div>
             </div>
         </section>

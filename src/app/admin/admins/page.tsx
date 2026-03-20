@@ -120,7 +120,7 @@ export default function AdminsPage() {
                         </div>
                         <p className="text-xs text-gray-600 mt-2">
                             <i className="fa-solid fa-lock mr-1" />
-                            "Manage Admins" permission is never grantable — only Super Admin can create admins.
+                            "Manage Admins" permission is never grantable - only Super Admin can create admins.
                         </p>
                     </div>
 

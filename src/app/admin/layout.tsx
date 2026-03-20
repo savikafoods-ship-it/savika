@@ -1,15 +1,24 @@
-// Admin Layout — Server Component
+// Admin Layout - Server Component
 // Handles role-based access control server-side before rendering anything
 import { redirect } from 'next/navigation'
 import AdminLayoutClient from './AdminLayoutClient'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    // Mock user for now
-    const user = { id: 'mock-admin', email: 'admin@savika.in' }
-    const role = 'super_admin'
+    if (!user) {
+        redirect('/admin/login')
+    }
+
+    const { data: adminData } = await supabase.from('admins').select('role, full_name').eq('id', user.id).single()
+
+    if (!adminData || adminData.role !== 'admin') {
+        redirect('/admin/login?error=unauthorized')
+    }
 
     const permissions = {
         can_manage_products: true,
@@ -20,10 +29,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
     return (
         <AdminLayoutClient
-            role={role as 'admin' | 'super_admin'}
+            role={adminData.role as 'admin' | 'super_admin'}
             permissions={permissions}
-            userEmail={user.email}
-            userName={'Admin'}
+            userEmail={user.email || ''}
+            userName={adminData.full_name || 'Admin'}
         >
             {children}
         </AdminLayoutClient>

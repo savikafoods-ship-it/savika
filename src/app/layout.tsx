@@ -1,21 +1,14 @@
 import type { Metadata } from 'next'
-import { Playfair_Display, Poppins } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 import './globals.css'
-import '@fortawesome/fontawesome-free/css/all.min.css'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
 const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-poppins',
-  display: 'swap',
-})
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
-  variable: '--font-playfair',
-  display: 'swap',
+ subsets: ['latin', 'latin-ext'],
+ weight: ['300', '400', '500', '600', '700', '800'],
+ variable: '--font-poppins',
+ display: 'swap',
+ preload: true,
 })
 
 export const metadata: Metadata = {
@@ -33,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable} ${playfair.variable}`}>
-      <body className="font-sans antialiased bg-[#FFF8F0]">
+    <html lang="en" className={poppins.variable}>
+      <body className="font-[--font-poppins] bg-[#F5F0E8]">
         {children}
       </body>
     </html>
