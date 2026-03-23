@@ -88,7 +88,7 @@ export default function Footer() {
                             </div>
                             <div className="flex items-center gap-2 text-xs text-white/60">
                                 <Mail className="w-4 h-4 text-white/80 shrink-0" />
-                                <span>hello@savikafoods.in</span>
+                                <span>savikafoods@gmail.com</span>
                             </div>
                         </div>
                     </div>
