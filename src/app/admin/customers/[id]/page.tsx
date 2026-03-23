@@ -10,7 +10,7 @@ export default async function AdminCustomerDetailsPage({ params }: { params: Pro
     let user = null
 
     try {
-        const { users } = createAdminClient()
+        const { users } = await createAdminClient()
         user = await users.get(id)
     } catch (error: any) {
         if (error.code === 404) notFound()

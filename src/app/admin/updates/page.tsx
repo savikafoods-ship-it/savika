@@ -1,2 +1,7 @@
 export const dynamic = 'force-dynamic'
-export { default } from './AdminUpdatesClient'
+
+import AdminUpdatesClient from './AdminUpdatesClient'
+
+export default function AdminUpdatesPage() {
+  return <AdminUpdatesClient />
+}

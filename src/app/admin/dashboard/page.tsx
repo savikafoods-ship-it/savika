@@ -47,7 +47,7 @@ export default function AdminDashboard() {
     const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
             {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold text-white">Dashboard</h1>
@@ -55,16 +55,16 @@ export default function AdminDashboard() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {stats.map((stat) => {
                     const Icon = stat.icon
                     return (
-                        <div key={stat.label} className="bg-[#1A1A1A] rounded-xl p-5 border border-white/5">
+                        <div key={stat.label} className="bg-[#1A1A1A] rounded-xl p-3 sm:p-4 lg:p-5 border border-white/5">
                             <div className="flex items-center justify-between mb-3">
                                 <Icon className={`w-5 h-5 ${stat.color}`} />
                                 <span className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">{stat.change}</span>
                             </div>
-                            <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
+                            <p className="text-xl sm:text-2xl font-bold text-white mt-1">{stat.value}</p>
                             <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
                         </div>
                     )
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
             {/* Charts Row */}
             <div className="grid lg:grid-cols-3 gap-4">
                 {/* Revenue Chart */}
-                <div className="lg:col-span-2 bg-[#1A1A1A] rounded-xl p-5 border border-white/5">
+                <div className="lg:col-span-2 bg-[#1A1A1A] rounded-xl p-4 sm:p-5 border border-white/5">
                     <h2 className="text-sm font-bold text-white mb-6">Monthly Revenue (Rs.)</h2>
                     <ResponsiveContainer width="100%" height={220}>
                         <LineChart data={revenueData}>
@@ -88,7 +88,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Top Products */}
-                <div className="bg-[#1A1A1A] rounded-xl p-5 border border-white/5">
+                <div className="bg-[#1A1A1A] rounded-xl p-4 sm:p-5 border border-white/5">
                     <h2 className="text-sm font-bold text-white mb-6">Top Products</h2>
                     <ResponsiveContainer width="100%" height={220}>
                         <BarChart data={topProducts} layout="vertical">
@@ -102,32 +102,32 @@ export default function AdminDashboard() {
             </div>
 
             {/* Recent Orders */}
-            <div className="bg-[#1A1A1A] rounded-xl p-5 border border-white/5">
+            <div className="bg-[#1A1A1A] rounded-xl p-4 sm:p-5 border border-white/5">
                 <div className="flex items-center justify-between mb-5">
                     <h2 className="text-sm font-bold text-white">Recent Orders</h2>
                     <Link href="/admin/orders" className="text-xs text-[#C17F24] hover:underline">View All</Link>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full">
+                <div className="overflow-x-auto -mx-4 sm:mx-0 rounded-xl">
+                    <table className="min-w-full divide-y divide-white/5">
                         <thead>
-                            <tr className="text-xs text-gray-500 border-b border-white/5">
-                                <th className="text-left pb-3">Order ID</th>
-                                <th className="text-left pb-3">Customer</th>
-                                <th className="text-left pb-3">Amount</th>
-                                <th className="text-left pb-3">Status</th>
-                                <th className="text-left pb-3">Date</th>
+                            <tr className="text-xs text-gray-500">
+                                <th className="text-left pb-3 whitespace-nowrap px-4 sm:px-0">Order ID</th>
+                                <th className="text-left pb-3 whitespace-nowrap px-2">Customer</th>
+                                <th className="text-left pb-3 whitespace-nowrap px-2">Amount</th>
+                                <th className="text-left pb-3 whitespace-nowrap px-2">Status</th>
+                                <th className="text-left pb-3 whitespace-nowrap px-2 hidden sm:table-cell">Date</th>
                             </tr>
                         </thead>
                         <tbody>
                             {recentOrders.map((order) => (
                                 <tr key={order.id} className="border-b border-white/5 last:border-0">
-                                    <td className="py-3 text-sm text-[#C17F24] font-medium">{order.id}</td>
-                                    <td className="py-3 text-sm text-white">{order.customer}</td>
-                                    <td className="py-3 text-sm text-white font-semibold">Rs.{order.amount}</td>
-                                    <td className="py-3">
-                                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColors[order.status]}`}>{order.status}</span>
+                                    <td className="py-3 text-sm text-[#C17F24] font-medium whitespace-nowrap px-4 sm:px-0">{order.id}</td>
+                                    <td className="py-3 text-sm text-white whitespace-nowrap px-2">{order.customer}</td>
+                                    <td className="py-3 text-sm text-white font-semibold whitespace-nowrap px-2">Rs.{order.amount}</td>
+                                    <td className="py-3 px-2">
+                                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${statusColors[order.status]}`}>{order.status}</span>
                                     </td>
-                                    <td className="py-3 text-sm text-gray-400">{order.date}</td>
+                                    <td className="py-3 text-sm text-gray-400 whitespace-nowrap px-2 hidden sm:table-cell">{order.date}</td>
                                 </tr>
                             ))}
                         </tbody>

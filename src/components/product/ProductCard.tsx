@@ -7,6 +7,7 @@ import { Heart, ShoppingCart, Check, Star } from 'lucide-react'
 import type { Product } from '@/types'
 import { formatCurrency, getDiscountPercent } from '@/lib/utils'
 import { useCartStore } from '@/store/cartStore'
+import { getProductImageUrl } from '@/lib/appwrite/imageUrl'
 
 interface ProductCardProps {
     product: Product
@@ -16,6 +17,7 @@ interface ProductCardProps {
 export default function ProductCard({ product, className = '' }: ProductCardProps) {
     const [isWishlisted, setIsWishlisted] = useState(false)
     const [adding, setAdding] = useState(false)
+    const [imgError, setImgError] = useState(false)
     const { addItem } = useCartStore()
 
     const handleAddToCart = async (e: React.MouseEvent) => {
@@ -32,14 +34,15 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
             <Link href={`/product/${product.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
                 {/* Image */}
                 <div className="product-card-img">
-                    {product.imageIds?.[0] ? (
+                    {product.imageIds?.[0] && !imgError ? (
                         <Image
-                            src={product.imageIds[0].startsWith('/') ? product.imageIds[0] : `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || ''}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS || ''}/files/${product.imageIds[0]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || ''}&width=400&quality=80&output=webp`}
+                            src={product.imageIds[0].startsWith('/') ? product.imageIds[0] : getProductImageUrl(product.imageIds[0], 400, 80)}
                             alt={product.name}
                             fill
                             className="object-contain"
                             style={{ padding: '1rem', transition: 'transform 400ms' }}
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                            onError={() => setImgError(true)}
                         />
                     ) : (
                         <div className="img-ph">

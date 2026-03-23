@@ -9,7 +9,7 @@ export default async function AdminCustomersPage() {
     let usersList: any = { users: [], total: 0 }
 
     try {
-        const { users } = createAdminClient()
+        const { users } = await createAdminClient()
         // Note: Admin Client is required to list users globally
         usersList = await users.list()
     } catch (e) {

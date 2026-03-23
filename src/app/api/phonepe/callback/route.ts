@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         const transactionId = data.data.merchantTransactionId
 
         // Update DB
-        const { databases } = createAdminClient()
+        const { databases } = await createAdminClient()
         
         await databases.updateDocument(
             process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,

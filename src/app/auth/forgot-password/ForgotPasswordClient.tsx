@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Mail, Loader2 } from 'lucide-react'
-import { account } from '@/lib/appwrite/client'
 
 export default function ForgotPasswordClient() {
     const [email, setEmail] = useState('')
@@ -17,11 +16,19 @@ export default function ForgotPasswordClient() {
         setLoading(true)
         setError('')
         try {
-            await account.createRecovery(email, `${window.location.origin}/auth/reset-password`)
-            setSuccess(true)
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Failed to send reset email'
-            setError(message)
+            const res = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            })
+            if (res.ok) {
+                setSuccess(true)
+            } else {
+                const data = await res.json()
+                setError(data.error || 'Failed to send reset email')
+            }
+        } catch {
+            setError('Something went wrong. Please try again.')
         } finally {
             setLoading(false)
         }

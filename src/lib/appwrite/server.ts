@@ -1,14 +1,13 @@
-// lib/appwrite/server.ts — Server-side Appwrite client (API routes only)
-// NEVER import this file in client components
-import { Client, Databases, Storage, Users } from 'node-appwrite'
+import { Client, Account, Databases, Storage, Users } from 'node-appwrite'
+import { cookies } from 'next/headers'
 
-export function createAdminClient() {
+export async function createAdminClient() {
   const client = new Client()
-  if (process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) client.setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-  if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) client.setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID)
-  if (process.env.APPWRITE_API_KEY) client.setKey(process.env.APPWRITE_API_KEY)
-
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1')
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || 'dummy')
+    .setKey(process.env.APPWRITE_API_KEY!)
   return {
+    account: new Account(client),
     databases: new Databases(client),
     storage: new Storage(client),
     users: new Users(client),
@@ -16,23 +15,17 @@ export function createAdminClient() {
 }
 
 export async function createSessionClient() {
-  const { cookies } = await import('next/headers')
   const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get(`a-session-${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`)
-  
-  if (!sessionCookie || !sessionCookie.value) {
-    throw new Error('No session cookie found')
-  }
+  const session = cookieStore.get('savika-session')
+  if (!session || !session.value) throw new Error('No session')
 
   const client = new Client()
-  if (process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) client.setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-  if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) client.setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID)
-  client.setSession(sessionCookie.value)
-
+    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
+    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
+    .setSession(session.value)
   return {
-    account: new (await import('node-appwrite')).Account(client),
+    account: new Account(client),
     databases: new Databases(client),
-    storage: new Storage(client),
   }
 }
 

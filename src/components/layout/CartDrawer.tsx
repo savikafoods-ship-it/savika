@@ -7,6 +7,7 @@ import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
 
 import { useCartStore } from '@/store/cartStore'
 import { formatCurrency } from '@/lib/utils'
+import { getProductImageUrl } from '@/lib/appwrite/imageUrl'
 
 export default function CartDrawer() {
     const { items, isOpen, closeCart, removeItem, updateQuantity, total } = useCartStore()
@@ -70,7 +71,7 @@ export default function CartDrawer() {
                                     <div key={`${item.productId}-${item.weight}`} className="flex gap-4 p-3 rounded-xl bg-[#F9F4EE]">
                                         <div className="relative w-18 h-18 rounded-lg overflow-hidden bg-white shrink-0">
                                             {item.product.imageIds?.[0] ? (
-                                                <Image src={item.product.imageIds[0].startsWith('/') ? item.product.imageIds[0] : `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || ''}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS || ''}/files/${item.product.imageIds[0]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || ''}`} alt={item.product.name} fill className="object-cover" />
+                                                <Image src={item.product.imageIds[0].startsWith('/') ? item.product.imageIds[0] : getProductImageUrl(item.product.imageIds[0], 100, 80)} alt={item.product.name} fill className="object-cover" />
                                             ) : (
                                                 <div className="w-full h-full bg-[#e8ddd0] flex items-center justify-center">
                                                     <ShoppingBag className="w-6 h-6 text-[#C47F17]/50" />

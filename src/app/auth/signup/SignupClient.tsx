@@ -3,9 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Loader2, CheckCircle } from 'lucide-react'
-import { account } from '@/lib/appwrite/client'
-import { ID } from 'appwrite'
 
 export default function SignupClient() {
     const [name, setName] = useState('')
@@ -14,19 +13,30 @@ export default function SignupClient() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
+    const router = useRouter()
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
         setError('')
         try {
-            await account.create(ID.unique(), email, password, name)
-            // Auto-login after signup
-            await account.createEmailPasswordSession(email, password)
-            setSuccess(true)
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Failed to create account'
-            setError(message)
+            const res = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, name }),
+            })
+            if (res.ok) {
+                setSuccess(true)
+                setTimeout(() => {
+                    router.push('/')
+                    router.refresh()
+                }, 1500)
+            } else {
+                const data = await res.json()
+                setError(data.error || 'Failed to create account')
+            }
+        } catch {
+            setError('Something went wrong. Please try again.')
         } finally {
             setLoading(false)
         }
@@ -41,7 +51,7 @@ export default function SignupClient() {
                     </div>
                     <h2 className="text-2xl font-bold text-[#2E2E2E] mb-2">Account Created!</h2>
                     <p className="text-gray-500 text-sm">Welcome to Savika Foods, {name}.</p>
-                    <Link href="/account" className="mt-6 inline-block text-[#C17F24] font-semibold hover:underline">Go to My Account</Link>
+                    <Link href="/" className="mt-6 inline-block text-[#C17F24] font-semibold hover:underline">Go to Home</Link>
                 </div>
             </div>
         )

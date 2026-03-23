@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { account } from '@/lib/appwrite/client'
+import { OAuthProvider } from 'appwrite'
 
 export default function LoginClient() {
     const [email, setEmail] = useState('')
@@ -20,26 +21,31 @@ export default function LoginClient() {
         setLoading(true)
         setError('')
         try {
-            await account.createEmailPasswordSession(email, password)
-            router.push('/account')
-            router.refresh()
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Invalid email or password'
-            setError(message)
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            })
+            if (res.ok) {
+                router.push('/')
+                router.refresh()
+            } else {
+                const data = await res.json()
+                setError(data.error || 'Invalid email or password')
+                setLoading(false)
+            }
+        } catch {
+            setError('Something went wrong. Please try again.')
             setLoading(false)
         }
     }
 
-    const handleGoogleLogin = async () => {
-        try {
-            account.createOAuth2Session(
-                'google' as never,
-                `${window.location.origin}/account`,
-                `${window.location.origin}/auth/login?error=oauth_failed`
-            )
-        } catch {
-            setError('Google sign-in failed. Please try again.')
-        }
+    const handleGoogleLogin = () => {
+        account.createOAuth2Session(
+            OAuthProvider.Google,
+            `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+            `${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=oauth`,
+        )
     }
 
     return (

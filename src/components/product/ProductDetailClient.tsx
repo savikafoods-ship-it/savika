@@ -6,6 +6,7 @@ import { Star, ShoppingCart, Heart, Package, Truck, Shield } from 'lucide-react'
 import type { Product } from '@/types'
 import { formatCurrency, getDiscountPercent } from '@/lib/utils'
 import { useCartStore } from '@/store/cartStore'
+import { getProductImageUrl } from '@/lib/appwrite/imageUrl'
 
 interface ProductDetailClientProps {
     product: Product
@@ -32,10 +33,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#F9F4EE]">
                     {product.imageIds?.[selectedImage] ? (
                         <Image
-                            src={`${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS}/files/${product.imageIds[selectedImage]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`}
+                            src={getProductImageUrl(product.imageIds[selectedImage], 800, 85)}
                             alt={product.name}
                             fill
                             className="object-contain p-8"
+                            sizes="(max-width: 1024px) 100vw, 50vw"
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
@@ -54,7 +56,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                             <button key={i} onClick={() => setSelectedImage(i)}
                                 className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${selectedImage === i ? 'border-[#C17F24]' : 'border-transparent'}`}>
                                 <Image
-                                    src={`${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS}/files/${imgId}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}&width=100&quality=80`}
+                                    src={getProductImageUrl(imgId, 100, 80)}
                                     alt=""
                                     fill
                                     className="object-cover"

@@ -1,9 +1,8 @@
-// lib/appwrite/client.ts — Browser-side Appwrite client
 import { Client, Account, Databases, Storage } from 'appwrite'
 
 const client = new Client()
-if (process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) client.setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
-if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) client.setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID)
+  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1')
+  .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || 'dummy')
 
 export const account = new Account(client)
 export const databases = new Databases(client)

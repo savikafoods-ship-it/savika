@@ -4,6 +4,7 @@ import { createSessionClient } from '@/lib/appwrite/server'
 import { Query } from 'node-appwrite'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
+import { getProductImageUrl } from '@/lib/appwrite/imageUrl'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export default async function AdminProductsPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-white">Products</h1>
@@ -83,7 +84,7 @@ export default async function AdminProductsPage() {
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 bg-[#27272a] rounded-lg overflow-hidden shrink-0 relative">
                                                 {product.imageIds?.[0] ? (
-                                                    <Image src={`${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS}/files/${product.imageIds[0]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`} alt={product.name} fill className="object-cover" />
+                                                    <Image src={getProductImageUrl(product.imageIds[0], 100, 80)} alt={product.name} fill className="object-cover" />
                                                 ) : null}
                                             </div>
                                             <div>

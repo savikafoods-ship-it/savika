@@ -1,146 +1,301 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Loader2 } from 'lucide-react'
-import { databases } from '@/lib/appwrite/client'
-import { DB_ID, COL_SITE_CONTENT } from '@/lib/appwrite/server'
-import { Query } from 'appwrite'
+import { Save, Eye, Flame, Star, Megaphone, Loader2, Check } from 'lucide-react'
 
 interface PromoCard {
-    badge: string
-    headline: string
-    subheading: string
-    body: string
-    button_label: string
-    button_url: string
-    bg_image: string | null
-    icon: string
+  badge: string
+  headline: string
+  subheading: string
+  body: string
+  buttonLabel: string
+  buttonUrl: string
+  icon: 'jar' | 'diamond' | 'star' | 'flame'
+}
+
+interface AnnouncementBar {
+  text: string
+}
+
+interface SiteContent {
+  promo_card_1: PromoCard
+  promo_card_2: PromoCard
+  announcement_bar: AnnouncementBar
+}
+
+const DEFAULT_PROMO_1: PromoCard = {
+  badge: 'Limited Time',
+  headline: '50% OFF',
+  subheading: 'On all masala blends',
+  body: 'Use code SPICE50 at checkout',
+  buttonLabel: 'Buy Now',
+  buttonUrl: '/products',
+  icon: 'flame',
+}
+
+const DEFAULT_PROMO_2: PromoCard = {
+  badge: 'Fan Favourite',
+  headline: '50% OFF',
+  subheading: 'Exotic & Rare spices',
+  body: 'Desi. Vegan. Powerful.',
+  buttonLabel: 'Buy Now',
+  buttonUrl: '/products?category=exotic',
+  icon: 'star',
+}
+
+async function fetchContent(): Promise<SiteContent> {
+  const res = await fetch('/api/content')
+  if (!res.ok) throw new Error('Failed to load content')
+  return res.json()
+}
+
+async function saveContent(key: string, value: object): Promise<void> {
+  const res = await fetch('/api/content', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key, value }),
+  })
+  if (!res.ok) throw new Error('Failed to save')
+}
+
+function InputField({
+  label, value, onChange, placeholder, hint,
+}: {
+  label: string; value: string; onChange: (v: string) => void
+  placeholder?: string; hint?: string
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="block text-sm font-[500] text-gray-300">{label}</label>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full h-11 bg-gray-800 border border-gray-700 rounded-lg px-4
+                   text-white text-sm placeholder:text-gray-500
+                   focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-600/20
+                   transition-all"
+      />
+      {hint && <p className="text-xs text-gray-500">{hint}</p>}
+    </div>
+  )
+}
+
+function SaveButton({ onClick, saving, saved }: {
+  onClick: () => void; saving: boolean; saved: boolean
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={saving}
+      className="flex items-center gap-2 px-5 h-10 rounded-lg text-sm font-[600]
+                 bg-amber-700 text-white hover:bg-amber-800 active:scale-95
+                 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+    >
+      {saving ? (
+        <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+      ) : saved ? (
+        <><Check className="w-4 h-4" /> Saved!</>
+      ) : (
+        <><Save className="w-4 h-4" /> Save Changes</>
+      )}
+    </button>
+  )
+}
+
+function PromoCardEditor({
+  title, cardKey, data, onChange,
+}: {
+  title: string
+  cardKey: 'promo_card_1' | 'promo_card_2'
+  data: PromoCard
+  onChange: (key: 'promo_card_1' | 'promo_card_2', val: PromoCard) => void
+}) {
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const isCard1 = cardKey === 'promo_card_1'
+  const previewBg = isCard1 ? 'from-amber-900 to-amber-800' : 'from-amber-600 to-amber-500'
+
+  const update = (field: keyof PromoCard, value: string) => {
+    onChange(cardKey, { ...data, [field]: value })
+    setSaved(false)
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await saveContent(cardKey, data)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch {
+      alert('Failed to save. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-800">
+        <div className="flex items-center gap-2.5">
+          {isCard1
+            ? <Flame className="w-4 h-4 text-amber-500" />
+            : <Star className="w-4 h-4 text-amber-400" />
+          }
+          <h2 className="text-white font-[600] text-base">{title}</h2>
+        </div>
+        <SaveButton onClick={handleSave} saving={saving} saved={saved} />
+      </div>
+      <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        <div className="space-y-4">
+          <InputField label="Badge Text" value={data.badge} onChange={(v) => update('badge', v)} placeholder="e.g. Limited Time" hint="Small pill shown above the headline" />
+          <InputField label="Headline" value={data.headline} onChange={(v) => update('headline', v)} placeholder="e.g. 50% OFF" hint="Large bold text, keep it short" />
+          <InputField label="Subheading" value={data.subheading} onChange={(v) => update('subheading', v)} placeholder="e.g. On all masala blends" />
+          <InputField label="Body Text" value={data.body} onChange={(v) => update('body', v)} placeholder="e.g. Use code SPICE50 at checkout" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <InputField label="Button Label" value={data.buttonLabel} onChange={(v) => update('buttonLabel', v)} placeholder="e.g. Buy Now" />
+            <InputField label="Button URL" value={data.buttonUrl} onChange={(v) => update('buttonUrl', v)} placeholder="e.g. /products" hint="Relative path" />
+          </div>
+        </div>
+        <div>
+          <div className="flex items-center gap-1.5 mb-3">
+            <Eye className="w-3.5 h-3.5 text-gray-500" />
+            <span className="text-xs text-gray-500 font-[500] uppercase tracking-wider">Live Preview</span>
+          </div>
+          <div className={`relative rounded-2xl bg-gradient-to-br ${previewBg} p-6 overflow-hidden min-h-[180px]`}>
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-white/10 flex items-center justify-center">
+              {isCard1 ? <Flame className="w-8 h-8 text-white/40" /> : <Star className="w-8 h-8 text-white/40" />}
+            </div>
+            <span className="inline-flex items-center gap-1.5 bg-gray-950/50 text-white text-xs font-[600] px-3 py-1 rounded-full mb-3">
+              {isCard1 ? <Flame className="w-3 h-3 text-amber-400" /> : <Star className="w-3 h-3 text-amber-300" />}
+              {data.badge || 'Badge'}
+            </span>
+            <div className="text-white font-[800] text-3xl mb-1">{data.headline || 'Headline'}</div>
+            <div className="text-white font-[700] text-sm mb-1">{data.subheading || 'Subheading'}</div>
+            <div className="text-white/80 text-sm mb-4">{data.body || 'Body text'}</div>
+            <button className="inline-flex items-center gap-2 bg-white text-gray-900 text-sm font-[600] px-5 py-2 rounded-full">
+              {data.buttonLabel || 'Button'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function AnnouncementEditor({ data, onChange }: {
+  data: AnnouncementBar; onChange: (val: AnnouncementBar) => void
+}) {
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await saveContent('announcement_bar', data)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch {
+      alert('Failed to save. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-800">
+        <div className="flex items-center gap-2.5">
+          <Megaphone className="w-4 h-4 text-amber-500" />
+          <h2 className="text-white font-[600] text-base">Announcement Bar</h2>
+        </div>
+        <SaveButton onClick={handleSave} saving={saving} saved={saved} />
+      </div>
+      <div className="p-4 sm:p-6 space-y-4">
+        <InputField
+          label="Announcement Text"
+          value={data.text}
+          onChange={(v) => { onChange({ text: v }); setSaved(false) }}
+          placeholder="Free shipping on orders above Rs.599 | 100% Pure & Natural"
+          hint="Separate sections with  |  (pipe character). Scrolls on mobile."
+        />
+        <div>
+          <div className="flex items-center gap-1.5 mb-2">
+            <Eye className="w-3.5 h-3.5 text-gray-500" />
+            <span className="text-xs text-gray-500 font-[500] uppercase tracking-wider">Preview</span>
+          </div>
+          <div className="bg-amber-700 text-white text-sm font-[500] text-center py-2.5 px-4 rounded-lg truncate">
+            {data.text || 'Announcement text will appear here'}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default function AdminUpdatesClient() {
-    const [loading, setLoading] = useState(true)
-    const [saving, setSaving] = useState(false)
-    const [message, setMessage] = useState({ type: '', text: '' })
+  const [content, setContent] = useState<SiteContent>({
+    promo_card_1: DEFAULT_PROMO_1,
+    promo_card_2: DEFAULT_PROMO_2,
+    announcement_bar: { text: '' },
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-    const [promo1, setPromo1] = useState<PromoCard | null>(null)
-    const [promo2, setPromo2] = useState<PromoCard | null>(null)
+  useEffect(() => {
+    fetchContent()
+      .then((data) => {
+        setContent({
+          promo_card_1: data.promo_card_1 as PromoCard ?? DEFAULT_PROMO_1,
+          promo_card_2: data.promo_card_2 as PromoCard ?? DEFAULT_PROMO_2,
+          announcement_bar: data.announcement_bar as AnnouncementBar ?? { text: '' },
+        })
+      })
+      .catch(() => setError('Failed to load site content. Check your Appwrite connection.'))
+      .finally(() => setLoading(false))
+  }, [])
 
-    useEffect(() => {
-        loadContent()
-    }, [])
-
-    const loadContent = async () => {
-        setLoading(true)
-        try {
-            const res = await databases.listDocuments(
-                process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-                process.env.NEXT_PUBLIC_COL_SITE_CONTENT!,
-                [Query.equal('$id', ['promo_card_1', 'promo_card_2'])]
-            )
-            const docs = res.documents
-            const p1 = docs.find(d => d.$id === 'promo_card_1')
-            const p2 = docs.find(d => d.$id === 'promo_card_2')
-
-            if (p1) setPromo1(JSON.parse(p1.value) as PromoCard)
-            if (p2) setPromo2(JSON.parse(p2.value) as PromoCard)
-        } catch {
-            // Content not yet created
-        }
-        setLoading(false)
-    }
-
-    const handleSave = async (key: string, value: PromoCard) => {
-        setSaving(true)
-        setMessage({ type: '', text: '' })
-        try {
-            await databases.updateDocument(
-                process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-                process.env.NEXT_PUBLIC_COL_SITE_CONTENT!,
-                key,
-                { value: JSON.stringify(value), updatedAt: new Date().toISOString() }
-            )
-            setMessage({ type: 'success', text: 'Content updated successfully! Changes are live.' })
-        } catch {
-            setMessage({ type: 'error', text: `Failed to update ${key}. Please try again.` })
-        }
-        setSaving(false)
-    }
-
-    if (loading) return (
-        <div className="p-6 text-white text-sm flex items-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin" /> Loading editor...
-        </div>
-    )
-
-    const renderCardEditor = (key: string, title: string, card: PromoCard, setter: (c: PromoCard) => void) => {
-        if (!card) return null
-        return (
-            <div className="bg-[#1A1A1A] p-6 rounded-xl border border-white/10 space-y-4">
-                <h2 className="text-lg font-bold text-[#C17F24] border-b border-white/10 pb-3">{title}</h2>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1">Badge Text</label>
-                        <input type="text" value={card.badge} onChange={e => setter({ ...card, badge: e.target.value })} className="w-full bg-[#262626] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#C17F24] focus:outline-none" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1">Headline (e.g. 50% OFF)</label>
-                        <input type="text" value={card.headline} onChange={e => setter({ ...card, headline: e.target.value })} className="w-full bg-[#262626] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#C17F24] focus:outline-none" />
-                    </div>
-                    <div className="col-span-2">
-                        <label className="block text-xs font-semibold text-gray-400 mb-1">Subheading</label>
-                        <input type="text" value={card.subheading} onChange={e => setter({ ...card, subheading: e.target.value })} className="w-full bg-[#262626] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#C17F24] focus:outline-none" />
-                    </div>
-                    <div className="col-span-2">
-                        <label className="block text-xs font-semibold text-gray-400 mb-1">Body Text</label>
-                        <input type="text" value={card.body} onChange={e => setter({ ...card, body: e.target.value })} className="w-full bg-[#262626] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#C17F24] focus:outline-none" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1">Button Label</label>
-                        <input type="text" value={card.button_label} onChange={e => setter({ ...card, button_label: e.target.value })} className="w-full bg-[#262626] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#C17F24] focus:outline-none" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1">Button URL</label>
-                        <input type="text" value={card.button_url} onChange={e => setter({ ...card, button_url: e.target.value })} className="w-full bg-[#262626] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#C17F24] focus:outline-none" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1">Lucide Icon Name</label>
-                        <input type="text" value={card.icon} onChange={e => setter({ ...card, icon: e.target.value })} className="w-full bg-[#262626] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#C17F24] focus:outline-none" />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-400 mb-1">Background Image URL (optional)</label>
-                        <input type="text" value={card.bg_image || ''} onChange={e => setter({ ...card, bg_image: e.target.value })} placeholder="https://..." className="w-full bg-[#262626] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:border-[#C17F24] focus:outline-none" />
-                    </div>
-                </div>
-                <div className="pt-4 flex justify-end">
-                    <button
-                        onClick={() => handleSave(key, card)}
-                        disabled={saving}
-                        className="bg-[#C17F24] hover:bg-[#8B5E16] text-white px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2 disabled:opacity-50"
-                    >
-                        <Save className="w-4 h-4" /> Save Changes
-                    </button>
-                </div>
-            </div>
-        )
-    }
-
+  if (loading) {
     return (
-        <div className="p-6 md:p-10 max-w-5xl mx-auto space-y-6">
-            <div className="mb-8">
-                <h1 className="text-2xl font-bold text-white">Content Updates</h1>
-                <p className="text-sm text-gray-400 mt-1">Manage storefront homepage banners instantly.</p>
-            </div>
-
-            {message.text && (
-                <div className={`p-4 rounded-xl text-sm ${message.type === 'error' ? 'bg-red-900/20 text-red-400 border border-red-800' : 'bg-green-900/20 text-green-400 border border-green-800'}`}>
-                    {message.text}
-                </div>
-            )}
-
-            <div className="grid md:grid-cols-2 gap-6">
-                {promo1 && renderCardEditor('promo_card_1', 'Promotional Card 1 (Left)', promo1, setPromo1)}
-                {promo2 && renderCardEditor('promo_card_2', 'Promotional Card 2 (Right)', promo2, setPromo2)}
-            </div>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 text-amber-600 animate-spin" />
+      </div>
     )
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 bg-red-900/20 border border-red-800 rounded-xl text-red-400 text-sm">
+        {error}
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-white text-2xl font-[700]">Site Content</h1>
+        <p className="text-gray-400 text-sm mt-1">
+          Edit homepage promo cards and the announcement bar. Changes go live instantly.
+        </p>
+      </div>
+      <AnnouncementEditor
+        data={content.announcement_bar}
+        onChange={(val) => setContent((prev) => ({ ...prev, announcement_bar: val }))}
+      />
+      <PromoCardEditor
+        title="Promo Card 1 (Dark Gold)"
+        cardKey="promo_card_1"
+        data={content.promo_card_1}
+        onChange={(key, val) => setContent((prev) => ({ ...prev, [key]: val }))}
+      />
+      <PromoCardEditor
+        title="Promo Card 2 (Light Gold)"
+        cardKey="promo_card_2"
+        data={content.promo_card_2}
+        onChange={(key, val) => setContent((prev) => ({ ...prev, [key]: val }))}
+      />
+    </div>
+  )
 }

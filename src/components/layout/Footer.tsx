@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { MapPin, Phone, Mail, Send, Leaf, Award, Truck, RotateCcw } from 'lucide-react'
+import { SavikaLogo } from '@/components/ui/SavikaLogo'
 
 const footerLinks = {
     shop: [
@@ -69,15 +69,7 @@ export default function Footer() {
 
                     {/* Brand Column */}
                     <div>
-                        <Link href="/" className="inline-flex items-center gap-3 mb-5 group">
-                            <div className="bg-white rounded-full p-1.5 shadow-sm group-hover:scale-105 transition-transform">
-                                <Image src="/logo.png" alt="Savika Logo" width={64} height={64} className="h-10 w-auto object-contain rounded-full" />
-                            </div>
-                            <div className="flex flex-col justify-center">
-                                <span className="text-2xl font-extrabold text-[#C47F17] tracking-tight leading-none mb-1">SAVIKA</span>
-                                <span className="block text-[10px] text-[#D4A855] uppercase tracking-[0.2em] leading-none">Premium Spices</span>
-                            </div>
-                        </Link>
+                        <SavikaLogo variant="footer" className="mb-5" />
                         <p className="text-sm text-white/70 leading-relaxed max-w-xs mb-6">
                             Bringing the soul of India&apos;s spice heritage to your kitchen. Every gram, pure. Every blend, authentic.
                         </p>
@@ -85,15 +77,15 @@ export default function Footer() {
                         {/* Contact */}
                         <div className="space-y-2 mb-6">
                             <div className="flex items-center gap-2 text-xs text-white/60">
-                                <MapPin className="w-4 h-4 text-[#C47F17] shrink-0" />
+                                <MapPin className="w-4 h-4 text-white/80 shrink-0" />
                                 <span>Savika Foods Pvt. Ltd., Mumbai, MH 400001</span>
                             </div>
                             <div className="flex items-center gap-2 text-xs text-white/60">
-                                <Phone className="w-4 h-4 text-[#C47F17] shrink-0" />
+                                <Phone className="w-4 h-4 text-white/80 shrink-0" />
                                 <span>+91 98765 43210</span>
                             </div>
                             <div className="flex items-center gap-2 text-xs text-white/60">
-                                <Mail className="w-4 h-4 text-[#C47F17] shrink-0" />
+                                <Mail className="w-4 h-4 text-white/80 shrink-0" />
                                 <span>hello@savikafoods.in</span>
                             </div>
                         </div>
@@ -105,7 +97,7 @@ export default function Footer() {
                         <ul className="space-y-2.5">
                             {footerLinks.shop.map((l) => (
                                 <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/60 hover:text-[#C47F17] transition-colors">
+                                    <Link href={l.href} className="text-sm text-white/60 hover:text-white transition-colors">
                                         {l.label}
                                     </Link>
                                 </li>
@@ -119,7 +111,7 @@ export default function Footer() {
                         <ul className="space-y-2.5">
                             {footerLinks.company.map((l) => (
                                 <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/60 hover:text-[#C47F17] transition-colors">
+                                    <Link href={l.href} className="text-sm text-white/60 hover:text-white transition-colors">
                                         {l.label}
                                     </Link>
                                 </li>
@@ -133,7 +125,7 @@ export default function Footer() {
                         <ul className="space-y-2.5">
                             {footerLinks.support.map((l) => (
                                 <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/60 hover:text-[#C47F17] transition-colors">
+                                    <Link href={l.href} className="text-sm text-white/60 hover:text-white transition-colors">
                                         {l.label}
                                     </Link>
                                 </li>
@@ -149,8 +141,8 @@ export default function Footer() {
                             const Icon = badge.icon
                             return (
                                 <div key={badge.label} className="flex flex-col items-center gap-1.5 group">
-                                    <div className="w-12 h-12 rounded-full bg-white/5 group-hover:bg-[#C47F17]/20 flex items-center justify-center transition-colors duration-200">
-                                        <Icon className="w-6 h-6 text-[#C47F17]" />
+                                    <div className="w-12 h-12 rounded-full bg-white/5 group-hover:bg-white/15 flex items-center justify-center transition-colors duration-200">
+                                        <Icon className="w-6 h-6 text-white/80" />
                                     </div>
                                     <span className="text-xs font-bold text-white">{badge.label}</span>
                                     <span className="text-[11px] text-white/50">{badge.sub}</span>
@@ -167,8 +159,8 @@ export default function Footer() {
                     &copy; {new Date().getFullYear()} Savika Foods Pvt. Ltd. All rights reserved.
                 </p>
                 <p>
-                    <Link href="/privacy" className="hover:text-[#C47F17]">Privacy Policy</Link> &nbsp;|&nbsp;
-                    <Link href="/terms" className="hover:text-[#C47F17]">Terms of Service</Link>
+                    <Link href="/privacy" className="hover:text-white">Privacy Policy</Link> &nbsp;|&nbsp;
+                    <Link href="/terms" className="hover:text-white">Terms of Service</Link>
                 </p>
             </div>
         </footer>

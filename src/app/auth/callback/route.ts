@@ -1,51 +1,30 @@
-import { NextResponse, type NextRequest } from 'next/server'
-import { Client, Account } from 'node-appwrite'
+import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/appwrite/server'
 import { cookies } from 'next/headers'
 
-// Appwrite OAuth2 callback handler
 export async function GET(request: NextRequest) {
-    const { searchParams } = new URL(request.url)
-    
-    // Check for provider error
-    const error = searchParams.get('error')
-    if (error) {
-        return NextResponse.redirect(new URL('/auth/login?error=oauth_failed', request.url))
-    }
+  const userId = request.nextUrl.searchParams.get('userId')
+  const secret = request.nextUrl.searchParams.get('secret')
 
-    // SSR OAuth Session creation
-    // Appwrite redirects back with userId and secret if configured for SSR
-    const userId = searchParams.get('userId')
-    const secret = searchParams.get('secret')
+  if (!userId || !secret) {
+    return NextResponse.redirect(new URL('/auth/login?error=oauth', request.url))
+  }
 
-    if (userId && secret) {
-        try {
-            const client = new Client()
-                .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-                .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
+  try {
+    const { account } = await createAdminClient()
+    const session = await account.createSession(userId, secret)
 
-            const account = new Account(client)
-            const session = await account.createSession(userId, secret)
-            
-            // Set the session cookie so Next.js server can read it
-            const cookieStore = await cookies()
-            cookieStore.set(
-                `a-session-${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`, 
-                session.secret, 
-                {
-                    domain: process.env.NODE_ENV === 'production' ? new URL(process.env.NEXT_PUBLIC_APP_URL || '').hostname : undefined,
-                    path: '/',
-                    httpOnly: true,
-                    sameSite: 'lax',
-                    secure: process.env.NODE_ENV === 'production',
-                    expires: new Date(session.expire)
-                }
-            )
-        } catch (err) {
-            console.error('OAuth Callback Session Error:', err)
-            return NextResponse.redirect(new URL('/auth/login?error=oauth_session_creation_failed', request.url))
-        }
-    }
+    const cookieStore = await cookies()
+    cookieStore.set('savika-session', session.secret, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: true,
+      maxAge: 60 * 60 * 24 * 30,
+    })
 
-    // Redirect to account dashboard
-    return NextResponse.redirect(new URL('/account', request.url))
+    return NextResponse.redirect(new URL('/', request.url))
+  } catch {
+    return NextResponse.redirect(new URL('/auth/login?error=oauth', request.url))
+  }
 }
