@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import type { Product } from '@/types/database'
+import { Heart, ShoppingCart, Check, Star } from 'lucide-react'
+import type { Product } from '@/types'
 import { formatCurrency, getDiscountPercent } from '@/lib/utils'
 import { useCartStore } from '@/store/cartStore'
 
@@ -24,16 +25,16 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
         setTimeout(() => setAdding(false), 900)
     }
 
-    const discountPercent = product.sale_price ? getDiscountPercent(product.price, product.sale_price) : 0
+    const discountPercent = product.comparePrice ? getDiscountPercent(product.comparePrice, product.price) : 0
 
     return (
         <div className={`product-card ${className}`}>
             <Link href={`/product/${product.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
                 {/* Image */}
                 <div className="product-card-img">
-                    {product.images?.[0] ? (
+                    {product.imageIds?.[0] ? (
                         <Image
-                            src={product.images[0]}
+                            src={`${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS}/files/${product.imageIds[0]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}&width=400&quality=80&output=webp`}
                             alt={product.name}
                             fill
                             className="object-contain"
@@ -42,23 +43,23 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
                         />
                     ) : (
                         <div className="img-ph">
-                            <i className="fa-solid fa-pepper-hot" style={{ fontSize: '3rem', color: 'rgba(196,127,23,.3)' }} />
+                            <ShoppingCart className="w-12 h-12" style={{ color: 'rgba(196,127,23,.3)' }} />
                         </div>
                     )}
                     {/* Badge */}
                     {discountPercent > 0 && (
                         <span style={{
                             position: 'absolute', top: '0.625rem', left: '0.625rem', zIndex: 10,
-                            background: '#C47F17', color: '#fff', fontSize: '10px', fontWeight: 700,
+                            background: '#ef4444', color: '#fff', fontSize: '10px', fontWeight: 700,
                             padding: '2px 7px', borderRadius: '9999px'
                         }}>-{discountPercent}%</span>
                     )}
-                    {product.is_featured && !discountPercent && (
+                    {product.isActive && !discountPercent && (
                         <span style={{
                             position: 'absolute', top: '0.625rem', left: '0.625rem', zIndex: 10,
-                            background: '#8E562E', color: '#fff', fontSize: '10px', fontWeight: 700,
+                            background: '#C17F24', color: '#fff', fontSize: '10px', fontWeight: 700,
                             padding: '2px 7px', borderRadius: '9999px'
-                        }}>Best Seller</span>
+                        }}>New</span>
                     )}
                     {/* Wishlist */}
                     <button
@@ -72,7 +73,7 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
                             boxShadow: '0 2px 8px rgba(0,0,0,.1)'
                         }}
                     >
-                        <i className={`fa-heart text-sm ${isWishlisted ? 'fa-solid' : 'fa-regular'}`} style={{ color: isWishlisted ? '#ef4444' : '#999' }} />
+                        <Heart className="w-4 h-4" fill={isWishlisted ? '#C17F24' : 'none'} stroke={isWishlisted ? '#C17F24' : '#999'} />
                     </button>
                 </div>
 
@@ -87,18 +88,18 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
                     {/* Stars */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1px', marginBottom: '0.5rem' }}>
                         {[...Array(5)].map((_, i) => (
-                            <i key={i} className="fa-solid fa-star" style={{ fontSize: '9px', color: '#C47F17' }} />
+                            <Star key={i} className="w-3 h-3" fill="#C17F24" stroke="#C17F24" />
                         ))}
                         <span style={{ fontSize: '10px', color: '#999', marginLeft: '4px' }}>(4.8)</span>
                     </div>
                     {/* Price */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#C47F17', fontFamily: 'var(--font-playfair, Georgia)' }}>
-                            {formatCurrency(product.sale_price ?? product.price)}
+                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#C17F24' }}>
+                            {formatCurrency(product.price)}
                         </span>
-                        {product.sale_price && (
+                        {product.comparePrice && (
                             <span style={{ fontSize: '0.8125rem', textDecoration: 'line-through', color: '#aaa' }}>
-                                {formatCurrency(product.price)}
+                                {formatCurrency(product.comparePrice)}
                             </span>
                         )}
                     </div>
@@ -112,7 +113,7 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
                     disabled={product.stock === 0}
                     className={`atc-btn${adding ? ' added' : ''}`}
                 >
-                    <i className={`fa-solid ${adding ? 'fa-check' : 'fa-cart-shopping'}`} style={{ fontSize: '12px' }} />
+                    {adding ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
                     {product.stock === 0 ? 'Out of Stock' : adding ? 'Added!' : 'Add to Cart'}
                 </button>
             </div>

@@ -1,7 +1,7 @@
 /* ── Tailwind v4 ─────────────────────────────────── */
 @import "tailwindcss";
 
-@source "../src";
+@source "../../src";
 
 @theme {
   --breakpoint-sm: 640px;
@@ -386,4 +386,26 @@ details>summary::-webkit-details-marker {
 .reason-card:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, .1);
   border-color: rgba(196, 127, 23, .25);
+}
+
+/* ── Texture background ───────────────────────────── */
+.texture-bg {
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"),
+    linear-gradient(to bottom, #F5F0E8, #F5F0E8);
+}
+
+/* ── Gold gradients & accents ─────────────────────── */
+.gold-gradient {
+  background: linear-gradient(135deg, #C17F24, #8B5E16);
+}
+
+.gold-border-hover:hover {
+  border-color: #C17F24;
+  box-shadow: 0 0 0 1px #C17F24;
+}
+
+.gold-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #C17F24, transparent);
 }

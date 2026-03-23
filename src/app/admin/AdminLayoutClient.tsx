@@ -1,113 +1,129 @@
 'use client'
 
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Image from 'next/image'
-import { cn } from '@/lib/utils'
+import {
+    LayoutDashboard, Package, ShoppingCart, Users, Tag, BarChart3,
+    Settings, FileText, LogOut, ChevronLeft, ChevronRight, Bell, UserCircle, Loader2
+} from 'lucide-react'
+import { account } from '@/lib/appwrite/client'
 
+const navItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
+    { icon: ShoppingCart, label: 'Orders', href: '/admin/orders' },
+    { icon: Package, label: 'Products', href: '/admin/products' },
+    { icon: Tag, label: 'Categories', href: '/admin/categories' },
+    { icon: Users, label: 'Customers', href: '/admin/customers' },
+    { icon: Tag, label: 'Coupons', href: '/admin/coupons' },
+    { icon: BarChart3, label: 'Analytics', href: '/admin/analytics' },
+    { icon: FileText, label: 'Updates', href: '/admin/updates' },
+    { icon: Settings, label: 'Settings', href: '/admin/settings' },
+]
 
-interface Permissions {
-    can_manage_products: boolean
-    can_manage_orders: boolean
-    can_manage_users: boolean
-    can_manage_admins: boolean
-}
-
-interface Props {
+interface AdminLayoutClientProps {
     children: React.ReactNode
-    role: 'admin' | 'super_admin'
-    permissions: Permissions
-    userEmail: string
-    userName: string
+    user: { name: string; email: string }
 }
 
-export default function AdminLayoutClient({ children, role, permissions, userEmail, userName }: Props) {
+export default function AdminLayoutClient({ children, user }: AdminLayoutClientProps) {
+    const [collapsed, setCollapsed] = useState(true)
+    const [signingOut, setSigningOut] = useState(false)
     const pathname = usePathname()
     const router = useRouter()
 
     const handleSignOut = async () => {
-        // Mock sign out
+        setSigningOut(true)
+        try {
+            await account.deleteSession('current')
+        } catch {
+            // Session may already be expired
+        }
         router.push('/admin/login')
     }
 
-    // Build nav items based on role/permissions
-    const navItems = [
-        { label: 'Dashboard', href: '/admin/dashboard', icon: 'fa-gauge-high', always: true },
-        { label: 'Orders', href: '/admin/orders', icon: 'fa-bag-shopping', show: permissions.can_manage_orders },
-        { label: 'Products', href: '/admin/products', icon: 'fa-boxes-stacked', show: permissions.can_manage_products },
-        { label: 'Categories', href: '/admin/categories', icon: 'fa-tags', show: permissions.can_manage_products },
-        { label: 'Customers', href: '/admin/customers', icon: 'fa-users', show: permissions.can_manage_users },
-        { label: 'Coupons', href: '/admin/coupons', icon: 'fa-percent', show: permissions.can_manage_orders },
-        { label: 'Analytics', href: '/admin/analytics', icon: 'fa-chart-line', always: true },
-        { label: 'Admin Management', href: '/admin/admins', icon: 'fa-user-shield', show: permissions.can_manage_admins },
-        { label: 'Settings', href: '/admin/settings', icon: 'fa-gear', always: true },
-    ].filter((item) => item.always || item.show)
-
     return (
-        <div className="flex h-screen bg-[#121212] text-white overflow-hidden">
+        <div className="flex min-h-screen bg-[#111111]">
             {/* Sidebar */}
-            <aside className="w-64 bg-[#1A1A1A] border-r border-white/10 flex flex-col shrink-0">
-                <div className="h-16 flex items-center px-6 border-b border-white/10 gap-2">
-                    <Link href="/" className="inline-flex items-center gap-2 group hover:scale-105 transition-transform">
-                        <div className="bg-white rounded-full p-1 shadow-sm">
-                            <Image src="/logo.png" alt="Savika Logo" width={48} height={48} className="h-6 w-auto object-contain rounded-full" />
-                        </div>
-                        <div className="flex flex-col justify-center">
-                            <span className="text-lg font-extrabold text-[#C47F17] tracking-tight leading-none mb-0.5">SAVIKA</span>
-                            <span className="block text-[7px] text-[#8E562E] uppercase tracking-[0.2em] leading-none">Premium Spices</span>
-                        </div>
-                    </Link>
-                    <span className="ml-2 text-[10px] text-gray-500 uppercase tracking-widest">Admin</span>
-                    {role === 'super_admin' && (
-                        <span className="ml-auto text-[9px] bg-[#C47F17]/20 text-[#C47F17] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                            Super
-                        </span>
+            <aside
+                className={`fixed top-0 left-0 h-full bg-[#111111] border-r border-white/10 flex flex-col z-40 transition-all duration-250 ${collapsed ? 'w-14' : 'w-56'
+                    }`}
+            >
+                {/* Logo */}
+                <div className="flex items-center h-[60px] px-3 border-b border-white/10">
+                    <Image src="/logo.png" alt="Savika" width={32} height={32} className="h-8 w-8 object-contain rounded-full shrink-0" />
+                    {!collapsed && (
+                        <span className="ml-2 text-sm font-bold text-[#C17F24] tracking-tight whitespace-nowrap">SAVIKA ADMIN</span>
                     )}
                 </div>
 
-                <nav className="flex-1 py-4 space-y-1 px-3 overflow-y-auto">
+                {/* Nav Items */}
+                <nav className="flex-1 py-3 px-1.5 space-y-0.5 overflow-y-auto">
                     {navItems.map((item) => {
-                        const active = pathname.startsWith(item.href)
+                        const Icon = item.icon
+                        const isActive = pathname.startsWith(item.href)
                         return (
                             <Link
-                                key={item.label}
+                                key={item.href}
                                 href={item.href}
-                                className={cn(
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200',
-                                    active
-                                        ? 'bg-[#C47F17] text-white'
-                                        : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                                )}
+                                title={collapsed ? item.label : undefined}
+                                className={`flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                                    ? 'bg-[#C17F24] text-white'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    }`}
                             >
-                                <i className={`fa-solid ${item.icon} w-4 text-sm`} />
-                                {item.label}
+                                <Icon className="w-5 h-5 shrink-0" />
+                                {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
                             </Link>
                         )
                     })}
                 </nav>
 
-                {/* User Info + Sign Out */}
-                <div className="p-4 border-t border-white/10 space-y-3">
-                    <div className="px-3">
-                        <p className="text-xs font-semibold text-white truncate">{userName}</p>
-                        <p className="text-[11px] text-gray-500 truncate">{userEmail}</p>
-                        <span className="inline-block mt-1 text-[9px] bg-white/10 text-gray-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                            {role === 'super_admin' ? 'Super Admin' : 'Admin'}
-                        </span>
-                    </div>
+                {/* Toggle + Sign Out */}
+                <div className="border-t border-white/10 p-2 space-y-1">
+                    <button
+                        onClick={() => setCollapsed(!collapsed)}
+                        className="w-full flex items-center gap-2 px-2.5 py-2 text-gray-500 hover:text-white rounded-lg hover:bg-white/5 transition-colors text-sm"
+                    >
+                        {collapsed ? <ChevronRight className="w-5 h-5 shrink-0" /> : <ChevronLeft className="w-5 h-5 shrink-0" />}
+                        {!collapsed && <span>Collapse</span>}
+                    </button>
                     <button
                         onClick={handleSignOut}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-400 hover:bg-red-900/20 hover:text-red-400 transition-all w-full"
+                        disabled={signingOut}
+                        className="w-full flex items-center gap-2 px-2.5 py-2 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-900/20 transition-colors text-sm"
                     >
-                        <i className="fa-solid fa-right-from-bracket w-4 text-sm" />
-                        Sign Out
+                        {signingOut ? <Loader2 className="w-5 h-5 shrink-0 animate-spin" /> : <LogOut className="w-5 h-5 shrink-0" />}
+                        {!collapsed && <span>{signingOut ? 'Signing out...' : 'Sign Out'}</span>}
                     </button>
                 </div>
             </aside>
 
-            <main className="flex-1 overflow-y-auto bg-[#121212]">
-                {children}
-            </main>
+            {/* Main */}
+            <div className={`flex-1 transition-all duration-250 ${collapsed ? 'ml-14' : 'ml-56'}`}>
+                {/* Top Bar */}
+                <header className="sticky top-0 z-30 h-[60px] bg-[#111111] border-b border-white/10 flex items-center justify-between px-6">
+                    <div />
+                    <div className="flex items-center gap-4">
+                        <button className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors relative">
+                            <Bell className="w-5 h-5" />
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <UserCircle className="w-8 h-8 text-gray-500" />
+                            <div className="text-right">
+                                <p className="text-sm font-semibold text-white leading-tight">{user.name}</p>
+                                <p className="text-[11px] text-gray-500">{user.email}</p>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                {/* Content */}
+                <main className="min-h-[calc(100vh-60px)]">
+                    {children}
+                </main>
+            </div>
         </div>
     )
 }

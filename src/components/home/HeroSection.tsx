@@ -1,11 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import { ShoppingCart, Gift, Leaf, CheckCircle } from 'lucide-react'
 
 const stats = [
     { value: '50+', label: 'Spice Varieties' },
     { value: '10k+', label: 'Happy Customers' },
-    { value: '4.9★', label: 'Avg. Rating' },
+    { value: '4.9', label: 'Avg. Rating' },
 ]
 
 export default function HeroSection() {
@@ -14,7 +15,7 @@ export default function HeroSection() {
             <div className="section-wrap" style={{ paddingTop: '3.5rem', paddingBottom: '3.5rem' }}>
                 <div className="grid-hero">
 
-                    {/* ── LEFT ── */}
+                    {/* LEFT */}
                     <div style={{ order: 1 }}>
                         {/* Eyebrow badge */}
                         <div style={{
@@ -22,15 +23,14 @@ export default function HeroSection() {
                             background: '#FFF0DC', border: '1px solid rgba(196,127,23,.3)',
                             borderRadius: '9999px', padding: '0.375rem 1rem', marginBottom: '1.5rem'
                         }}>
-                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C47F17', animation: 'pulse 2s infinite' }} />
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#C47F17', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C17F24', animation: 'pulse 2s infinite' }} />
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#C17F24', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                                 India&apos;s #1 Premium Spice Brand
                             </span>
                         </div>
 
                         {/* Headline */}
                         <h1 style={{
-                            fontFamily: 'var(--font-playfair, Georgia, serif)',
                             fontSize: 'clamp(2.5rem, 6vw, 4rem)',
                             fontWeight: 800,
                             lineHeight: 1.05,
@@ -38,7 +38,7 @@ export default function HeroSection() {
                             marginBottom: '1.25rem'
                         }}>
                             Your Kitchen.<br />
-                            <span style={{ color: '#C47F17', fontStyle: 'italic', position: 'relative' }}>
+                            <span style={{ color: '#C17F24', fontStyle: 'italic', position: 'relative' }}>
                                 Your Spice.
                             </span>
                         </h1>
@@ -52,12 +52,12 @@ export default function HeroSection() {
 
                         {/* CTAs */}
                         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
-                            <Link href="/shop" className="btn-gold">
-                                <i className="fa-solid fa-cart-shopping" />
+                            <Link href="/shop" className="btn-gold" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <ShoppingCart style={{ width: '16px', height: '16px' }} />
                                 Explore Spice Range
                             </Link>
-                            <Link href="/category/gift-packs" className="btn-outline-brown">
-                                <i className="fa-solid fa-gift" />
+                            <Link href="/category/gift-packs" className="btn-outline-brown" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <Gift style={{ width: '16px', height: '16px' }} />
                                 Gift Sets
                             </Link>
                         </div>
@@ -69,33 +69,31 @@ export default function HeroSection() {
                         }}>
                             {stats.map((s) => (
                                 <div key={s.label}>
-                                    <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#C47F17', fontFamily: 'var(--font-playfair, Georgia)' }}>{s.value}</p>
+                                    <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#C17F24' }}>{s.value}</p>
                                     <p style={{ fontSize: '0.75rem', color: '#8E562E', fontWeight: 500, marginTop: '2px' }}>{s.label}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* ── RIGHT: Visual ── */}
+                    {/* RIGHT: Visual */}
                     <div style={{ order: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative', padding: '2rem 0' }}>
-                        {/* Outer blob */}
                         <div style={{
                             width: '320px', height: '320px', borderRadius: '50%',
                             background: 'linear-gradient(135deg, #FFF0DC 0%, #FFE0A0 100%)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             position: 'relative'
                         }}>
-                            {/* Central icon */}
                             <div style={{ textAlign: 'center' }}>
                                 <div style={{
                                     width: '120px', height: '120px', borderRadius: '50%',
                                     background: 'rgba(196,127,23,.15)', display: 'flex',
                                     alignItems: 'center', justifyContent: 'center', margin: '0 auto'
                                 }}>
-                                    <i className="fa-solid fa-pepper-hot" style={{ fontSize: '3.5rem', color: '#C47F17' }} />
+                                    <span style={{ fontSize: '3.5rem' }}>🌶️</span>
                                 </div>
                                 <p style={{ marginTop: '0.75rem', fontWeight: 700, color: '#2E2E2E', fontSize: '0.9rem' }}>Kashmiri Mirch</p>
-                                <p style={{ fontSize: '0.75rem', color: '#8E562E' }}>Whole · Single Origin</p>
+                                <p style={{ fontSize: '0.75rem', color: '#8E562E' }}>Whole - Single Origin</p>
                             </div>
 
                             {/* Floating badge - top right */}
@@ -107,7 +105,7 @@ export default function HeroSection() {
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#FFF0DC', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <i className="fa-solid fa-mortar-pestle" style={{ color: '#C47F17', fontSize: '14px' }} />
+                                    <span style={{ fontSize: '14px' }}>🧂</span>
                                 </div>
                                 <div>
                                     <p style={{ fontSize: '11px', fontWeight: 700, color: '#2E2E2E' }}>Pure Turmeric</p>
@@ -124,7 +122,7 @@ export default function HeroSection() {
                                 display: 'flex', alignItems: 'center', gap: '0.5rem'
                             }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#F0FFF4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <i className="fa-solid fa-circle-check" style={{ color: '#28A745', fontSize: '14px' }} />
+                                    <CheckCircle style={{ width: '16px', height: '16px', color: '#28A745' }} />
                                 </div>
                                 <div>
                                     <p style={{ fontSize: '11px', fontWeight: 700, color: '#2E2E2E' }}>FSSAI Certified</p>
@@ -136,12 +134,13 @@ export default function HeroSection() {
                         {/* Natural tag */}
                         <div className="animate-float" style={{
                             position: 'absolute', bottom: '0', right: '1rem',
-                            background: '#C47F17', color: '#fff',
+                            background: '#C17F24', color: '#fff',
                             fontSize: '11px', fontWeight: 700,
                             padding: '0.375rem 0.875rem', borderRadius: '9999px',
-                            boxShadow: '0 4px 12px rgba(196,127,23,.4)'
+                            boxShadow: '0 4px 12px rgba(196,127,23,.4)',
+                            display: 'inline-flex', alignItems: 'center', gap: '0.3rem'
                         }}>
-                            <i className="fa-solid fa-leaf" style={{ marginRight: '0.3rem' }} />
+                            <Leaf style={{ width: '12px', height: '12px' }} />
                             Natural Ingredients
                         </div>
                     </div>

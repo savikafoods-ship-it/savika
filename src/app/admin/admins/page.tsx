@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Crown, UserPlus, Lock, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 
 interface Perm { label: string; key: string }
 const PERMS: Perm[] = [
@@ -53,15 +54,15 @@ export default function AdminsPage() {
                 <p className="text-gray-500 text-sm mt-1">
                     Create new administrator accounts and assign their permissions.
                 </p>
-                <div className="mt-2 flex items-center gap-2 text-xs bg-[#C47F17]/10 border border-[#C47F17]/30 text-[#C47F17] px-3 py-2 rounded-lg w-fit">
-                    <i className="fa-solid fa-crown" />
+                <div className="mt-2 flex items-center gap-2 text-xs bg-[#C17F24]/10 border border-[#C17F24]/30 text-[#C17F24] px-3 py-2 rounded-lg w-fit">
+                    <Crown className="w-3.5 h-3.5" />
                     Only Super Admin can access this page
                 </div>
             </div>
 
-            <div className="bg-[#1A1A1A] border border-white/10 rounded-2xl p-6">
+            <div className="bg-[#1A1A1A] border border-white/10 rounded-xl p-6">
                 <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2">
-                    <i className="fa-solid fa-user-plus text-[#C47F17]" />
+                    <UserPlus className="w-5 h-5 text-[#C17F24]" />
                     Create New Admin
                 </h2>
 
@@ -74,7 +75,7 @@ export default function AdminsPage() {
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                                 placeholder="Admin Name"
-                                className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-[#262626] text-white text-sm focus:outline-none focus:border-[#C47F17] transition-all"
+                                className="w-full px-4 py-2.5 rounded-lg border border-white/10 bg-[#262626] text-white text-sm focus:outline-none focus:border-[#C17F24] transition-all"
                             />
                         </div>
                         <div>
@@ -85,7 +86,7 @@ export default function AdminsPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 placeholder="admin@savikafoods.in"
-                                className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-[#262626] text-white text-sm focus:outline-none focus:border-[#C47F17] transition-all"
+                                className="w-full px-4 py-2.5 rounded-lg border border-white/10 bg-[#262626] text-white text-sm focus:outline-none focus:border-[#C17F24] transition-all"
                             />
                         </div>
                     </div>
@@ -99,7 +100,7 @@ export default function AdminsPage() {
                             required
                             minLength={8}
                             placeholder="Min 8 characters"
-                            className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-[#262626] text-white text-sm focus:outline-none focus:border-[#C47F17] transition-all"
+                            className="w-full px-4 py-2.5 rounded-lg border border-white/10 bg-[#262626] text-white text-sm focus:outline-none focus:border-[#C17F24] transition-all"
                         />
                     </div>
 
@@ -110,7 +111,7 @@ export default function AdminsPage() {
                                 <label key={key} className="flex items-center gap-3 cursor-pointer group">
                                     <div
                                         onClick={() => togglePerm(key)}
-                                        className={`w-10 h-5 rounded-full transition-all duration-200 flex items-center ${perms[key] ? 'bg-[#C47F17]' : 'bg-white/10'} cursor-pointer`}
+                                        className={`w-10 h-5 rounded-full transition-all duration-200 flex items-center ${perms[key] ? 'bg-[#C17F24]' : 'bg-white/10'} cursor-pointer`}
                                     >
                                         <div className={`w-4 h-4 rounded-full bg-white shadow mx-0.5 transition-all duration-200 ${perms[key] ? 'translate-x-5' : 'translate-x-0'}`} />
                                     </div>
@@ -118,9 +119,9 @@ export default function AdminsPage() {
                                 </label>
                             ))}
                         </div>
-                        <p className="text-xs text-gray-600 mt-2">
-                            <i className="fa-solid fa-lock mr-1" />
-                            "Manage Admins" permission is never grantable - only Super Admin can create admins.
+                        <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+                            <Lock className="w-3 h-3" />
+                            &quot;Manage Admins&quot; permission is never grantable - only Super Admin can create admins.
                         </p>
                     </div>
 
@@ -129,7 +130,7 @@ export default function AdminsPage() {
                             ? 'bg-green-900/20 border border-green-800 text-green-400'
                             : 'bg-red-900/20 border border-red-800 text-red-400'
                             }`}>
-                            <i className={`fa-solid ${message.type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} mt-0.5`} />
+                            {message.type === 'success' ? <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> : <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />}
                             {message.text}
                         </div>
                     )}
@@ -137,9 +138,9 @@ export default function AdminsPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex items-center gap-2 bg-[#C47F17] hover:bg-[#a86c12] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 bg-[#C17F24] hover:bg-[#8B5E16] text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                        {loading ? <><i className="fa-solid fa-spinner fa-spin" /> Creating...</> : <><i className="fa-solid fa-user-plus" /> Create Admin</>}
+                        {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</> : <><UserPlus className="w-4 h-4" /> Create Admin</>}
                     </button>
                 </form>
             </div>

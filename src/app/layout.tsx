@@ -1,19 +1,23 @@
 import type { Metadata } from 'next'
 import { Poppins } from 'next/font/google'
+import NextTopLoader from 'nextjs-toploader'
 import './globals.css'
-import '@fortawesome/fontawesome-free/css/all.min.css'
+import { ToastProvider } from '@/components/ui/Toast'
+import AnnouncementBar from '@/components/layout/AnnouncementBar'
+import WhatsAppFloat from '@/components/layout/WhatsAppFloat'
 
 const poppins = Poppins({
- subsets: ['latin', 'latin-ext'],
- weight: ['300', '400', '500', '600', '700', '800'],
- variable: '--font-poppins',
- display: 'swap',
- preload: true,
+  subsets: ['latin', 'latin-ext'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-poppins',
+  display: 'swap',
+  preload: true,
 })
 
 export const metadata: Metadata = {
-  title: 'Savika Store',
-  description: 'Discover the finest, purest premium Indian spices online. Authentic flavors, sourced with care.',
+  title: 'Savika Foods | Premium Indian Spices Online',
+  description:
+    'Buy premium Indian spices online. 100% pure whole spices, ground masalas, and artisan blends. FSSAI certified. Fast delivery across India. Shop Savika.',
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',
@@ -27,8 +31,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={poppins.variable}>
-      <body className="font-[--font-poppins] bg-[#F5F0E8]">
-        {children}
+      <head>
+        <link rel="preconnect" href="https://cloud.appwrite.io" />
+        <link rel="dns-prefetch" href="https://cloud.appwrite.io" />
+      </head>
+      <body className="font-[--font-poppins] bg-[#F5F0E8] texture-bg">
+        <ToastProvider>
+          <AnnouncementBar />
+          <NextTopLoader color="#C17F24" height={3} showSpinner={false} />
+          {children}
+          <WhatsAppFloat />
+        </ToastProvider>
       </body>
     </html>
   )

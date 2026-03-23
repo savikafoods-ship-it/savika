@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
+import { ChevronRight, ShieldCheck, Star, ShoppingBag, Heart, Truck, RotateCcw, Shield, Sprout, CookingPot, Handshake, Ban, BookOpen, HeartPulse, UtensilsCrossed, Award, CircleHelp, ChevronDown, Flame, Store, ArrowRight, MapPin, Languages, Leaf, Landmark, Map, Package, Clock, Archive } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 // ─── ISR: revalidate every hour ─────────────────────────────────────────
 export const revalidate = 3600
@@ -304,13 +306,13 @@ export default async function ProductPage({ params }: Props) {
             <div className="bg-white border-b border-[#e8ddd0] py-3">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-gray-400">
-                        <Link href="/" className="hover:text-[#C47F17] transition-colors">Home</Link>
-                        <i className="fa-solid fa-chevron-right text-[8px]" />
-                        <Link href="/shop" className="hover:text-[#C47F17] transition-colors">Shop</Link>
-                        <i className="fa-solid fa-chevron-right text-[8px]" />
-                        <Link href={`/category/${p.category.slug}`} className="hover:text-[#C47F17] transition-colors">{p.category.name}</Link>
-                        <i className="fa-solid fa-chevron-right text-[8px]" />
-                        <span className="text-[#C47F17] font-medium line-clamp-1">{p.name}</span>
+                        <Link href="/" className="hover:text-[#C17F24] transition-colors">Home</Link>
+                        <ChevronRight className="w-2 h-2" />
+                        <Link href="/shop" className="hover:text-[#C17F24] transition-colors">Shop</Link>
+                        <ChevronRight className="w-2 h-2" />
+                        <Link href={`/category/${p.category.slug}`} className="hover:text-[#C17F24] transition-colors">{p.category.name}</Link>
+                        <ChevronRight className="w-2 h-2" />
+                        <span className="text-[#C17F24] font-medium line-clamp-1">{p.name}</span>
                     </nav>
                 </div>
             </div>
@@ -339,7 +341,7 @@ export default async function ProductPage({ params }: Props) {
                                 </div>
                             )}
                             <div className="absolute top-4 right-4 bg-white/90 text-[#2E2E2E] text-xs font-semibold px-3 py-1.5 rounded-full shadow flex items-center gap-1">
-                                <i className="fa-solid fa-shield-halved text-green-600 text-xs" />
+                                <ShieldCheck className="w-3 h-3 text-green-600" />
                                 FSSAI Certified
                             </div>
                         </div>
@@ -370,7 +372,7 @@ export default async function ProductPage({ params }: Props) {
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-0.5">
                                 {Array.from({ length: 5 }).map((_, i) => (
-                                    <i key={i} className={`fa-star text-sm ${i < Math.floor(p.rating) ? 'fa-solid text-[#C47F17]' : 'fa-regular text-gray-300'}`} />
+                                    <Star key={i} className={`w-4 h-4 ${i < Math.floor(p.rating) ? 'text-[#C17F24] fill-[#C17F24]' : 'text-gray-300'}`} />
                                 ))}
                             </div>
                             <span className="text-sm font-semibold text-[#2E2E2E]">{p.rating}</span>
@@ -408,12 +410,12 @@ export default async function ProductPage({ params }: Props) {
 
                         {/* CTA Buttons */}
                         <div className="flex flex-col sm:flex-row gap-3">
-                            <button className="flex-1 flex items-center justify-center gap-2 bg-[#C47F17] hover:bg-[#a86c12] text-white py-4 rounded-2xl font-bold text-base transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#C47F17]/30">
-                                <i className="fa-solid fa-bag-shopping" />
+                            <button className="flex-1 flex items-center justify-center gap-2 bg-[#C17F24] hover:bg-[#8B5E16] text-white py-4 rounded-2xl font-bold text-base transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#C17F24]/30">
+                                <ShoppingBag className="w-5 h-5" />
                                 Add to Cart
                             </button>
-                            <button className="flex items-center justify-center gap-2 border-2 border-[#C47F17] text-[#C47F17] hover:bg-[#C47F17] hover:text-white px-5 py-4 rounded-2xl font-bold text-base transition-all duration-300">
-                                <i className="fa-regular fa-heart" />
+                            <button className="flex items-center justify-center gap-2 border-2 border-[#C17F24] text-[#C17F24] hover:bg-[#C17F24] hover:text-white px-5 py-4 rounded-2xl font-bold text-base transition-all duration-300">
+                                <Heart className="w-5 h-5" />
                                 Wishlist
                             </button>
                         </div>
@@ -421,21 +423,21 @@ export default async function ProductPage({ params }: Props) {
                         {/* Delivery estimate */}
                         <div className="bg-white rounded-2xl border border-[#e8ddd0] p-4 space-y-3">
                             <div className="flex items-center gap-3">
-                                <i className="fa-solid fa-truck text-[#C47F17] text-lg w-5" />
+                                <Truck className="w-5 h-5 text-[#C17F24]" />
                                 <div>
                                     <p className="text-sm font-semibold text-[#2E2E2E]">Free delivery on orders ₹599+</p>
                                     <p className="text-xs text-gray-500">Delivered in 3–7 business days across India</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <i className="fa-solid fa-rotate-left text-[#C47F17] text-lg w-5" />
+                                <RotateCcw className="w-5 h-5 text-[#C17F24]" />
                                 <div>
                                     <p className="text-sm font-semibold text-[#2E2E2E]">7-Day Easy Returns</p>
                                     <p className="text-xs text-gray-500">Not satisfied? Return hassle-free.</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <i className="fa-solid fa-shield-halved text-[#C47F17] text-lg w-5" />
+                                <Shield className="w-5 h-5 text-[#C17F24]" />
                                 <div>
                                     <p className="text-sm font-semibold text-[#2E2E2E]">100% Authentic & FSSAI Certified</p>
                                     <p className="text-xs text-gray-500">Tested for purity, adulteration & pesticides</p>
@@ -454,7 +456,7 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 2 - WHAT IS THIS SPICE?
                 ══════════════════════════════════════════════════ */}
                 <section className="bg-white rounded-3xl p-8 shadow-sm border border-[#e8ddd0]">
-                    <SectionHeading icon="fa-book-open" text={`What Is ${p.name.split(' ')[0]}?`} />
+                    <SectionHeading icon={BookOpen} text={`What Is ${p.name.split(' ')[0]}?`} />
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
                         <div className="lg:col-span-2 space-y-4">
                             {p.whatIsThis.split('\n\n').map((para, i) => (
@@ -462,11 +464,11 @@ export default async function ProductPage({ params }: Props) {
                             ))}
                         </div>
                         <div className="space-y-4">
-                            <InfoCard label="Origin" value={p.origin} icon="fa-location-dot" />
-                            <InfoCard label="Local Name" value={p.localName} icon="fa-language" />
-                            <InfoCard label="Botanical Name" value={p.botanicalName} icon="fa-leaf" italic />
-                            <InfoCard label="Cultural Role" value={p.culturalImportance} icon="fa-landmark" />
-                            <InfoCard label="Regional Use" value={p.regionalUsage} icon="fa-map-marked-alt" />
+                            <InfoCard label="Origin" value={p.origin} icon={MapPin} />
+                            <InfoCard label="Local Name" value={p.localName} icon={Languages} />
+                            <InfoCard label="Botanical Name" value={p.botanicalName} icon={Leaf} italic />
+                            <InfoCard label="Cultural Role" value={p.culturalImportance} icon={Landmark} />
+                            <InfoCard label="Regional Use" value={p.regionalUsage} icon={Map} />
                         </div>
                     </div>
                 </section>
@@ -475,7 +477,7 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 3 - HEALTH BENEFITS
                 ══════════════════════════════════════════════════ */}
                 <section>
-                    <SectionHeading icon="fa-heart-pulse" text={`Health Benefits of ${p.name.split(' ')[0]}`} />
+                    <SectionHeading icon={HeartPulse} text={`Health Benefits of ${p.name.split(' ')[0]}`} />
                     <p className="text-gray-500 mt-2 mb-6 max-w-2xl">
                         Backed by traditional Ayurvedic wisdom and modern nutritional science.
                     </p>
@@ -483,7 +485,7 @@ export default async function ProductPage({ params }: Props) {
                         {p.benefits.map((b, i) => (
                             <div key={i} className="bg-white rounded-2xl p-5 border border-[#e8ddd0] hover:shadow-md transition-shadow">
                                 <div className="w-10 h-10 rounded-xl bg-[#C47F17]/10 flex items-center justify-center mb-3">
-                                    <i className="fa-solid fa-seedling text-[#C47F17]" />
+                                    <Sprout className="w-4 h-4 text-[#C17F24]" />
                                 </div>
                                 <h3 className="font-bold text-[#2C1A0E] mb-2">{b.title}</h3>
                                 <p className="text-sm text-gray-500 leading-relaxed">{b.desc}</p>
@@ -499,13 +501,13 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 4 - CULINARY USES
                 ══════════════════════════════════════════════════ */}
                 <section className="bg-[#2C1A0E] rounded-3xl p-8">
-                    <SectionHeading icon="fa-utensils" text="Culinary Uses & Cooking Tips" dark />
+                    <SectionHeading icon={UtensilsCrossed} text="Culinary Uses & Cooking Tips" dark />
                     <p className="text-gray-400 mt-2 mb-6">How to use {p.name} like an Indian chef</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {p.culinaryUses.map((u, i) => (
                             <div key={i} className="bg-white/5 rounded-2xl p-5 border border-white/10 hover:bg-white/10 transition-colors">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <i className="fa-solid fa-bowl-food text-[#C47F17]" />
+                                    <UtensilsCrossed className="w-4 h-4 text-[#C17F24]" />
                                     <h3 className="font-bold text-white">{u.dish}</h3>
                                 </div>
                                 <p className="text-sm text-gray-400 leading-relaxed">{u.tip}</p>
@@ -518,22 +520,25 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 5 - WHY CHOOSE SAVIKA
                 ══════════════════════════════════════════════════ */}
                 <section>
-                    <SectionHeading icon="fa-award" text="Why Choose Savika?" />
+                    <SectionHeading icon={Award} text="Why Choose Savika?" />
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
                         {[
-                            { icon: 'fa-mortar-pestle', title: 'Stone Ground Fresh', desc: 'Ground in small batches to preserve essential oils and peak flavour' },
-                            { icon: 'fa-handshake', title: 'Ethical Direct Sourcing', desc: 'Directly from verified farms - no middlemen, fair farmer prices' },
-                            { icon: 'fa-ban', title: 'Zero Preservatives', desc: 'No artificial colour, no salt, no anti-caking agents - ever' },
-                            { icon: 'fa-truck', title: 'Pan-India Shipping', desc: 'Delivered to all 28 states within 3–7 business days' },
-                        ].map((f) => (
-                            <div key={f.title} className="bg-[#FFF8F0] rounded-2xl p-5 border border-[#e8ddd0] text-center">
-                                <div className="w-12 h-12 rounded-full bg-[#C47F17]/15 flex items-center justify-center mx-auto mb-3">
-                                    <i className={`fa-solid ${f.icon} text-[#C47F17] text-lg`} />
+                            { icon: CookingPot, title: 'Stone Ground Fresh', desc: 'Ground in small batches to preserve essential oils and peak flavour' },
+                            { icon: Handshake, title: 'Ethical Direct Sourcing', desc: 'Directly from verified farms - no middlemen, fair farmer prices' },
+                            { icon: Ban, title: 'Zero Preservatives', desc: 'No artificial colour, no salt, no anti-caking agents - ever' },
+                            { icon: Truck, title: 'Pan-India Shipping', desc: 'Delivered to all 28 states within 3-7 business days' },
+                        ].map((f) => {
+                            const Icon = f.icon
+                            return (
+                                <div key={f.title} className="bg-[#FFF8F0] rounded-2xl p-5 border border-[#e8ddd0] text-center">
+                                    <div className="w-12 h-12 rounded-full bg-[#C17F24]/15 flex items-center justify-center mx-auto mb-3">
+                                        <Icon className="w-5 h-5 text-[#C17F24]" />
+                                    </div>
+                                    <h3 className="font-bold text-[#2C1A0E] mb-1">{f.title}</h3>
+                                    <p className="text-xs text-gray-500">{f.desc}</p>
                                 </div>
-                                <h3 className="font-bold text-[#2C1A0E] mb-1">{f.title}</h3>
-                                <p className="text-xs text-gray-500">{f.desc}</p>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </section>
 
@@ -543,13 +548,13 @@ export default async function ProductPage({ params }: Props) {
                 <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="bg-white rounded-3xl p-7 border border-[#e8ddd0]">
                         <h2 className="text-xl font-extrabold text-[#2C1A0E] mb-4 flex items-center gap-2">
-                            <i className="fa-solid fa-jar text-[#C47F17]" />
+                            <Package className="w-5 h-5 text-[#C17F24]" />
                             Storage &amp; Shelf Life
                         </h2>
                         <div className="space-y-4">
                             <div className="flex items-start gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-[#C47F17]/10 flex items-center justify-center shrink-0 mt-0.5">
-                                    <i className="fa-solid fa-clock text-[#C47F17] text-xs" />
+                                    <Clock className="w-3 h-3 text-[#C17F24]" />
                                 </div>
                                 <div>
                                     <p className="font-semibold text-[#2C1A0E] text-sm">Shelf Life</p>
@@ -558,7 +563,7 @@ export default async function ProductPage({ params }: Props) {
                             </div>
                             <div className="flex items-start gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-[#C47F17]/10 flex items-center justify-center shrink-0 mt-0.5">
-                                    <i className="fa-solid fa-box-archive text-[#C47F17] text-xs" />
+                                    <Archive className="w-3 h-3 text-[#C17F24]" />
                                 </div>
                                 <div>
                                     <p className="font-semibold text-[#2C1A0E] text-sm">How to Store</p>
@@ -571,12 +576,12 @@ export default async function ProductPage({ params }: Props) {
                     {/* ──────── Sourcing Story ──────── */}
                     <section className="bg-[#FFF8F0] rounded-3xl p-7 border border-[#e8ddd0]">
                         <h2 className="text-xl font-extrabold text-[#2C1A0E] mb-4 flex items-center gap-2">
-                            <i className="fa-solid fa-jar text-[#C47F17]" />
+                            <Leaf className="w-5 h-5 text-[#C17F24]" />
                             Sourcing Story
                         </h2>
                         <p className="text-sm text-gray-600 leading-relaxed">{p.sourcingStory}</p>
                         <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-[#C47F17]">
-                            <i className="fa-solid fa-leaf" />
+                            <Leaf className="w-3 h-3" />
                             <span>Farm-to-kitchen transparency</span>
                         </div>
                     </section>
@@ -586,7 +591,7 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 7 - FAQ
                 ══════════════════════════════════════════════════ */}
                 <section>
-                    <SectionHeading icon="fa-circle-question" text="Frequently Asked Questions" />
+                    <SectionHeading icon={CircleHelp} text="Frequently Asked Questions" />
                     <div className="mt-6 space-y-3 max-w-3xl">
                         {p.faqs.map((faq, i) => (
                             <details
@@ -595,7 +600,7 @@ export default async function ProductPage({ params }: Props) {
                             >
                                 <summary className="flex items-center justify-between p-5 cursor-pointer list-none font-semibold text-[#2C1A0E] hover:bg-[#FFF8F0] transition-colors">
                                     <span>{faq.q}</span>
-                                    <i className="fa-solid fa-chevron-down text-[#C47F17] text-xs group-open:rotate-180 transition-transform" />
+                                    <ChevronDown className="w-3 h-3 text-[#C17F24] group-open:rotate-180 transition-transform" />
                                 </summary>
                                 <div className="px-5 pb-5 text-sm text-gray-600 leading-relaxed border-t border-[#e8ddd0] pt-4">
                                     {faq.a}
@@ -609,7 +614,7 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 8 - INTERNAL LINKS / RELATED PRODUCTS
                 ══════════════════════════════════════════════════ */}
                 <section className="pb-4">
-                    <SectionHeading icon="fa-pepper-hot" text="You May Also Like" />
+                    <SectionHeading icon={Flame} text="You May Also Like" />
                     <div className="flex flex-wrap gap-4 mt-5">
                         {p.relatedProducts.map((rp) => (
                             <Link
@@ -617,7 +622,7 @@ export default async function ProductPage({ params }: Props) {
                                 href={`/product/${rp.slug}`}
                                 className="flex items-center gap-2 bg-white border border-[#e8ddd0] hover:border-[#C47F17] hover:bg-[#FFF8F0] text-[#2C1A0E] font-semibold px-4 py-2.5 rounded-full text-sm transition-all"
                             >
-                                <i className="fa-solid fa-arrow-right text-[#C47F17] text-xs" />
+                                <ArrowRight className="w-3 h-3 text-[#C17F24]" />
                                 {rp.name}
                             </Link>
                         ))}
@@ -625,7 +630,7 @@ export default async function ProductPage({ params }: Props) {
                             href="/shop"
                             className="flex items-center gap-2 bg-[#C47F17]/10 border border-[#C47F17]/30 hover:bg-[#C47F17] hover:text-white text-[#C47F17] font-semibold px-4 py-2.5 rounded-full text-sm transition-all"
                         >
-                            <i className="fa-solid fa-store text-xs" />
+                            <Store className="w-3 h-3" />
                             View Complete Indian Spice Collection
                         </Link>
                     </div>
@@ -637,22 +642,22 @@ export default async function ProductPage({ params }: Props) {
 
 // ─── Sub-components ──────────────────────────────────────────────────────
 
-function SectionHeading({ icon, text, dark }: { icon: string; text: string; dark?: boolean }) {
+function SectionHeading({ icon: Icon, text, dark }: { icon: LucideIcon; text: string; dark?: boolean }) {
     return (
         <h2 className={`text-2xl font-extrabold flex items-center gap-3 ${dark ? 'text-white' : 'text-[#2C1A0E]'}`}>
-            <div className="w-9 h-9 rounded-xl bg-[#C47F17]/20 flex items-center justify-center">
-                <i className={`fa-solid ${icon} text-[#C47F17]`} />
+            <div className="w-9 h-9 rounded-xl bg-[#C17F24]/20 flex items-center justify-center">
+                <Icon className="w-4 h-4 text-[#C17F24]" />
             </div>
             {text}
         </h2>
     )
 }
 
-function InfoCard({ label, value, icon, italic }: { label: string; value: string; icon: string; italic?: boolean }) {
+function InfoCard({ label, value, icon: Icon, italic }: { label: string; value: string; icon: LucideIcon; italic?: boolean }) {
     return (
         <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#e8ddd0]">
             <div className="flex items-center gap-2 mb-1">
-                <i className={`fa-solid ${icon} text-[#C47F17] text-xs`} />
+                <Icon className="w-3 h-3 text-[#C17F24]" />
                 <span className="text-xs font-bold text-[#8E562E] uppercase tracking-wider">{label}</span>
             </div>
             <p className={`text-sm text-[#2C1A0E] font-medium ${italic ? 'italic' : ''}`}>{value}</p>
