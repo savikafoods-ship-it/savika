@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { ChevronRight, ShieldCheck, Star, ShoppingBag, Heart, Truck, RotateCcw, Shield, Sprout, CookingPot, Handshake, Ban, BookOpen, HeartPulse, UtensilsCrossed, Award, CircleHelp, ChevronDown, Flame, Store, ArrowRight, MapPin, Languages, Leaf, Landmark, Map, Package, Clock, Archive } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import ProductCommercePanel from '@/components/product/ProductCommercePanel'
 
 // ─── ISR: revalidate every hour ─────────────────────────────────────────
 export const revalidate = 3600
@@ -90,7 +91,7 @@ const PRODUCTS: Record<string, ProductData> = {
             { slug: 'garam-masala-artisan', name: 'Artisan Garam Masala' },
             { slug: 'kashmiri-saffron', name: 'Kashmiri Saffron' },
         ],
-        image: '/images/kashmiri-mirch.jpg',
+        image: '/images/products/kashmiri-mirch-whole.jpg',
     },
     'premium-turmeric-powder': {
         slug: 'premium-turmeric-powder',
@@ -141,7 +142,7 @@ const PRODUCTS: Record<string, ProductData> = {
             { slug: 'garam-masala-artisan', name: 'Artisan Garam Masala' },
             { slug: 'coriander-powder', name: 'Coriander Powder' },
         ],
-        image: '/images/turmeric-powder.jpg',
+        image: '/images/products/premium-turmeric-powder.jpg',
     },
     'garam-masala-artisan': {
         slug: 'garam-masala-artisan',
@@ -188,7 +189,7 @@ const PRODUCTS: Record<string, ProductData> = {
             { slug: 'premium-turmeric-powder', name: 'Premium Turmeric Powder' },
             { slug: 'coriander-powder', name: 'Coriander Powder' },
         ],
-        image: '/images/garam-masala.jpg',
+        image: '/images/products/garam-masala-artisan.jpg',
     },
 }
 
@@ -394,61 +395,8 @@ export default async function ProductPage({ params }: Props) {
                             )}
                         </div>
 
-                        {/* Weight / Variant selector */}
-                        <div>
-                            <p className="text-sm font-semibold text-[#2E2E2E] mb-2">Select Weight</p>
-                            <WeightSelector options={p.weight} />
-                        </div>
-
-                        {/* Stock */}
-                        <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${p.stock > 20 ? 'bg-green-500' : p.stock > 0 ? 'bg-yellow-500' : 'bg-red-500'}`} />
-                            <span className="text-sm font-medium text-[#2E2E2E]">
-                                {p.stock > 20 ? 'In Stock' : p.stock > 0 ? `Only ${p.stock} left` : 'Out of Stock'}
-                            </span>
-                        </div>
-
-                        {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <button className="flex-1 flex items-center justify-center gap-2 bg-[#C17F24] hover:bg-[#8B5E16] text-white py-4 rounded-2xl font-bold text-base transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#C17F24]/30">
-                                <ShoppingBag className="w-5 h-5" />
-                                Add to Cart
-                            </button>
-                            <button className="flex items-center justify-center gap-2 border-2 border-[#C17F24] text-[#C17F24] hover:bg-[#C17F24] hover:text-white px-5 py-4 rounded-2xl font-bold text-base transition-all duration-300">
-                                <Heart className="w-5 h-5" />
-                                Wishlist
-                            </button>
-                        </div>
-
-                        {/* Delivery estimate */}
-                        <div className="bg-white rounded-2xl border border-[#e8ddd0] p-4 space-y-3">
-                            <div className="flex items-center gap-3">
-                                <Truck className="w-5 h-5 text-[#C17F24]" />
-                                <div>
-                                    <p className="text-sm font-semibold text-[#2E2E2E]">Free delivery on orders ₹599+</p>
-                                    <p className="text-xs text-gray-500">Delivered in 3–7 business days across India</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <RotateCcw className="w-5 h-5 text-[#C17F24]" />
-                                <div>
-                                    <p className="text-sm font-semibold text-[#2E2E2E]">7-Day Easy Returns</p>
-                                    <p className="text-xs text-gray-500">Not satisfied? Return hassle-free.</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Shield className="w-5 h-5 text-[#C17F24]" />
-                                <div>
-                                    <p className="text-sm font-semibold text-[#2E2E2E]">100% Authentic & FSSAI Certified</p>
-                                    <p className="text-xs text-gray-500">Tested for purity, adulteration & pesticides</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Hero Intro (SEO text) */}
-                        <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed">
-                            <p>{p.heroIntro}</p>
-                        </div>
+                        {/* ProductCommercePanel replaces the static WeightSelector and buttons */}
+                        <ProductCommercePanel productData={p} />
                     </div>
                 </section>
 

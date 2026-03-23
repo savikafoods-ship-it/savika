@@ -53,7 +53,7 @@ export default function HomePage() {
                         ],
                         contactPoint: {
                             '@type': 'ContactPoint',
-                            telephone: '+91-98765-43210',
+                            telephone: '+91-98981-76667',
                             contactType: 'customer service',
                             areaServed: 'IN',
                             availableLanguage: ['English', 'Hindi'],

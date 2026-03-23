@@ -5,7 +5,7 @@ import { MessageCircle } from 'lucide-react'
 
 export default function WhatsAppFloat() {
     const [isVisible, setIsVisible] = useState(false)
-    const phoneNumber = '919876543210' // Replace with actual number
+    const phoneNumber = '919898176667' // Replace with actual number
     const defaultMessage = 'Hello Savika! I would like to know more about your premium spices.'
 
     // Show button after slightly scrolling down

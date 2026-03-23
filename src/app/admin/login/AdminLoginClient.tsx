@@ -128,11 +128,13 @@ export default function AdminLoginClient() {
                     </button>
                 </form>
 
-                <p className="text-center text-xs text-gray-600 mt-6">
-                    <Link href="/auth/login" className="hover:text-[#C17F24] transition-colors">
-                        Back to Customer Login
-                    </Link>
-                </p>
+                <div className="mt-6 border-t border-white/10 pt-6">
+                    <p className="text-center text-xs text-gray-500">
+                        <Link href="/" className="hover:text-[#C17F24] transition-colors">
+                            Return to Storefront
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
     )

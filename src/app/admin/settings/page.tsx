@@ -40,7 +40,7 @@ export default function AdminSettingsPage() {
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-sm font-medium text-[#e4e4e7]">Support Phone</label>
-                            <input type="text" defaultValue="+91 98765 43210" className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 focus:border-[#C17F24] outline-none max-w-xs" />
+                            <input type="text" defaultValue="+91 98981 76667" className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 focus:border-[#C17F24] outline-none max-w-xs" />
                         </div>
                     </div>
                 </div>

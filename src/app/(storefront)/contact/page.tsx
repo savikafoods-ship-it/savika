@@ -42,14 +42,14 @@ export default function ContactPage() {
                                     <MapPin className="w-6 h-6 text-[#C47F17] shrink-0 mt-1" />
                                     <div>
                                         <h3 className="font-semibold mb-1">Our Headquarters</h3>
-                                        <p className="text-gray-400 text-sm leading-relaxed">Savika Foods Pvt. Ltd.<br />123 Spice Route Avenue,<br />Mumbai, Maharashtra 400001,<br />India</p>
+                                        <p className="text-gray-400 text-sm leading-relaxed">Savika Foods Pvt. Ltd.<br />Umbergaon,<br />Gujarat - 396171,<br />India</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4">
                                     <Phone className="w-6 h-6 text-[#C47F17] shrink-0 mt-1" />
                                     <div>
                                         <h3 className="font-semibold mb-1">Phone Number</h3>
-                                        <p className="text-gray-400 text-sm">+91 98765 43210</p>
+                                        <p className="text-gray-400 text-sm">+91 98981 76667</p>
                                         <p className="text-gray-400 text-xs mt-1">Mon-Fri from 9am to 6pm</p>
                                     </div>
                                 </div>
