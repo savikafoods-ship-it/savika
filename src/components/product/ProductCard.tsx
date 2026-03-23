@@ -34,7 +34,7 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
                 <div className="product-card-img">
                     {product.imageIds?.[0] ? (
                         <Image
-                            src={`${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS}/files/${product.imageIds[0]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}&width=400&quality=80&output=webp`}
+                            src={product.imageIds[0].startsWith('/') ? product.imageIds[0] : `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || ''}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS || ''}/files/${product.imageIds[0]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || ''}&width=400&quality=80&output=webp`}
                             alt={product.name}
                             fill
                             className="object-contain"

@@ -2,8 +2,8 @@
 import { Client, Account, Databases, Storage } from 'appwrite'
 
 const client = new Client()
-  .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-  .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
+if (process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) client.setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) client.setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID)
 
 export const account = new Account(client)
 export const databases = new Databases(client)

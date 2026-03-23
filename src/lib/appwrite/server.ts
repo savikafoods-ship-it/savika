@@ -4,9 +4,9 @@ import { Client, Databases, Storage, Users } from 'node-appwrite'
 
 export function createAdminClient() {
   const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
-    .setKey(process.env.APPWRITE_API_KEY!)
+  if (process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) client.setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+  if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) client.setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID)
+  if (process.env.APPWRITE_API_KEY) client.setKey(process.env.APPWRITE_API_KEY)
 
   return {
     databases: new Databases(client),
@@ -25,9 +25,9 @@ export async function createSessionClient() {
   }
 
   const client = new Client()
-    .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-    .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!)
-    .setSession(sessionCookie.value)
+  if (process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) client.setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)
+  if (process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) client.setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID)
+  client.setSession(sessionCookie.value)
 
   return {
     account: new (await import('node-appwrite')).Account(client),

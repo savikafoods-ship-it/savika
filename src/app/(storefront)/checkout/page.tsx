@@ -125,7 +125,7 @@ export default function CheckoutPage() {
                                 <div className="w-12 h-12 bg-[#F9F4EE] rounded-lg relative overflow-hidden shrink-0">
                                     {item.product.imageIds?.[0] && (
                                         <Image
-                                            src={`${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS}/files/${item.product.imageIds[0]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}&width=60`}
+                                            src={item.product.imageIds[0].startsWith('/') ? item.product.imageIds[0] : `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || ''}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS || ''}/files/${item.product.imageIds[0]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || ''}&width=60`}
                                             fill alt="" className="object-cover"
                                         />
                                     )}
