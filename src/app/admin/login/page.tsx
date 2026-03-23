@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import AdminLoginClient from './AdminLoginClient'
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 }
 
 export default function AdminLoginPage() {
-    return <AdminLoginClient />
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#111111] flex items-center justify-center"><div className="w-8 h-8 rounded-full border-t-2 border-[#C17F24] animate-spin"></div></div>}>
+            <AdminLoginClient />
+        </Suspense>
+    )
 }
