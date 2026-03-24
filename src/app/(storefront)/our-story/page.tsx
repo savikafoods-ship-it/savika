@@ -44,7 +44,7 @@ export default function OurStoryPage() {
                         <div className="relative h-80 md:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                             <div className="absolute inset-0 bg-[#C47F17]/20 mix-blend-color z-10 rounded-2xl" />
                             <Image 
-                                src="https://images.unsplash.com/photo-1540340061722-9293d5163008?q=80&w=800" 
+                                src="https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?q=80&w=800" 
                                 alt="Farmers sorting spices" 
                                 fill 
                                 className="object-cover"

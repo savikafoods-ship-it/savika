@@ -85,9 +85,12 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
                     <p style={{ fontSize: '10px', color: '#8E562E', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px' }}>
                         {product.category?.name ?? 'Spice'}
                     </p>
-                    <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#2E2E2E', lineHeight: 1.35, marginBottom: '0.5rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                        {product.name}
-                    </h3>
+                    <div>
+                        <p className="font-semibold text-gray-950 text-base leading-tight">{product.name}</p>
+                        {product.tagline && (
+                            <p className="text-amber-700 text-xs italic mt-0.5">{product.tagline}</p>
+                        )}
+                    </div>
                     {/* Stars */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1px', marginBottom: '0.5rem' }}>
                         {[...Array(5)].map((_, i) => (

@@ -88,7 +88,7 @@ export default function Navbar() {
                                         {link.children && <ChevronDown className="w-3.5 h-3.5 ml-0.5" />}
                                     </Link>
                                     {link.children && openDropdown === link.label && (
-                                        <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-2xl shadow-2xl border border-[#F0E8DC] py-2 z-50 animate-fadeIn">
+                                        <div className="absolute top-full left-0 w-56 bg-white rounded-b-2xl shadow-2xl border border-[#F0E8DC] py-2 z-50 animate-fadeIn">
                                             {link.children.map((child) => (
                                                 <Link
                                                     key={child.label}

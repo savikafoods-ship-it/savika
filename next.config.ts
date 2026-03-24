@@ -23,6 +23,20 @@ const nextConfig: NextConfig = {
     deviceSizes: [320, 420, 640, 768, 1024, 1280, 1536],
     imageSizes: [16, 32, 64, 96, 128, 256, 384],
   },
+  async redirects() {
+    return [
+      {
+        source: '/products',
+        destination: '/shop',
+        permanent: true,
+      },
+      {
+        source: '/products/:slug',
+        destination: '/shop/:slug',
+        permanent: true,
+      },
+    ]
+  },
   async headers() {
     return [
       {

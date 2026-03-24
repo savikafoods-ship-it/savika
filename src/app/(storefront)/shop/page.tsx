@@ -5,11 +5,55 @@ import type { Product } from '@/types'
 
 // Mock products - replace with Appwrite fetch
 const ALL_PRODUCTS: Product[] = [
-    { $id: '1', slug: 'kashmiri-mirch-whole', name: 'Kashmiri Mirch - Whole', description: 'Hand-picked from the valleys of Kashmir, these vibrant red chilies add colour without excessive heat.', price: 299, comparePrice: 199, stock: 50, categoryId: 'cat1', imageIds: [], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat1', slug: 'whole-spices', name: 'Whole Spices', imageId: '', sortOrder: 0, $createdAt: '', $updatedAt: '' } },
-    { $id: '2', slug: 'premium-turmeric-powder', name: 'Premium Turmeric Powder', description: 'Single-origin Erode turmeric, freshly milled for maximum curcumin content.', price: 249, stock: 80, categoryId: 'cat2', imageIds: [], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' } },
-    { $id: '3', slug: 'garam-masala-artisan', name: 'Artisan Garam Masala', description: 'A complex, warming blend of 12 whole spices, slow-roasted and stone-ground.', price: 399, comparePrice: 299, stock: 35, categoryId: 'cat3', imageIds: [], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' } },
-    { $id: '4', slug: 'malabar-black-pepper', name: 'Malabar Black Pepper', description: 'The OG of Indian spices. Bold, robust, and intensely aromatic.', price: 349, stock: 60, categoryId: 'cat1', imageIds: [], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat1', slug: 'whole-spices', name: 'Whole Spices', imageId: '', sortOrder: 0, $createdAt: '', $updatedAt: '' } },
-    { $id: '5', slug: 'star-anise-whole', name: 'Star Anise - Premium Whole', description: 'Star anise from Assam - licorice-sweet, fragrant and bolder than any import.', price: 399, comparePrice: 299, stock: 40, categoryId: 'cat1', imageIds: [], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat1', slug: 'whole-spices', name: 'Whole Spices', imageId: '', sortOrder: 0, $createdAt: '', $updatedAt: '' } },
+    {
+        $id: '1', name: 'Red Chilli Powder', tagline: 'Tikha Swad', slug: 'red-chilli-powder',
+        category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat2', price: 185, stock: 100, isActive: true,
+        imageIds: ['/images/products/kashmiri-mirch-whole.jpg'],
+        description: 'Pure red chilli powder with the authentic fiery heat of Indian kitchens.'
+    },
+    {
+        $id: '2', name: 'Garam Masala', tagline: 'Rich Aroma', slug: 'garam-masala',
+        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat3', price: 295, stock: 80, isActive: true,
+        imageIds: ['/images/products/garam-masala-artisan.jpg'],
+        description: 'A perfectly balanced blend of whole spices, slow-roasted and stone-ground.'
+    },
+    {
+        $id: '3', name: 'Turmeric Powder', tagline: 'Rang Aur Shuddhta', slug: 'turmeric-powder',
+        category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat2', price: 145, stock: 120, isActive: true,
+        imageIds: ['/images/products/premium-turmeric-powder.jpg'],
+        description: 'Cold-ground pure turmeric with high curcumin content.'
+    },
+    {
+        $id: '4', name: 'Coriander Powder', tagline: 'Khushboo Bhara Taste', slug: 'coriander-powder',
+        category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat2', price: 165, stock: 90, isActive: true,
+        imageIds: ['/images/products/coriander-powder.jpg'],
+        description: 'Freshly ground coriander with an unmistakable khushboo.'
+    },
+    {
+        $id: '5', name: 'Chicken Masala', tagline: 'Perfect Non-Veg Taste', slug: 'chicken-masala',
+        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat3', price: 225, stock: 150, isActive: true,
+        imageIds: ['/images/products/biryani-masala.jpg'],
+        description: 'Specially crafted masala blend for chicken curries, tikka, and gravies.'
+    },
+    {
+        $id: '6', name: 'Meat Masala', tagline: 'Dumdar Flavour', slug: 'meat-masala',
+        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat3', price: 245, stock: 120, isActive: true,
+        imageIds: ['/images/products/black-pepper-malabar.jpg'],
+        description: 'A bold, robust blend for mutton, lamb, and beef preparations.'
+    },
+    {
+        $id: '7', name: 'Deshi Ghati Masala', tagline: 'Special Traditional Blend', slug: 'deshi-ghati-masala',
+        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat3', price: 325, stock: 40, isActive: true,
+        imageIds: ['/images/products/star-anise-whole.jpg'],
+        description: 'A rare traditional masala from the Ghati region, crafted from a secret family recipe.'
+    },
 ]
 
 export const metadata: Metadata = {

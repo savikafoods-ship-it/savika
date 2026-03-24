@@ -35,14 +35,14 @@ const trustBadges = [
 
 export default function Footer() {
     return (
-        <footer className="bg-[#8B5E16] text-white">
+        <footer className="bg-[#1A120B] text-white">
             {/* Newsletter Strip */}
-            <div className="bg-[#C17F24] py-10 px-4">
+            <div className="bg-[#2D1B0D] py-10 px-4">
                 <div className="max-w-3xl mx-auto text-center">
                     <p className="text-2xl font-extrabold text-white mb-1">
                         Join the Spice Family!
                     </p>
-                    <p className="text-sm text-white/80 mb-6">Get exclusive recipes, first access to new arrivals &amp; member-only deals.</p>
+                    <p className="text-sm text-white/90 mb-6 font-medium">Get exclusive recipes, first access to new arrivals &amp; member-only deals.</p>
                     <form
                         className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto"
                         onSubmit={(e) => e.preventDefault()}
@@ -66,8 +66,8 @@ export default function Footer() {
             </div>
 
             {/* Main Footer */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-                <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
 
                     {/* Brand Column */}
                     <div>
@@ -78,15 +78,15 @@ export default function Footer() {
 
                         {/* Contact */}
                         <div className="space-y-2 mb-6">
-                            <div className="flex items-center gap-2 text-xs text-white/60">
+                            <div className="flex items-center gap-2 text-xs text-white/75">
                                 <MapPin className="w-4 h-4 text-white/80 shrink-0" />
                                 <span>Savika Foods Pvt. Ltd., Umbergaon, Gujarat - 396171</span>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-white/60">
+                            <div className="flex items-center gap-2 text-xs text-white/75">
                                 <Phone className="w-4 h-4 text-white/80 shrink-0" />
                                 <span>+91 98981 76667</span>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-white/60">
+                            <div className="flex items-center gap-2 text-xs text-white/75">
                                 <Mail className="w-4 h-4 text-white/80 shrink-0" />
                                 <span>savikafoods@gmail.com</span>
                             </div>
@@ -99,7 +99,7 @@ export default function Footer() {
                         <ul className="space-y-2.5">
                             {footerLinks.shop.map((l) => (
                                 <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/60 hover:text-white transition-colors">
+                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors">
                                         {l.label}
                                     </Link>
                                 </li>
@@ -113,7 +113,7 @@ export default function Footer() {
                         <ul className="space-y-2.5">
                             {footerLinks.company.map((l) => (
                                 <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/60 hover:text-white transition-colors">
+                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors">
                                         {l.label}
                                     </Link>
                                 </li>
@@ -127,7 +127,7 @@ export default function Footer() {
                         <ul className="space-y-2.5">
                             {footerLinks.support.map((l) => (
                                 <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/60 hover:text-white transition-colors">
+                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors">
                                         {l.label}
                                     </Link>
                                 </li>
@@ -156,7 +156,7 @@ export default function Footer() {
             </div>
 
             {/* Bottom Bar */}
-            <div className="border-t border-white/20 py-4 px-4 flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto text-xs text-white/50 gap-2">
+            <div className="border-t border-white/20 py-4 px-4 flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto text-xs text-white/60 gap-2">
                 <p>
                     &copy; {new Date().getFullYear()} Savika Foods Pvt. Ltd. All rights reserved.
                 </p>

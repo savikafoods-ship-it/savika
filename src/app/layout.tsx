@@ -3,7 +3,6 @@ import { Poppins } from 'next/font/google'
 import NextTopLoader from 'nextjs-toploader'
 import './globals.css'
 import { ToastProvider } from '@/components/ui/Toast'
-import AnnouncementBar from '@/components/layout/AnnouncementBar'
 import WhatsAppFloat from '@/components/layout/WhatsAppFloat'
 
 const poppins = Poppins({
@@ -34,10 +33,14 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://cloud.appwrite.io" />
         <link rel="dns-prefetch" href="https://cloud.appwrite.io" />
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        />
       </head>
       <body className="font-[--font-poppins] bg-[#F5F0E8] texture-bg">
         <ToastProvider>
-          <AnnouncementBar />
           <NextTopLoader color="#C17F24" height={3} showSpinner={false} />
           {children}
           <WhatsAppFloat />

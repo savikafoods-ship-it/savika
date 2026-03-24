@@ -3,10 +3,27 @@ import ProductCard from '@/components/product/ProductCard'
 import type { Product } from '@/types'
 
 const BESTSELLERS: Product[] = [
-    { $id: 'bs1', slug: 'star-anise-whole', name: 'Star Anise - Premium Whole', description: '', price: 299, comparePrice: 399, stock: 40, categoryId: 'cat1', imageIds: ['/images/products/star-anise-whole.jpg'], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat1', slug: 'whole-spices', name: 'Whole Spices', imageId: '', sortOrder: 0, $createdAt: '', $updatedAt: '' } },
-    { $id: 'bs2', slug: 'coriander-powder', name: 'Coriander Powder - Freshly Ground', description: '', price: 189, stock: 90, categoryId: 'cat2', imageIds: ['/images/products/coriander-powder.jpg'], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' } },
-    { $id: 'bs3', slug: 'biryani-masala', name: 'Royal Biryani Masala', description: '', price: 349, comparePrice: 449, stock: 25, categoryId: 'cat3', imageIds: ['/images/products/biryani-masala.jpg'], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' } },
-    { $id: 'bs4', slug: 'saffron-premium', name: 'Kashmiri Saffron - Grade A', description: '', price: 1299, stock: 15, categoryId: 'cat5', imageIds: ['/images/products/saffron-premium.jpg'], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat5', slug: 'exotics-rare', name: 'Exotics & Rare', imageId: '', sortOrder: 4, $createdAt: '', $updatedAt: '' } },
+    {
+        $id: '5', name: 'Chicken Masala', tagline: 'Perfect Non-Veg Taste', slug: 'chicken-masala',
+        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat3', price: 225, stock: 150, isActive: true,
+        imageIds: ['/images/products/biryani-masala.jpg'],
+        description: 'Specially crafted masala blend for chicken curries, tikka, and gravies. Every spice chosen for its role - delivering the perfect non-veg taste every time.'
+    },
+    {
+        $id: '6', name: 'Meat Masala', tagline: 'Dumdar Flavour', slug: 'meat-masala',
+        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat3', price: 245, stock: 120, isActive: true,
+        imageIds: ['/images/products/black-pepper-malabar.jpg'],
+        description: 'A bold, robust blend for mutton, lamb, and beef preparations. Deep, complex, and uncompromisingly dumdar - this masala means serious cooking.'
+    },
+    {
+        $id: '7', name: 'Deshi Ghati Masala', tagline: 'Special Traditional Blend', slug: 'deshi-ghati-masala',
+        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat3', price: 325, stock: 40, isActive: true,
+        imageIds: ['/images/products/star-anise-whole.jpg'],
+        description: 'A rare traditional masala from the Ghati region, crafted from a secret family recipe. The special traditional blend that carries decades of culinary heritage in every spoon.'
+    },
 ]
 
 export default function BestSellers() {

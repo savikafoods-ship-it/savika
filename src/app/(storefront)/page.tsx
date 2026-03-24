@@ -48,7 +48,7 @@ export default function HomePage() {
                         url: 'https://savikafoods.in',
                         logo: 'https://savikafoods.in/logo.png',
                         sameAs: [
-                            'https://www.instagram.com/savikafoods.in',
+                            'https://www.instagram.com/savika.foods/',
                             'https://www.facebook.com/savikafoods.in',
                         ],
                         contactPoint: {

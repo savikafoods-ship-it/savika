@@ -3,10 +3,34 @@ import ProductCard from '@/components/product/ProductCard'
 import type { Product } from '@/types'
 
 const MOCK_PRODUCTS: Product[] = [
-    { $id: '1', slug: 'kashmiri-mirch-whole', name: 'Kashmiri Mirch - Whole', description: '', price: 199, comparePrice: 299, stock: 50, categoryId: 'cat1', imageIds: ['/images/products/kashmiri-mirch-whole.jpg'], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat1', slug: 'whole-spices', name: 'Whole Spices', imageId: '', sortOrder: 0, $createdAt: '', $updatedAt: '' } },
-    { $id: '2', slug: 'premium-turmeric-powder', name: 'Premium Turmeric Powder', description: '', price: 249, stock: 80, categoryId: 'cat2', imageIds: ['/images/products/premium-turmeric-powder.jpg'], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' } },
-    { $id: '3', slug: 'garam-masala-artisan', name: 'Artisan Garam Masala', description: '', price: 299, comparePrice: 399, stock: 35, categoryId: 'cat3', imageIds: ['/images/products/garam-masala-artisan.jpg'], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' } },
-    { $id: '4', slug: 'black-pepper-malabar', name: 'Malabar Black Pepper', description: '', price: 349, stock: 60, categoryId: 'cat1', imageIds: ['/images/products/black-pepper-malabar.jpg'], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat1', slug: 'whole-spices', name: 'Whole Spices', imageId: '', sortOrder: 0, $createdAt: '', $updatedAt: '' } },
+    {
+        $id: '1', name: 'Red Chilli Powder', tagline: 'Tikha Swad', slug: 'red-chilli-powder',
+        category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat2', price: 185, stock: 100, isActive: true,
+        imageIds: ['/images/products/kashmiri-mirch-whole.jpg'],
+        description: 'Pure red chilli powder with the authentic fiery heat of Indian kitchens. No fillers, no artificial color. Just the real tikha swad that elevates every dish.'
+    },
+    {
+        $id: '2', name: 'Garam Masala', tagline: 'Rich Aroma', slug: 'garam-masala',
+        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat3', price: 295, stock: 80, isActive: true,
+        imageIds: ['/images/products/garam-masala-artisan.jpg'],
+        description: 'A perfectly balanced blend of whole spices, slow-roasted and stone-ground. The rich aroma of Savika Garam Masala transforms ordinary meals into unforgettable ones.'
+    },
+    {
+        $id: '3', name: 'Turmeric Powder', tagline: 'Rang Aur Shuddhta', slug: 'turmeric-powder',
+        category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat2', price: 145, stock: 120, isActive: true,
+        imageIds: ['/images/products/premium-turmeric-powder.jpg'],
+        description: 'Cold-ground pure turmeric with high curcumin content. The vibrant rang and shuddhta of this turmeric is unmatched - sourced directly from Erode, Tamil Nadu.'
+    },
+    {
+        $id: '4', name: 'Coriander Powder', tagline: 'Khushboo Bhara Taste', slug: 'coriander-powder',
+        category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' },
+        categoryId: 'cat2', price: 165, stock: 90, isActive: true,
+        imageIds: ['/images/products/coriander-powder.jpg'],
+        description: 'Freshly ground coriander with an unmistakable khushboo. Adds a warm, citrusy depth to curries, dals, and marinades. 100% pure, no mixing.'
+    },
 ]
 
 export default function FeaturedProducts() {

@@ -17,6 +17,7 @@ export interface Profile {
 export interface Product {
   $id: string
   name: string
+  tagline?: string
   slug: string
   description?: string
   price: number

@@ -25,7 +25,7 @@ const fallbackCards: PromoCard[] = [
     subheading: 'On all masala blends',
     body: 'Use code SPICE50 at checkout',
     buttonLabel: 'Buy Now',
-    buttonUrl: '/products',
+    buttonUrl: '/shop',
     icon: 'flame',
   },
   {
@@ -34,7 +34,7 @@ const fallbackCards: PromoCard[] = [
     subheading: 'Exotic & Rare spices',
     body: 'Desi. Vegan. Powerful.',
     buttonLabel: 'Buy Now',
-    buttonUrl: '/products?category=exotic',
+    buttonUrl: '/shop?category=exotic',
     icon: 'star',
   },
 ]
