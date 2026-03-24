@@ -70,29 +70,29 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
 
                     {/* Brand Column */}
-                    <div>
+                    <div className="flex flex-col items-center text-center">
                         <SavikaLogo variant="footer" className="mb-5" />
-                        <p className="text-sm text-white/70 leading-relaxed max-w-xs mb-6">
+                        <p className="text-sm text-white/70 leading-relaxed max-w-sm mb-8">
                             Bringing the soul of India&apos;s spice heritage to your kitchen. Every gram, pure. Every blend, authentic.
                         </p>
 
                         {/* Contact */}
-                        <div className="space-y-4 mb-6">
-                            <div className="flex items-start gap-3 text-xs text-white/75 group">
-                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-colors">
-                                    <MapPin className="w-3.5 h-3.5 text-white/80" />
+                        <div className="space-y-4 mb-6 w-full max-w-xs">
+                            <div className="flex flex-col items-center gap-2 text-xs text-white/75 group">
+                                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
+                                    <MapPin className="w-4 h-4 text-white/80" />
                                 </div>
-                                <span className="pt-1.5 leading-relaxed">Savika Foods Pvt. Ltd., Umbergaon, Gujarat - 396171</span>
+                                <span className="leading-relaxed">Savika Foods Pvt. Ltd., Umbergaon, Gujarat - 396171</span>
                             </div>
-                            <div className="flex items-center gap-3 text-xs text-white/75 group">
-                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-colors">
-                                    <Phone className="w-3.5 h-3.5 text-white/80" />
+                            <div className="flex flex-col items-center gap-2 text-xs text-white/75 group">
+                                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
+                                    <Phone className="w-4 h-4 text-white/80" />
                                 </div>
                                 <span>+91 98981 76667</span>
                             </div>
-                            <div className="flex items-center gap-3 text-xs text-white/75 group">
-                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-colors">
-                                    <Mail className="w-3.5 h-3.5 text-white/80" />
+                            <div className="flex flex-col items-center gap-2 text-xs text-white/75 group">
+                                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
+                                    <Mail className="w-4 h-4 text-white/80" />
                                 </div>
                                 <span>savikafoods@gmail.com</span>
                             </div>
@@ -100,12 +100,12 @@ export default function Footer() {
                     </div>
 
                     {/* Shop */}
-                    <div>
-                        <h4 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Shop</h4>
-                        <ul className="space-y-2.5">
+                    <div className="flex flex-col items-center text-center">
+                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-full max-w-[120px]">Shop</h4>
+                        <ul className="space-y-3">
                             {footerLinks.shop.map((l) => (
                                 <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors">
+                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors duration-200">
                                         {l.label}
                                     </Link>
                                 </li>
@@ -114,12 +114,12 @@ export default function Footer() {
                     </div>
 
                     {/* Company */}
-                    <div>
-                        <h4 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Company</h4>
-                        <ul className="space-y-2.5">
+                    <div className="flex flex-col items-center text-center">
+                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-full max-w-[120px]">Company</h4>
+                        <ul className="space-y-3">
                             {footerLinks.company.map((l) => (
                                 <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors">
+                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors duration-200">
                                         {l.label}
                                     </Link>
                                 </li>
@@ -128,12 +128,12 @@ export default function Footer() {
                     </div>
 
                     {/* Support */}
-                    <div>
-                        <h4 className="text-sm font-bold text-white mb-4 uppercase tracking-wider">Support</h4>
-                        <ul className="space-y-2.5">
+                    <div className="flex flex-col items-center text-center">
+                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-full max-w-[120px]">Support</h4>
+                        <ul className="space-y-3">
                             {footerLinks.support.map((l) => (
                                 <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors">
+                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors duration-200">
                                         {l.label}
                                     </Link>
                                 </li>
