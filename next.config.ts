@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/products/:slug',
-        destination: '/shop/:slug',
+        destination: '/product/:slug',
         permanent: true,
       },
     ]
