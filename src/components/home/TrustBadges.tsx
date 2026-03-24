@@ -30,10 +30,10 @@ export default function TrustBadges() {
                 {all.map((b, i) => {
                     const Icon = b.icon
                     return (
-                        <span key={i} className="inline-flex items-center gap-2 text-white text-xs font-semibold px-6">
-                            <Icon className="w-3.5 h-3.5" style={{ color: 'rgba(255,255,255,0.8)' }} />
+                        <span key={i} className="inline-flex items-center gap-1.5 text-white text-[11px] font-bold px-4">
+                            <Icon className="w-3 h-3" style={{ color: 'rgba(255,255,255,0.9)' }} />
                             {b.text}
-                            <span className="mx-2 opacity-40">|</span>
+                            <span className="ml-3 opacity-20 font-light">|</span>
                         </span>
                     )
                 })}
