@@ -57,14 +57,14 @@ export default function ContactPage() {
                                     <Mail className="w-6 h-6 text-[#C47F17] shrink-0 mt-1" />
                                     <div>
                                         <h3 className="font-semibold mb-1">Email Support</h3>
-                                        <p className="text-gray-400 text-sm">support@savikafoods.in</p>
+                                        <p className="text-gray-400 text-sm">savikafoods@gmail.com</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
                         <div className="mt-12 text-gray-500 text-sm">
-                            <p>For wholesale inquiries, please contact wholesale@savikafoods.in</p>
+                            <p>For wholesale inquiries, please contact savikafoods@gmail.com</p>
                         </div>
                     </div>
 

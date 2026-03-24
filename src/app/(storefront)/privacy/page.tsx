@@ -35,7 +35,7 @@ export default function PrivacyPolicyPage() {
                     <p>All payments are processed securely through PhonePe. We do not store your credit card or UPI details on our servers. Your payment information is subject to PhonePe's respective privacy policies.</p>
 
                     <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">4. Contact Information</h2>
-                    <p>To ask questions or comment about this privacy policy and our privacy practices, contact us at: <strong>privacy@savikafoods.in</strong> or via our Contact Us page.</p>
+                    <p>To ask questions or comment about this privacy policy and our privacy practices, contact us at: <strong>savikafoods@gmail.com</strong> or via our Contact Us page.</p>
                 </div>
             </div>
         </main>

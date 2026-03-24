@@ -35,7 +35,7 @@ export default function AdminSettingsPage() {
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium text-[#e4e4e7]">Contact Email</label>
-                                <input type="email" defaultValue="hello@savikafoods.in" className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 focus:border-[#C17F24] outline-none" />
+                                <input type="email" defaultValue="savikafoods@gmail.com" className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 focus:border-[#C17F24] outline-none" />
                             </div>
                         </div>
                         <div className="space-y-1.5">

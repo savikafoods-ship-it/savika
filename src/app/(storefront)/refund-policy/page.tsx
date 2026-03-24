@@ -23,7 +23,7 @@ export default function RefundPolicyPage() {
                     </ul>
 
                     <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">2. Claiming a Refund</h2>
-                    <p>If you are eligible for a refund, you must notify us within 7 days of receiving the product. Please send an email to support@savikafoods.in with your order number and photographic evidence of the issue.</p>
+                    <p>If you are eligible for a refund, you must notify us within 7 days of receiving the product. Please send an email to savikafoods@gmail.com with your order number and photographic evidence of the issue.</p>
 
                     <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">3. Refund Processing</h2>
                     <p>Once your claim is approved, we will initiate a refund to your original method of payment (via PhonePe, Credit Card, etc.). You will receive the credit within 5-7 business days, depending on your card issuer's policies.</p>
