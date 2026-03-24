@@ -67,30 +67,30 @@ export default function Footer() {
 
             {/* Main Footer */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 items-center mb-16">
 
                     {/* Brand Column */}
-                    <div className="flex flex-col items-center text-center">
+                    <div className="flex flex-col items-start text-left">
                         <SavikaLogo variant="footer" className="mb-5" />
-                        <p className="text-sm text-white/70 leading-relaxed max-w-sm mb-8">
+                        <p className="text-sm text-white/70 leading-relaxed max-w-xs mb-8">
                             Bringing the soul of India&apos;s spice heritage to your kitchen. Every gram, pure. Every blend, authentic.
                         </p>
 
                         {/* Contact */}
-                        <div className="space-y-4 mb-6 w-full max-w-xs">
-                            <div className="flex flex-col items-center gap-2 text-xs text-white/75 group">
+                        <div className="space-y-4 mb-6">
+                            <div className="flex items-start gap-3 text-xs text-white/75 group">
                                 <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
                                     <MapPin className="w-4 h-4 text-white/80" />
                                 </div>
-                                <span className="leading-relaxed">Savika Foods Pvt. Ltd., Umbergaon, Gujarat - 396171</span>
+                                <span className="pt-2 leading-relaxed">Savika Foods Pvt. Ltd., Umbergaon, Gujarat - 396171</span>
                             </div>
-                            <div className="flex flex-col items-center gap-2 text-xs text-white/75 group">
+                            <div className="flex items-center gap-3 text-xs text-white/75 group">
                                 <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
                                     <Phone className="w-4 h-4 text-white/80" />
                                 </div>
                                 <span>+91 98981 76667</span>
                             </div>
-                            <div className="flex flex-col items-center gap-2 text-xs text-white/75 group">
+                            <div className="flex items-center gap-3 text-xs text-white/75 group">
                                 <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
                                     <Mail className="w-4 h-4 text-white/80" />
                                 </div>
@@ -100,8 +100,8 @@ export default function Footer() {
                     </div>
 
                     {/* Shop */}
-                    <div className="flex flex-col items-center text-center">
-                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-full max-w-[120px]">Shop</h4>
+                    <div className="flex flex-col items-start text-left">
+                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-fit pr-4">Shop</h4>
                         <ul className="space-y-3">
                             {footerLinks.shop.map((l) => (
                                 <li key={l.label}>
@@ -114,8 +114,8 @@ export default function Footer() {
                     </div>
 
                     {/* Company */}
-                    <div className="flex flex-col items-center text-center">
-                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-full max-w-[120px]">Company</h4>
+                    <div className="flex flex-col items-start text-left">
+                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-fit pr-4">Company</h4>
                         <ul className="space-y-3">
                             {footerLinks.company.map((l) => (
                                 <li key={l.label}>
@@ -128,8 +128,8 @@ export default function Footer() {
                     </div>
 
                     {/* Support */}
-                    <div className="flex flex-col items-center text-center">
-                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-full max-w-[120px]">Support</h4>
+                    <div className="flex flex-col items-start text-left">
+                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-fit pr-4">Support</h4>
                         <ul className="space-y-3">
                             {footerLinks.support.map((l) => (
                                 <li key={l.label}>
