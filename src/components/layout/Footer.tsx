@@ -66,8 +66,8 @@ export default function Footer() {
             </div>
 
             {/* Main Footer */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 items-start mb-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 items-start mb-10">
 
                     {/* Brand Column */}
                     <div className="flex flex-col items-start text-left">
@@ -143,7 +143,7 @@ export default function Footer() {
                 </div>
 
                 {/* Trust Badges */}
-                <div className="mt-12 pt-8 border-t border-white/20">
+                <div className="mt-8 pt-8 border-t border-white/20">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
                         {trustBadges.map((badge) => {
                             const Icon = badge.icon
