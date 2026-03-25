@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { X, Search, Loader2 } from 'lucide-react'
 import { databases } from '@/lib/appwrite/client'
-import { Query } from 'node-appwrite' // technically appwrite SDK
+import { Query } from 'appwrite'
 
 interface SearchModalProps {
     isOpen: boolean
@@ -39,13 +39,17 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         const debounceTimer = setTimeout(async () => {
             setLoading(true)
             try {
-                // Using Appwrite search query
+                // Using Appwrite search query with better matching
                 const res = await databases.listDocuments(
                     process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
                     process.env.NEXT_PUBLIC_COL_PRODUCTS!,
                     [
-                        Query.search('name', query),
-                        Query.limit(5)
+                        Query.or([
+                            Query.contains('name', query),
+                            Query.contains('description', query),
+                            Query.search('name', query)
+                        ]),
+                        Query.limit(8)
                     ]
                 )
                 setResults(res.documents)
@@ -54,7 +58,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             } finally {
                 setLoading(false)
             }
-        }, 500)
+        }, 300)
 
         return () => clearTimeout(debounceTimer)
     }, [query])

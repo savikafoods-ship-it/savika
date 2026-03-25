@@ -12,14 +12,20 @@ export const revalidate = 3600
 // ─── Product Data (replace with Supabase query) ─────────────────────────
 // In production: createClient().from('products').select('*,category:categories(*)').eq('slug', slug).single()
 
+interface WeightOption {
+    label: string
+    price: number
+    salePrice?: number
+}
+
 interface ProductData {
     slug: string
     name: string
     localName: string
     category: { slug: string; name: string }
-    price: number
-    salePrice?: number
-    weight: string[]
+    price: number // Default/Base price for smallest weight
+    salePrice?: number // Default/Base sale price
+    weightOptions: WeightOption[]
     stock: number
     rating: number
     reviewCount: number
@@ -49,7 +55,14 @@ const PRODUCTS: Record<string, ProductData> = {
         localName: 'Kashmiri Lal Mirch / Deggi Mirch',
         category: { slug: 'whole-spices', name: 'Whole Spices' },
         price: 299, salePrice: 199,
-        weight: ['20gm', '50gm', '100gm', '200gm', '500gm', '1000gm'],
+        weightOptions: [
+            { label: '20gm', price: 69, salePrice: 49 },
+            { label: '50gm', price: 149, salePrice: 99 },
+            { label: '100gm', price: 299, salePrice: 199 },
+            { label: '200gm', price: 549, salePrice: 389 },
+            { label: '500gm', price: 1299, salePrice: 899 },
+            { label: '1000gm', price: 2499, salePrice: 1699 },
+        ],
         stock: 50, rating: 4.8, reviewCount: 218,
         heroIntro: 'Buy authentic Kashmiri Mirch whole online in India - hand-picked from the sunlit valleys of Kashmir. Celebrated for its signature deep crimson colour and gentle warmth, Kashmiri Mirch is the secret behind restaurant-quality biryanis, rogan josh, and tandoori marinades. Unlike ordinary red chilli, it delivers vivid colour with very mild heat, making it perfect for family cooking. 100% natural, chemical-free, and FSSAI certified. Savika sources directly from verified Kashmir farms to bring you fresh, unadulterated spice in every pack.',
         whatIsThis: 'Kashmiri Mirch (Capsicum annuum var. Kashmiriense) is a bright red chilli variety indigenous to the Kashmir valley of northern India. Grown at altitudes between 1,500–2,500 metres, the cool mountain climate and rich volcanic soil give these chilies their characteristic thick skin, deep red pigmentation, and naturally sweet, mildly pungent flavour profile - scoring just 1,000–2,000 on the Scoville scale compared to 30,000–50,000 for regular red chilli.\n\nFor centuries, Kashmiri cuisine has relied entirely on this single variety to achieve the hallmark rich red colour of dishes like Rogan Josh, Dum Aloo, and Kashmiri Pulao without making them too spicy. Mughal court kitchens historically prized Kashmiri red chilli above all others for its aesthetic appeal. Today it remains a GI-tagged product from the Kashmir Valley, meaning authentic Deggi Mirch can only originate from this region.\n\nWhole Kashmiri Mirch is preferred over powder by discerning cooks because the full pod retains its essential oils, colour pigments (primarily capsanthin), and aroma compounds far longer than pre-ground powder. When you bloom whole Kashmiri chilies in hot oil, you extract a gorgeous crimson colour and a sweet warmth that powder simply cannot replicate.',
@@ -99,7 +112,13 @@ const PRODUCTS: Record<string, ProductData> = {
         localName: 'Haldi / Manjal',
         category: { slug: 'ground-powdered', name: 'Ground & Powdered' },
         price: 249, salePrice: 179,
-        weight: ['20gm', '50gm', '100gm', '200gm', '500gm', '1000gm'],
+        weightOptions: [
+            { label: '50gm', price: 129, salePrice: 89 },
+            { label: '100gm', price: 249, salePrice: 179 },
+            { label: '200gm', price: 449, salePrice: 329 },
+            { label: '500gm', price: 999, salePrice: 749 },
+            { label: '1000gm', price: 1899, salePrice: 1399 },
+        ],
         stock: 120, rating: 4.9, reviewCount: 412,
         heroIntro: 'Buy premium turmeric powder online in India from Savika - freshly ground from high-curcumin Lakadong turmeric sourced directly from Meghalaya. With a curcumin content of 7–9% (vs 2–3% in ordinary supermarket turmeric), this is India\'s most potent, vibrant turmeric for cooking, wellness, and skin care. FSSAI certified. No artificial colour. Zero adulteration. Delivered fresh across India.',
         whatIsThis: 'Turmeric (Curcuma longa) is the golden root that has been the cornerstone of Indian cooking, Ayurvedic medicine, and religious ritual for over 4,000 years. Belonging to the ginger family (Zingiberaceae), turmeric is a rhizome - an underground stem - that is harvested, dried, and ground into the vivid yellow-orange powder we know as haldi.\n\nIndia produces over 75% of the world\'s turmeric, with major cultivation in Andhra Pradesh, Tamil Nadu, Karnataka, and the northeastern state of Meghalaya. Lakadong turmeric from Meghalaya is considered the gold standard - it consistently tests at 7–9% curcumin content, the active compound responsible for turmeric\'s colour, flavour, and health benefits. Most commercial turmeric contains only 2–3% curcumin.\n\nNo Indian kitchen is complete without turmeric. It appears in virtually every curry, dal, rice dish, and marinade. Beyond cooking, turmeric has been used in Ayurveda for thousands of years as an anti-inflammatory, antiseptic, and immunity booster. Modern science has validated much of this traditional wisdom - curcumin is now one of the most studied natural compounds in biomedical research.',
@@ -150,10 +169,15 @@ const PRODUCTS: Record<string, ProductData> = {
         localName: 'Garam Masala / Spice Mix',
         category: { slug: 'blends-masalas', name: 'Blends & Masalas' },
         price: 349, salePrice: 249,
-        weight: ['20gm', '50gm', '100gm', '200gm', '500gm', '1000gm'],
+        weightOptions: [
+            { label: '50gm', price: 189, salePrice: 129 },
+            { label: '100gm', price: 349, salePrice: 249 },
+            { label: '200gm', price: 649, salePrice: 479 },
+            { label: '500gm', price: 1499, salePrice: 1099 },
+        ],
         stock: 75, rating: 4.9, reviewCount: 289,
-        heroIntro: 'Buy Savika Artisan Garam Masala online in India - a hand-blended small-batch spice mix crafted from 14 whole spices, stone-ground in our facility.',
-        whatIsThis: 'Garam Masala (literally "hot spice blend" in Hindi) is arguably India\'s most important spice blend and one of the most complex in world cuisine.',
+        heroIntro: 'Buy Savika Artisan Garam Masala online in India...',
+        whatIsThis: 'Garam Masala is arguably India\'s most important spice blend...',
         origin: 'Multi-origin blend; blended in Mumbai',
         botanicalName: '14-spice blend',
         culturalImportance: 'The defining blend of North Indian cuisine.',
@@ -186,10 +210,14 @@ const PRODUCTS: Record<string, ProductData> = {
         localName: 'Dhaniya Powder',
         category: { slug: 'ground-powdered', name: 'Ground & Powdered' },
         price: 249, salePrice: 165,
-        weight: ['100gm', '200gm', '500gm'],
+        weightOptions: [
+            { label: '100gm', price: 129, salePrice: 89 },
+            { label: '200gm', price: 249, salePrice: 165 },
+            { label: '500gm', price: 549, salePrice: 389 },
+        ],
         stock: 90, rating: 4.8, reviewCount: 156,
-        heroIntro: 'Freshly ground coriander with an unmistakable khushboo. Adds a warm, citrusy depth to curries, dals, and marinades. 100% pure, no mixing.',
-        whatIsThis: 'Coriander powder is derived from the seeds of the Coriandrum sativum plant. It is one of the most widely used spices in Indian cooking.',
+        heroIntro: 'Freshly ground coriander with an unmistakable khushboo...',
+        whatIsThis: 'Coriander powder is derived from the seeds of the Coriandrum sativum plant.',
         origin: 'Rajasthan, India',
         botanicalName: 'Coriandrum sativum',
         culturalImportance: 'An essential base spice for almost all Indian savory dishes.',
@@ -198,11 +226,11 @@ const PRODUCTS: Record<string, ProductData> = {
             { title: 'Digestive Health', desc: 'Known to soothe the stomach and support healthy digestion.' },
             { title: 'Cholesterol Management', desc: 'May help in maintaining healthy cholesterol levels.' }
         ],
-        culinaryUses: [{ dish: 'Basic Curry Base', tip: 'Mix with turmeric and chilli powder for the standard Indian spice base.' }],
+        culinaryUses: [{ dish: 'Basic Curry Base', tip: 'Mix with turmeric and chilli powder.' }],
         storageLife: '12 months',
         storageInstructions: 'Keep in a cool, dry place in an airtight jar.',
-        sourcingStory: 'Sourced from the best coriander growing regions in Rajasthan, known for their high aroma seeds.',
-        faqs: [{ q: 'Is it roasted?', a: 'We lightly sun-dry the seeds before grinding to preserve the oils.' }],
+        sourcingStory: 'Sourced from the best coriander growing regions in Rajasthan.',
+        faqs: [{ q: 'Is it roasted?', a: 'We lightly sun-dry the seeds before grinding.' }],
         keywords: ['coriander powder online', 'dhaniya powder buy'],
         metaTitle: 'Buy Pure Coriander Powder Online | Savika',
         metaDescription: 'Freshly ground aromatic coriander powder.',
@@ -215,21 +243,25 @@ const PRODUCTS: Record<string, ProductData> = {
         localName: 'Murgh Masala Mix',
         category: { slug: 'blends-masalas', name: 'Blends & Masalas' },
         price: 299, salePrice: 225,
-        weight: ['50gm', '100gm'],
+        weightOptions: [
+            { label: '50gm', price: 149, salePrice: 119 },
+            { label: '100gm', price: 299, salePrice: 225 },
+            { label: '200gm', price: 549, salePrice: 429 },
+        ],
         stock: 150, rating: 4.9, reviewCount: 342,
-        heroIntro: 'Specially crafted masala blend for chicken curries, tikka, and gravies. Every spice chosen for its role - delivering the perfect non-veg taste every time.',
+        heroIntro: 'Specially crafted masala blend for chicken curries...',
         whatIsThis: 'A robust blend of traditional spices specifically balanced to enhance poultry dishes.',
         origin: 'Multiple origins, blended in Mumbai',
         botanicalName: 'Spice Blend',
         culturalImportance: 'The secret to restaurant-style chicken curries at home.',
         regionalUsage: 'Northern and Central India',
-        benefits: [{ title: 'Metabolism Boost', desc: 'Contains warming spices that support a healthy metabolism.' }, { title: 'Rich in Antioxidants', desc: 'Packed with cloves and cardamom known for antioxidant properties.' }],
-        culinaryUses: [{ dish: 'Chicken Tikka', tip: 'Marinate the chicken with yoghurt and this masala for at least 2 hours.' }],
+        benefits: [{ title: 'Metabolism Boost', desc: 'Contains warming spices that support a healthy metabolism.' }, { title: 'Rich in Antioxidants', desc: 'Packed with cloves and cardamom.' }],
+        culinaryUses: [{ dish: 'Chicken Tikka', tip: 'Marinate with yoghurt and this masala for at least 2 hours.' }],
         storageLife: '12 months',
-        storageInstructions: 'Store in an airtight container to keep the aroma intact.',
-        sourcingStory: 'Our master blenders use a 30-year-old recipe to create this signature mix.',
-        faqs: [{ q: 'Is it very spicy?', a: 'It has a medium heat profile, focusing more on aroma and depth.' }],
-        keywords: ['chicken masala online', 'best chicken masala india'],
+        storageInstructions: 'Store in an airtight container.',
+        sourcingStory: 'Our master blenders use a 30-year-old recipe.',
+        faqs: [{ q: 'Is it very spicy?', a: 'Medium heat profile, focusing on aroma.' }],
+        keywords: ['chicken masala online'],
         metaTitle: 'Buy Best Chicken Masala Online | Savika',
         metaDescription: 'Authentic aromatic chicken masala blend.',
         relatedProducts: [{ slug: 'garam-masala-artisan', name: 'Artisan Garam Masala' }],
@@ -241,21 +273,25 @@ const PRODUCTS: Record<string, ProductData> = {
         localName: 'Mutton / Meat Spice Mix',
         category: { slug: 'blends-masalas', name: 'Blends & Masalas' },
         price: 325, salePrice: 245,
-        weight: ['50gm', '100gm'],
+        weightOptions: [
+            { label: '50gm', price: 169, salePrice: 129 },
+            { label: '100gm', price: 325, salePrice: 245 },
+            { label: '200gm', price: 599, salePrice: 469 },
+        ],
         stock: 120, rating: 4.9, reviewCount: 198,
-        heroIntro: 'A bold, robust blend for mutton, lamb, and beef preparations. Deep, complex, and uncompromisingly dumdar - this masala means serious cooking.',
-        whatIsThis: 'A strong, pepper-forward spice blend designed to penetrate and tenderise red meats while adding explosive flavour.',
+        heroIntro: 'A bold, robust blend for mutton, lamb, and beef preparations...',
+        whatIsThis: 'A strong, pepper-forward spice blend designed to penetrate and tenderise red meats.',
         origin: 'Regional Indian blend',
         botanicalName: 'Spice Blend',
         culturalImportance: 'A must-have for Sunday mutton curries across India.',
-        regionalUsage: 'Pan-India, especially popular in meat-loving regions.',
-        benefits: [{ title: 'Digestion of Fats', desc: 'Spices like black pepper and ginger aid in the breakdown of heavy meat proteins.' }, { title: 'Iron Absorption', desc: 'Certain components may help in better absorption of iron from meat.' }],
-        culinaryUses: [{ dish: 'Slow Cooked Mutton', tip: 'Add half the masala during sautéing and the other half during the slow cooking phase.' }],
+        regionalUsage: 'Pan-India',
+        benefits: [{ title: 'Digestion of Fats', desc: 'Aids in the breakdown of heavy meat proteins.' }, { title: 'Iron Absorption', desc: 'May help in better absorption of iron.' }],
+        culinaryUses: [{ dish: 'Slow Cooked Mutton', tip: 'Add half the masala during sautéing.' }],
         storageLife: '12 months',
-        storageInstructions: 'Keep away from moisture to prevent clumping.',
+        storageInstructions: 'Keep away from moisture.',
         sourcingStory: 'Inspired by traditional Rajasthani and Mughlai meat preparations.',
-        faqs: [{ q: 'Can I use this for beef?', a: 'Yes, it works exceptionally well with all types of red meat.' }],
-        keywords: ['mutton masala buy', 'best meat masala online'],
+        faqs: [{ q: 'Can I use this for beef?', a: 'Yes, it works exceptionally well.' }],
+        keywords: ['mutton masala buy'],
         metaTitle: 'Buy Robust Meat Masala Online | Savika',
         metaDescription: 'Bold and robust spice blend for red meat.',
         relatedProducts: [{ slug: 'kashmiri-mirch-whole', name: 'Kashmiri Mirch Whole' }],
@@ -267,21 +303,25 @@ const PRODUCTS: Record<string, ProductData> = {
         localName: 'Ghati Masala / Malvani Style',
         category: { slug: 'blends-masalas', name: 'Blends & Masalas' },
         price: 395, salePrice: 325,
-        weight: ['50gm', '100gm'],
+        weightOptions: [
+            { label: '50gm', price: 199, salePrice: 169 },
+            { label: '100gm', price: 395, salePrice: 325 },
+            { label: '200gm', price: 749, salePrice: 629 },
+        ],
         stock: 40, rating: 5.0, reviewCount: 87,
-        heroIntro: 'A rare traditional masala from the Ghati region, crafted from a secret family recipe. The special traditional blend that carries decades of culinary heritage in every spoon.',
-        whatIsThis: 'An extremely aromatic and fiery blend from the Western Ghats of Maharashtra, known for its complex layers of roasted spices.',
+        heroIntro: 'A rare traditional masala from the Ghati region...',
+        whatIsThis: 'An extremely aromatic and fiery blend from the Western Ghats of Maharashtra...',
         origin: 'Maharashtra, India',
         botanicalName: 'Spice Blend',
         culturalImportance: 'The soul of Maharashtrian Ghati cuisine.',
         regionalUsage: 'Maharashtra, Goa, North Karnataka',
-        benefits: [{ title: 'Heart Health', desc: 'Rich in spices that support healthy circulation.' }, { title: 'Immunity', desc: 'The combination of roasted spices provides a natural immunity boost.' }],
-        culinaryUses: [{ dish: 'Veg/Non-Veg Misal', tip: 'This is the key ingredient for an authentic, spicy Ghati misal pav.' }],
+        benefits: [{ title: 'Heart Health', desc: 'Rich in spices that support healthy circulation.' }, { title: 'Immunity', desc: 'Provides a natural immunity boost.' }],
+        culinaryUses: [{ dish: 'Veg/Non-Veg Misal', tip: 'Key ingredient for an authentic spicy misal.' }],
         storageLife: '9 months',
         storageInstructions: 'Best used fresh; store in a cool, dark place.',
-        sourcingStory: 'The recipe comes from a 4th generation spice blender in the Sahyadri mountains.',
-        faqs: [{ q: 'Is it very hot?', a: 'Yes, Ghati masala is known for its bold heat and intense spice profile.' }],
-        keywords: ['ghati masala buy online', 'maharashtrian spices online'],
+        sourcingStory: 'The recipe comes from a 4th generation spice blender.',
+        faqs: [{ q: 'Is it very hot?', a: 'Yes, bold heat and intense spice profile.' }],
+        keywords: ['ghati masala buy online'],
         metaTitle: 'Buy Traditional Deshi Ghati Masala | Savika',
         metaDescription: 'Authentic Maharashtrian Ghati spice blend.',
         relatedProducts: [{ slug: 'garam-masala-artisan', name: 'Artisan Garam Masala' }],
@@ -474,21 +514,6 @@ export default async function ProductPage({ params }: Props) {
                             </div>
                             <span className="text-sm font-semibold text-[#2E2E2E]">{p.rating}</span>
                             <span className="text-sm text-gray-400">({p.reviewCount} reviews)</span>
-                        </div>
-
-                        {/* Price */}
-                        <div className="flex items-baseline gap-3">
-                            <span className="text-3xl font-extrabold text-[#2C1A0E]">
-                                ₹{p.salePrice ?? p.price}
-                            </span>
-                            {p.salePrice && (
-                                <>
-                                    <span className="text-xl text-gray-400 line-through">₹{p.price}</span>
-                                    <span className="text-sm bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">
-                                        Save ₹{savings}
-                                    </span>
-                                </>
-                            )}
                         </div>
 
                         {/* ProductCommercePanel replaces the static WeightSelector and buttons */}

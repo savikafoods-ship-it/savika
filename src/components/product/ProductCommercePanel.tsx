@@ -6,53 +6,68 @@ import { useCartStore } from '@/store/cartStore'
 import type { Product } from '@/types'
 
 export default function ProductCommercePanel({ productData }: { productData: any }) {
-    const [selectedWeight, setSelectedWeight] = useState(productData.weight[0])
+    const [selectedVariant, setSelectedVariant] = useState(productData.weightOptions[0])
     const [adding, setAdding] = useState(false)
     const { addItem } = useCartStore()
 
-    const savings = productData.salePrice ? productData.price - productData.salePrice : 0
+    const currentPrice = selectedVariant.price
+    const currentSalePrice = selectedVariant.salePrice
+    const savings = currentSalePrice ? currentPrice - currentSalePrice : 0
+    const savingsPct = savings > 0 ? Math.round((savings / currentPrice) * 100) : 0
 
     const handleAddToCart = () => {
         setAdding(true)
         
-        // Map static ProductData to global Product type for CartStore
         const cartProduct: Product = {
             $id: productData.slug,
             name: productData.name,
             slug: productData.slug,
-            price: productData.salePrice ?? productData.price,
-            comparePrice: productData.salePrice ? productData.price : undefined,
+            price: currentSalePrice ?? currentPrice,
+            comparePrice: currentSalePrice ? currentPrice : undefined,
             stock: productData.stock,
             isActive: true,
             categoryId: productData.category.slug,
-            imageIds: [] // Cannot pass local static images easily through string array, fallback will show
+            imageIds: []
         }
-
-        // We can pass the static image url via a hack or just rely on the cart's placeholder
-        // For accurate pricing based on weight, ideally this would scale the price. 
-        // Since pricing isn't mapped per weight in the static data, we use base price.
         
-        addItem(cartProduct, 1, selectedWeight) 
+        addItem(cartProduct, 1, selectedVariant.label) 
         setTimeout(() => setAdding(false), 1000)
     }
 
     return (
         <div className="space-y-6">
+            {/* Price Display */}
+            <div className="flex flex-col gap-1">
+                <div className="flex items-baseline gap-3">
+                    <span className="text-3xl font-extrabold text-[#2C1A0E]">
+                        ₹{currentSalePrice ?? currentPrice}
+                    </span>
+                    {currentSalePrice && (
+                        <>
+                            <span className="text-xl text-gray-400 line-through">₹{currentPrice}</span>
+                            <span className="text-sm bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">
+                                Save ₹{savings} ({savingsPct}%)
+                            </span>
+                        </>
+                    )}
+                </div>
+            </div>
+
             {/* Weight / Variant selector */}
             <div>
                 <p className="text-sm font-semibold text-[#2E2E2E] mb-2">Select Weight</p>
                 <div className="flex flex-wrap gap-2">
-                    {productData.weight.map((opt: string) => (
+                    {productData.weightOptions.map((opt: any) => (
                         <button
-                            key={opt}
-                            onClick={() => setSelectedWeight(opt)}
+                            key={opt.label}
+                            onClick={() => setSelectedVariant(opt)}
                             className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
-                                selectedWeight === opt
+                                selectedVariant.label === opt.label
                                     ? 'border-[#C47F17] bg-[#C47F17] text-white'
                                     : 'border-[#e8ddd0] bg-white text-[#2E2E2E] hover:border-[#C47F17]'
                             }`}
                         >
-                            {opt}
+                            {opt.label}
                         </button>
                     ))}
                 </div>
