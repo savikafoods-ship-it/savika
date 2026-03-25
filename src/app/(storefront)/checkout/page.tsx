@@ -3,14 +3,20 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Loader2, Lock } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+    faSpinner, 
+    faLock 
+} from '@fortawesome/free-solid-svg-icons'
 import { useCartStore } from '@/store/cartStore'
-import { account } from '@/lib/appwrite/client'
+import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils'
+import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
 export default function CheckoutPage() {
     const { items, total, clearCart } = useCartStore()
     const router = useRouter()
+    const supabase = createClient()
 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -34,14 +40,18 @@ export default function CheckoutPage() {
         }
         const checkAuth = async () => {
             try {
-                await account.get()
-                setReady(true)
+                const { data: { user } } = await supabase.auth.getUser()
+                if (user) {
+                    setReady(true)
+                } else {
+                    router.push('/auth/login?next=/checkout')
+                }
             } catch {
                 router.push('/auth/login?next=/checkout')
             }
         }
         checkAuth()
-    }, [items, router])
+    }, [items, router, supabase])
 
     const handlePlaceOrder = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -59,8 +69,9 @@ export default function CheckoutPage() {
                         price: i.product.price,
                         quantity: i.quantity,
                         weight: i.weight,
+                        image: i.product.image_urls?.[0]
                     })),
-                    shipping_address: address,
+                    shippingAddress: address,
                     subtotal: cartTotal,
                     shipping,
                     total: finalAmount
@@ -123,9 +134,9 @@ export default function CheckoutPage() {
                         {items.map(item => (
                             <div key={`${item.productId}-${item.weight}`} className="flex items-center gap-3">
                                 <div className="w-12 h-12 bg-[#F9F4EE] rounded-lg relative overflow-hidden shrink-0">
-                                    {item.product.imageIds?.[0] && (
+                                    {item.product.image_urls?.[0] && (
                                         <Image
-                                            src={item.product.imageIds[0].startsWith('/') ? item.product.imageIds[0] : `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || ''}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS || ''}/files/${item.product.imageIds[0]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || ''}&width=60`}
+                                            src={getProductImageUrl(item.product.image_urls[0])}
                                             fill alt="" className="object-cover"
                                         />
                                     )}
@@ -162,7 +173,7 @@ export default function CheckoutPage() {
                         disabled={loading}
                         className="w-full bg-[#C17F24] hover:bg-[#8B5E16] text-white py-4 rounded-lg font-bold transition-transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-60"
                     >
-                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                        {loading ? <FontAwesomeIcon icon={faSpinner} className="w-4 h-4 animate-spin" /> : <FontAwesomeIcon icon={faLock} className="w-4 h-4" />}
                         {loading ? 'Processing...' : `Pay ${formatCurrency(finalAmount)}`}
                     </button>
                 </div>

@@ -25,12 +25,12 @@ export const useCartStore = create<CartStore>()(
       addItem: (product, quantity = 1, weight) => {
         set((state) => {
           const existing = state.items.find(
-            (i) => i.productId === product.$id && i.weight === weight
+            (i) => i.productId === product.id && i.weight === weight
           )
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productId === product.$id && i.weight === weight
+                i.productId === product.id && i.weight === weight
                   ? { ...i, quantity: i.quantity + quantity }
                   : i
               ),
@@ -40,7 +40,7 @@ export const useCartStore = create<CartStore>()(
           return {
             items: [
               ...state.items,
-              { productId: product.$id, product, quantity, weight },
+              { productId: product.id, product, quantity, weight },
             ],
             isOpen: true,
           }
@@ -76,9 +76,7 @@ export const useCartStore = create<CartStore>()(
 
       total: () => {
         return get().items.reduce((sum, item) => {
-          const price = item.product.comparePrice
-            ? item.product.price
-            : item.product.price
+          const price = item.product.price
           return sum + price * item.quantity
         }, 0)
       },

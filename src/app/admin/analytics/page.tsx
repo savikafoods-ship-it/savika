@@ -1,4 +1,5 @@
-import { BarChart3, TrendingUp, Users, ShoppingBag, DollarSign, Calendar } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChartBar, faArrowTrendUp, faUsers, faShoppingBag, faDollarSign, faCalendar } from '@fortawesome/free-solid-svg-icons'
 
 export default function AdminAnalyticsPage() {
     return (
@@ -10,7 +11,7 @@ export default function AdminAnalyticsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <button className="flex items-center gap-2 bg-[#27272a] text-[#e4e4e7] hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                        <Calendar className="w-4 h-4" /> Last 30 Days
+                        <FontAwesomeIcon icon={faCalendar} className="w-4 h-4" /> Last 30 Days
                     </button>
                     <button className="flex items-center gap-2 bg-[#C17F24] hover:bg-[#D4A855] text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                         Generate Report
@@ -21,12 +22,11 @@ export default function AdminAnalyticsPage() {
             {/* Top Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 {[
-                    { label: 'Total Revenue', value: '₹4,82,500', trend: '+12.5%', isUp: true, icon: DollarSign, color: 'text-green-500' },
-                    { label: 'Total Orders', value: '845', trend: '+8.2%', isUp: true, icon: ShoppingBag, color: 'text-blue-500' },
-                    { label: 'Active Customers', value: '1,204', trend: '+15.3%', isUp: true, icon: Users, color: 'text-purple-500' },
-                    { label: 'Conversion Rate', value: '2.4%', trend: '-0.4%', isUp: false, icon: TrendingUp, color: 'text-[#C17F24]' }
+                    { label: 'Total Revenue', value: '₹4,82,500', trend: '+12.5%', isUp: true, icon: faDollarSign, color: 'text-green-500' },
+                    { label: 'Total Orders', value: '845', trend: '+8.2%', isUp: true, icon: faShoppingBag, color: 'text-blue-500' },
+                    { label: 'Active Customers', value: '1,204', trend: '+15.3%', isUp: true, icon: faUsers, color: 'text-purple-500' },
+                    { label: 'Conversion Rate', value: '2.4%', trend: '-0.4%', isUp: false, icon: faArrowTrendUp, color: 'text-[#C17F24]' }
                 ].map((stat, i) => {
-                    const Icon = stat.icon
                     return (
                         <div key={i} className="bg-[#18181b] border border-[#27272a] rounded-xl p-6 relative overflow-hidden group hover:border-[#3f3f46] transition-colors">
                             <div className="flex items-start justify-between">
@@ -35,7 +35,7 @@ export default function AdminAnalyticsPage() {
                                     <h3 className="text-2xl font-bold text-white">{stat.value}</h3>
                                 </div>
                                 <div className={`p-3 rounded-lg bg-[#27272a]/50 ${stat.color}`}>
-                                    <Icon className="w-6 h-6" />
+                                    <FontAwesomeIcon icon={stat.icon} className="w-5 h-5" />
                                 </div>
                             </div>
                             <div className="mt-4 flex items-center gap-2 text-sm">
@@ -61,7 +61,7 @@ export default function AdminAnalyticsPage() {
                     </div>
                     <div className="h-72 w-full flex items-center justify-center border border-dashed border-[#3f3f46] rounded-xl bg-[#27272a]/20">
                         <div className="text-center text-[#a1a1aa]">
-                            <BarChart3 className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                            <FontAwesomeIcon icon={faChartBar} className="w-8 h-8 mx-auto mb-2 opacity-30" />
                             <p className="text-sm">Interactive visualization will load here.</p>
                         </div>
                     </div>

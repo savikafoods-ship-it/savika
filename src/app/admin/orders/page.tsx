@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { Search, Eye, Filter, Download } from 'lucide-react'
-import { createSessionClient } from '@/lib/appwrite/server'
-import { Query } from 'node-appwrite'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSearch, faEye, faFilter, faDownload } from '@fortawesome/free-solid-svg-icons'
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
@@ -10,21 +10,25 @@ export default async function AdminOrdersPage() {
     let orders: any[] = []
 
     try {
-        const { account, databases } = await createSessionClient()
-        await account.get()
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) redirect('/admin/login')
         
-        const res = await databases.listDocuments(
-            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-            process.env.NEXT_PUBLIC_APPWRITE_ORDERS_COLLECTION_ID!,
-            [Query.orderDesc('$createdAt'), Query.limit(50)]
-        )
-        orders = res.documents
-    } catch {
-        redirect('/admin/login')
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(50)
+            
+        if (error) throw error
+        orders = data || []
+    } catch (err) {
+        console.error('Error fetching orders:', err)
+        // Fallback to empty list or redirect
     }
 
     const getStatusStyle = (status: string) => {
-        switch (status) {
+        switch (status?.toLowerCase()) {
             case 'pending': return 'bg-amber-500/10 text-amber-500'
             case 'processing': return 'bg-blue-500/10 text-blue-500'
             case 'shipped': return 'bg-indigo-500/10 text-indigo-400'
@@ -42,14 +46,14 @@ export default async function AdminOrdersPage() {
                     <p className="text-[#a1a1aa] text-sm mt-1">Manage processing, shipping, and order history.</p>
                 </div>
                 <button className="inline-flex items-center gap-2 bg-[#27272a] hover:bg-[#3f3f46] text-white px-5 py-2.5 rounded-lg font-semibold transition-colors w-fit">
-                    <Download className="w-4 h-4" /> Export CSV
+                    <FontAwesomeIcon icon={faDownload} className="w-4 h-4" /> Export CSV
                 </button>
             </div>
 
             <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
                 <div className="p-4 border-b border-[#27272a] flex flex-col sm:flex-row gap-4 justify-between items-center">
                     <div className="relative w-full sm:w-96">
-                        <Search className="w-4 h-4 text-[#a1a1aa] absolute left-3 top-1/2 -translate-y-1/2" />
+                        <FontAwesomeIcon icon={faSearch} className="w-4 h-4 text-[#a1a1aa] absolute left-3 top-1/2 -translate-y-1/2" />
                         <input 
                             type="text" 
                             placeholder="Search by order ID or email..." 
@@ -64,7 +68,7 @@ export default async function AdminOrdersPage() {
                             <option value="shipped">Shipped</option>
                         </select>
                         <button className="p-2.5 bg-[#27272a] text-[#e4e4e7] hover:text-white rounded-lg transition-colors">
-                            <Filter className="w-4 h-4" />
+                            <FontAwesomeIcon icon={faFilter} className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
@@ -89,16 +93,16 @@ export default async function AdminOrdersPage() {
                                     </td>
                                 </tr>
                             ) : orders.map(order => (
-                                <tr key={order.$id} className="hover:bg-[#27272a]/30 transition-colors">
+                                <tr key={order.id} className="hover:bg-[#27272a]/30 transition-colors">
                                     <td className="px-6 py-4 font-mono text-[#e4e4e7]">
-                                        #{order.$id.slice(-8).toUpperCase()}
+                                        #{order.id.slice(-8).toUpperCase()}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="font-medium text-white">{order.customerName || 'Guest'}</div>
-                                        <div className="text-xs text-[#a1a1aa] mt-0.5">{order.customerEmail}</div>
+                                        <div className="font-medium text-white">{order.customer_name || 'Guest'}</div>
+                                        <div className="text-xs text-[#a1a1aa] mt-0.5">{order.customer_email}</div>
                                     </td>
                                     <td className="px-6 py-4 text-[#a1a1aa]">
-                                        {new Date(order.$createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        {new Date(order.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${getStatusStyle(order.status)}`}>
@@ -109,8 +113,8 @@ export default async function AdminOrdersPage() {
                                         ₹{order.total}
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <Link href={`/admin/orders/${order.$id}`} className="inline-flex items-center justify-center p-2 hover:bg-[#27272a] text-[#a1a1aa] hover:text-white rounded-lg transition-colors">
-                                            <Eye className="w-4 h-4 cursor-pointer" />
+                                        <Link href={`/admin/orders/${order.id}`} className="inline-flex items-center justify-center p-2 hover:bg-[#27272a] text-[#a1a1aa] hover:text-white rounded-lg transition-colors">
+                                            <FontAwesomeIcon icon={faEye} className="w-4 h-4 cursor-pointer" />
                                         </Link>
                                     </td>
                                 </tr>

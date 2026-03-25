@@ -1,46 +1,46 @@
-// Savika Foods - Appwrite Collection Types
+// Savika Foods - Database Types
 
 // Profile (collection: profiles)
 export interface Profile {
-  $id: string
-  userId: string
-  fullName: string
+  id: string
+  full_name: string
   email: string
-  mobile?: string
-  address?: string // JSON: {street, city, state, pincode}
-  avatarUrl?: string
-  wishlistIds?: string[]
-  createdAt: string
+  phone?: string
+  address?: any // JSON: {street, city, state, pincode}
+  avatar_url?: string
+  wishlist_ids?: string[]
+  is_active: boolean
+  created_at: string
 }
 
 // Product (collection: products)
 export interface Product {
-  $id: string
+  id: string
   name: string
   tagline?: string
   slug: string
   description?: string
   price: number
-  comparePrice?: number
+  compare_price?: number
   stock: number
-  categoryId?: string
+  category_id?: string
   category?: Category
-  imageIds?: string[]
-  isActive: boolean
+  image_urls?: string[]
+  is_active: boolean
   tags?: string[]
-  $createdAt?: string
-  $updatedAt?: string
+  created_at?: string
+  updated_at?: string
 }
 
 // Category (collection: categories)
 export interface Category {
-  $id: string
+  id: string
   name: string
   slug: string
-  imageId?: string
-  sortOrder?: number
-  $createdAt?: string
-  $updatedAt?: string
+  image_url?: string
+  sort_order?: number
+  created_at?: string
+  updated_at?: string
 }
 
 // Order status & payment
@@ -48,21 +48,21 @@ export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | '
 
 // Order (collection: orders)
 export interface Order {
-  $id: string
-  userId: string
-  items: string // JSON array of cart items
+  id: string
+  user_id: string
+  items: any[] // Array of items
   subtotal: number
   discount: number
   total: number
-  couponCode?: string
+  coupon_code?: string
   status: OrderStatus
-  phonePeMerchantOrderId?: string
-  phonePeTransactionId?: string
-  shippingAddress: string // JSON delivery address
-  createdAt: string
-  // Hydrated fields (not stored in Appwrite)
-  parsedItems?: OrderItem[]
-  parsedAddress?: ShippingAddress
+  payment_status: 'pending' | 'paid' | 'failed'
+  payment_id?: string
+  shipping_address: any // JSON delivery address
+  customer_name?: string
+  customer_email?: string
+  created_at: string
+  updated_at?: string
 }
 
 // Parsed order item (from JSON)

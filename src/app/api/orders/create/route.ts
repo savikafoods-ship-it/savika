@@ -1,41 +1,42 @@
 import { NextResponse } from 'next/server'
-import { createSessionClient } from '@/lib/appwrite/server'
-import { ID } from 'node-appwrite'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: Request) {
     try {
-        const { account, databases } = await createSessionClient()
+        const supabase = await createClient()
         
         // 1. Get User
-        const user = await account.get()
+        const { data: { user } } = await supabase.auth.getUser()
         if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
         const body = await req.json()
         const { items, shippingAddress, subtotal, shipping, total, couponCode } = body
 
-        // 2. Create Order Document in Appwrite
-        const order = await databases.createDocument(
-            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-            process.env.NEXT_PUBLIC_APPWRITE_ORDERS_COLLECTION_ID!,
-            ID.unique(),
-            {
-                userId: user.$id,
-                customerEmail: user.email,
-                customerName: user.name,
-                items: items, // Make sure items array matches Appwrite expected attributes
-                shippingAddress, 
+        // 2. Create Order in Supabase
+        const { data: order, error } = await supabase
+            .from('orders')
+            .insert({
+                user_id: user.id,
+                customer_email: user.email,
+                customer_name: user.user_metadata?.full_name || 'Anonymous',
+                items: items, 
+                shipping_address: shippingAddress, 
                 subtotal,
                 discount: 0,
                 total,
-                couponCode: couponCode || null,
+                coupon_code: couponCode || null,
                 status: 'processing'
-            }
-        )
+            })
+            .select()
+            .single()
+
+        if (error) throw error
 
         return NextResponse.json({
-            orderId: order.$id
+            orderId: order.id
         })
     } catch (e: any) {
+        console.error('Order creation error:', e)
         return NextResponse.json({ error: e.message }, { status: 500 })
     }
 }

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Crown, UserPlus, Lock, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCrown, faUserPlus, faLock, faSpinner, faCheckCircle, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 
 interface Perm { label: string; key: string }
 const PERMS: Perm[] = [
@@ -55,14 +56,14 @@ export default function AdminsPage() {
                     Create new administrator accounts and assign their permissions.
                 </p>
                 <div className="mt-2 flex items-center gap-2 text-xs bg-[#C17F24]/10 border border-[#C17F24]/30 text-[#C17F24] px-3 py-2 rounded-lg w-fit">
-                    <Crown className="w-3.5 h-3.5" />
+                    <FontAwesomeIcon icon={faCrown} className="w-3.5 h-3.5" />
                     Only Super Admin can access this page
                 </div>
             </div>
 
             <div className="bg-[#1A1A1A] border border-white/10 rounded-xl p-6">
                 <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2">
-                    <UserPlus className="w-5 h-5 text-[#C17F24]" />
+                    <FontAwesomeIcon icon={faUserPlus} className="w-5 h-5 text-[#C17F24]" />
                     Create New Admin
                 </h2>
 
@@ -120,7 +121,7 @@ export default function AdminsPage() {
                             ))}
                         </div>
                         <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
-                            <Lock className="w-3 h-3" />
+                            <FontAwesomeIcon icon={faLock} className="w-3 h-3" />
                             &quot;Manage Admins&quot; permission is never grantable - only Super Admin can create admins.
                         </p>
                     </div>
@@ -130,7 +131,7 @@ export default function AdminsPage() {
                             ? 'bg-green-900/20 border border-green-800 text-green-400'
                             : 'bg-red-900/20 border border-red-800 text-red-400'
                             }`}>
-                            {message.type === 'success' ? <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> : <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />}
+                            <FontAwesomeIcon icon={message.type === 'success' ? faCheckCircle : faExclamationCircle} className="w-4 h-4 mt-0.5 shrink-0" />
                             {message.text}
                         </div>
                     )}
@@ -140,7 +141,7 @@ export default function AdminsPage() {
                         disabled={loading}
                         className="flex items-center gap-2 bg-[#C17F24] hover:bg-[#8B5E16] text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                        {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating...</> : <><UserPlus className="w-4 h-4" /> Create Admin</>}
+                        {loading ? <><FontAwesomeIcon icon={faSpinner} className="w-4 h-4 animate-spin" /> Creating...</> : <><FontAwesomeIcon icon={faUserPlus} className="w-4 h-4" /> Create Admin</>}
                     </button>
                 </form>
             </div>

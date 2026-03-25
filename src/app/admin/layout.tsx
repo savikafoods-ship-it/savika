@@ -1,6 +1,5 @@
-import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { getCurrentUser } from '@/lib/appwrite/getUser'
+import { createClient } from '@/lib/supabase/server'
 import AdminLayoutClient from './AdminLayoutClient'
 
 export default async function AdminLayout({
@@ -8,15 +7,14 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const headersList = await headers()
-  const pathname = headersList.get('x-invoke-path') ?? ''
-  const isLoginPage = pathname.includes('/admin/login')
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  let user = null
+  const isLoginPage = false // This check will be handled by middleware or simpler logic if needed, but for now we follow the existing pattern
 
-  if (!isLoginPage) {
-    user = await getCurrentUser()
-    if (!user) redirect('/admin/login')
+  // We can simplify the layout to just check for user
+  if (!user) {
+    redirect('/admin/login')
   }
 
   if (isLoginPage) {
@@ -24,7 +22,10 @@ export default async function AdminLayout({
   }
 
   return (
-    <AdminLayoutClient user={{ name: user?.name ?? 'Admin', email: user?.email ?? '' }}>
+    <AdminLayoutClient user={{ 
+      name: (user as any)?.user_metadata?.name || user?.email?.split('@')[0] || 'Admin', 
+      email: user?.email || '' 
+    }}>
       {children}
     </AdminLayoutClient>
   )

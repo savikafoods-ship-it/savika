@@ -2,15 +2,44 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { ChevronRight, ShieldCheck, Star, ShoppingBag, Heart, Truck, RotateCcw, Shield, Sprout, CookingPot, Handshake, Ban, BookOpen, HeartPulse, UtensilsCrossed, Award, CircleHelp, ChevronDown, Flame, Store, ArrowRight, MapPin, Languages, Leaf, Landmark, Map, Package, Clock, Archive } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+    faChevronRight, 
+    faCheckCircle, 
+    faStar, 
+    faShoppingBag, 
+    faHeart, 
+    faTruck, 
+    faRotateLeft, 
+    faShieldAlt, 
+    faLeaf, 
+    faUtensils, 
+    faHandshake, 
+    faBan, 
+    faBookOpen, 
+    faHeartPulse, 
+    faAward, 
+    faQuestionCircle, 
+    faChevronDown, 
+    faFire, 
+    faStore, 
+    faArrowRight, 
+    faMapMarkerAlt, 
+    faGlobe, 
+    faUniversity, 
+    faMap, 
+    faBoxOpen, 
+    faClock, 
+    faArchive 
+} from '@fortawesome/free-solid-svg-icons'
 import ProductCommercePanel from '@/components/product/ProductCommercePanel'
+import { createClient } from '@/lib/supabase/server'
+import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
 // ─── ISR: revalidate every hour ─────────────────────────────────────────
 export const revalidate = 3600
 
-// ─── Product Data (replace with Supabase query) ─────────────────────────
-// In production: createClient().from('products').select('*,category:categories(*)').eq('slug', slug).single()
+// ─── Product Metadata (rich content not in DB yet) ─────────────────────────
 
 interface WeightOption {
     label: string
@@ -48,7 +77,7 @@ interface ProductData {
     image: string
 }
 
-const PRODUCTS: Record<string, ProductData> = {
+const PRODUCT_METADATA: Record<string, any> = {
     'kashmiri-mirch-whole': {
         slug: 'kashmiri-mirch-whole',
         name: 'Kashmiri Mirch Whole',
@@ -329,41 +358,49 @@ const PRODUCTS: Record<string, ProductData> = {
     }
 };
 
-function getProduct(slug: string): ProductData | null {
-    return PRODUCTS[slug] ?? null
+async function getProduct(slug: string) {
+    const supabase = await createClient()
+    const { data: product } = await supabase
+        .from('products')
+        .select('*, category:categories(*)')
+        .eq('slug', slug)
+        .single()
+    return product
 }
 
 type Props = { params: Promise<{ slug: string }> }
 
-// ─── generateStaticParams (for ISR pre-generation) ──────────────────────
 export async function generateStaticParams() {
-    return Object.keys(PRODUCTS).map((slug) => ({ slug }))
+    const supabase = await createClient()
+    const { data: products } = await supabase.from('products').select('slug')
+    return (products || []).map((p) => ({ slug: p.slug }))
 }
 
-// ─── generateMetadata ────────────────────────────────────────────────────
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params
-    const p = getProduct(slug)
+    const p = await getProduct(slug)
+    const meta = PRODUCT_METADATA[slug] || {}
+    
     if (!p) return { title: 'Product Not Found | Savika' }
 
     return {
-        title: p.metaTitle,
-        description: p.metaDescription,
-        keywords: p.keywords.join(', '),
+        title: meta.metaTitle || `${p.name} | Savika`,
+        description: meta.metaDescription || p.description,
+        keywords: (meta.keywords || []).join(', '),
         openGraph: {
-            title: p.metaTitle,
-            description: p.metaDescription,
+            title: meta.metaTitle || p.name,
+            description: meta.metaDescription || p.description,
             url: `https://savikafoods.in/product/${slug}`,
             siteName: 'Savika',
-            images: [{ url: `https://savikafoods.in${p.image}`, width: 1200, height: 630, alt: p.name }],
+            images: [{ url: getProductImageUrl(p.image_urls?.[0]), width: 1200, height: 630, alt: p.name }],
             locale: 'en_IN',
             type: 'website',
         },
         twitter: {
             card: 'summary_large_image',
-            title: p.metaTitle,
-            description: p.metaDescription,
-            images: [`https://savikafoods.in${p.image}`],
+            title: meta.metaTitle || p.name,
+            description: meta.metaDescription || p.description,
+            images: [getProductImageUrl(p.image_urls?.[0])],
         },
         alternates: {
             canonical: `https://savikafoods.in/product/${slug}`,
@@ -371,44 +408,59 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 }
 
-// ─── Page Component ───────────────────────────────────────────────────────
 export default async function ProductPage({ params }: Props) {
     const { slug } = await params
-    const p = getProduct(slug)
+    const p = await getProduct(slug)
     if (!p) notFound()
 
-    const savings = p.salePrice ? p.price - p.salePrice : 0
-    const savingsPct = savings > 0 ? Math.round((savings / p.price) * 100) : 0
+    // Enrich with local metadata if available
+    const meta = PRODUCT_METADATA[slug] || {
+        heroIntro: p.description,
+        whatIsThis: p.description,
+        origin: 'India',
+        botanicalName: 'N/A',
+        culturalImportance: 'N/A',
+        regionalUsage: 'N/A',
+        benefits: [],
+        culinaryUses: [],
+        storageLife: '12 months',
+        storageInstructions: 'Store in a cool, dry place.',
+        sourcingStory: 'Sourced from the finest farms.',
+        faqs: [],
+        relatedProducts: [],
+    }
+
+    // Merge weight options from DB if they exist, otherwise use default
+    const weightOptions = p.weight_options || meta.weightOptions || [
+        { label: '100g', price: p.price, salePrice: p.sale_price }
+    ]
+
+    const enrichedProduct = {
+        ...p,
+        ...meta,
+        weightOptions
+    }
+
+    const currentPrice = enrichedProduct.price
+    const currentSalePrice = enrichedProduct.sale_price
+    const savings = currentSalePrice ? currentPrice - currentSalePrice : 0
+    const savingsPct = savings > 0 ? Math.round((savings / currentPrice) * 100) : 0
 
     const productSchema = {
         '@context': 'https://schema.org',
         '@type': 'Product',
-        name: p.name,
-        description: p.heroIntro.slice(0, 500),
-        image: [`https://savikafoods.in${p.image}`],
+        name: enrichedProduct.name,
+        description: enrichedProduct.heroIntro?.slice(0, 500) || enrichedProduct.description?.slice(0, 500),
+        image: [getProductImageUrl(enrichedProduct.image_urls?.[0])],
         brand: { '@type': 'Brand', name: 'Savika' },
-        sku: `SAV-${slug.toUpperCase().replace(/-/g, '')}`,
-        gtin14: undefined,
+        sku: enrichedProduct.id,
         offers: {
             '@type': 'Offer',
-            price: p.salePrice ?? p.price,
+            price: enrichedProduct.sale_price ?? enrichedProduct.price,
             priceCurrency: 'INR',
-            priceValidUntil: '2026-12-31',
-            availability: p.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            availability: enrichedProduct.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
             url: `https://savikafoods.in/product/${slug}`,
-            seller: { '@type': 'Organization', name: 'Savika' },
         },
-        aggregateRating: {
-            '@type': 'AggregateRating',
-            ratingValue: p.rating.toString(),
-            reviewCount: p.reviewCount.toString(),
-            bestRating: '5',
-            worstRating: '1',
-        },
-        additionalProperty: [
-            { '@type': 'PropertyValue', name: 'Origin', value: p.origin },
-            { '@type': 'PropertyValue', name: 'Botanical Name', value: p.botanicalName },
-        ],
     }
 
     const breadcrumbSchema = {
@@ -417,15 +469,15 @@ export default async function ProductPage({ params }: Props) {
         itemListElement: [
             { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://savikafoods.in' },
             { '@type': 'ListItem', position: 2, name: 'Shop', item: 'https://savikafoods.in/shop' },
-            { '@type': 'ListItem', position: 3, name: p.category.name, item: `https://savikafoods.in/category/${p.category.slug}` },
-            { '@type': 'ListItem', position: 4, name: p.name, item: `https://savikafoods.in/product/${slug}` },
+            { '@type': 'ListItem', position: 3, name: enrichedProduct.category?.name, item: `https://savikafoods.in/category/${enrichedProduct.category?.slug}` },
+            { '@type': 'ListItem', position: 4, name: enrichedProduct.name, item: `https://savikafoods.in/product/${slug}` },
         ],
     }
 
     const faqSchema = {
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
-        mainEntity: p.faqs.map((f) => ({
+        mainEntity: (enrichedProduct.faqs || []).map((f: any) => ({
             '@type': 'Question',
             name: f.q,
             acceptedAnswer: { '@type': 'Answer', text: f.a },
@@ -444,12 +496,12 @@ export default async function ProductPage({ params }: Props) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-gray-400">
                         <Link href="/" className="hover:text-[#C17F24] transition-colors">Home</Link>
-                        <ChevronRight className="w-2 h-2" />
+                        <FontAwesomeIcon icon={faChevronRight} className="w-2 h-2" />
                         <Link href="/shop" className="hover:text-[#C17F24] transition-colors">Shop</Link>
-                        <ChevronRight className="w-2 h-2" />
-                        <Link href={`/category/${p.category.slug}`} className="hover:text-[#C17F24] transition-colors">{p.category.name}</Link>
-                        <ChevronRight className="w-2 h-2" />
-                        <span className="text-[#C17F24] font-medium line-clamp-1">{p.name}</span>
+                        <FontAwesomeIcon icon={faChevronRight} className="w-2 h-2" />
+                        <Link href={`/category/${enrichedProduct.category?.slug}`} className="hover:text-[#C17F24] transition-colors">{enrichedProduct.category?.name}</Link>
+                        <FontAwesomeIcon icon={faChevronRight} className="w-2 h-2" />
+                        <span className="text-[#C17F24] font-medium line-clamp-1">{enrichedProduct.name}</span>
                     </nav>
                 </div>
             </div>
@@ -465,8 +517,8 @@ export default async function ProductPage({ params }: Props) {
                     <div className="space-y-3">
                         <div className="relative aspect-square rounded-3xl overflow-hidden bg-white shadow-xl">
                             <Image
-                                src={p.image}
-                                alt={`${p.name} - Buy Online India | Savika`}
+                                src={getProductImageUrl(enrichedProduct.image_urls?.[0])}
+                                alt={`${enrichedProduct.name} - Buy Online India | Savika`}
                                 fill
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 className="object-cover"
@@ -478,15 +530,15 @@ export default async function ProductPage({ params }: Props) {
                                 </div>
                             )}
                             <div className="absolute top-4 right-4 bg-white/90 text-[#2E2E2E] text-xs font-semibold px-3 py-1.5 rounded-full shadow flex items-center gap-1">
-                                <ShieldCheck className="w-3 h-3 text-green-600" />
+                                <FontAwesomeIcon icon={faCheckCircle} className="w-3 h-3 text-green-600" />
                                 FSSAI Certified
                             </div>
                         </div>
                         {/* Thumbnail row placeholder */}
                         <div className="grid grid-cols-4 gap-2">
-                            {[1, 2, 3, 4].map((i) => (
+                            {enrichedProduct.image_urls?.slice(0, 4).map((url: string, i: number) => (
                                 <div key={i} className="aspect-square rounded-xl bg-white shadow border-2 border-transparent hover:border-[#C47F17] transition-all cursor-pointer overflow-hidden relative">
-                                    <Image src={p.image} alt={`${p.name} view ${i}`} fill sizes="80px" className="object-cover" />
+                                    <Image src={getProductImageUrl(url)} alt={`${enrichedProduct.name} view ${i}`} fill sizes="80px" className="object-cover" />
                                 </div>
                             ))}
                         </div>
@@ -497,27 +549,31 @@ export default async function ProductPage({ params }: Props) {
                         {/* H1 */}
                         <div>
                             <p className="text-sm text-[#C47F17] font-semibold uppercase tracking-widest mb-1">
-                                {p.category.name}
+                                {enrichedProduct.category?.name}
                             </p>
                             <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2C1A0E] leading-tight">
-                                Buy {p.name} Online in India
+                                Buy {enrichedProduct.name} Online in India
                             </h1>
-                            <p className="text-sm text-gray-500 mt-1 italic">{p.localName}</p>
+                            <p className="text-sm text-gray-500 mt-1 italic">{enrichedProduct.localName}</p>
                         </div>
 
                         {/* Rating */}
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-0.5">
                                 {Array.from({ length: 5 }).map((_, i) => (
-                                    <Star key={i} className={`w-4 h-4 ${i < Math.floor(p.rating) ? 'text-[#C17F24] fill-[#C17F24]' : 'text-gray-300'}`} />
+                                    <FontAwesomeIcon 
+                                        key={i} 
+                                        icon={faStar} 
+                                        className={`w-4 h-4 ${i < Math.floor(enrichedProduct.rating || 4.8) ? 'text-[#C17F24]' : 'text-gray-300'}`} 
+                                    />
                                 ))}
                             </div>
-                            <span className="text-sm font-semibold text-[#2E2E2E]">{p.rating}</span>
-                            <span className="text-sm text-gray-400">({p.reviewCount} reviews)</span>
+                            <span className="text-sm font-semibold text-[#2E2E2E]">{enrichedProduct.rating || 4.8}</span>
+                            <span className="text-sm text-gray-400">({enrichedProduct.review_count || enrichedProduct.reviewCount || 0} reviews)</span>
                         </div>
 
                         {/* ProductCommercePanel replaces the static WeightSelector and buttons */}
-                        <ProductCommercePanel productData={p} />
+                        <ProductCommercePanel productData={enrichedProduct} />
                     </div>
                 </section>
 
@@ -525,19 +581,19 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 2 - WHAT IS THIS SPICE?
                 ══════════════════════════════════════════════════ */}
                 <section className="bg-white rounded-3xl p-8 shadow-sm border border-[#e8ddd0]">
-                    <SectionHeading icon={BookOpen} text={`What Is ${p.name.split(' ')[0]}?`} />
+                    <SectionHeading icon={faBookOpen} text={`What Is ${enrichedProduct.name.split(' ')[0]}?`} />
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
                         <div className="lg:col-span-2 space-y-4">
-                            {p.whatIsThis.split('\n\n').map((para, i) => (
+                            {enrichedProduct.whatIsThis?.split('\n\n').map((para: string, i: number) => (
                                 <p key={i} className="text-gray-600 leading-relaxed">{para}</p>
                             ))}
                         </div>
                         <div className="space-y-4">
-                            <InfoCard label="Origin" value={p.origin} icon={MapPin} />
-                            <InfoCard label="Local Name" value={p.localName} icon={Languages} />
-                            <InfoCard label="Botanical Name" value={p.botanicalName} icon={Leaf} italic />
-                            <InfoCard label="Cultural Role" value={p.culturalImportance} icon={Landmark} />
-                            <InfoCard label="Regional Use" value={p.regionalUsage} icon={Map} />
+                            <InfoCard label="Origin" value={enrichedProduct.origin} icon={faMapMarkerAlt} />
+                            <InfoCard label="Local Name" value={enrichedProduct.localName} icon={faGlobe} />
+                            <InfoCard label="Botanical Name" value={enrichedProduct.botanicalName} icon={faLeaf} italic />
+                            <InfoCard label="Cultural Role" value={enrichedProduct.culturalImportance} icon={faUniversity} />
+                            <InfoCard label="Regional Use" value={enrichedProduct.regionalUsage} icon={faMap} />
                         </div>
                     </div>
                 </section>
@@ -546,15 +602,15 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 3 - HEALTH BENEFITS
                 ══════════════════════════════════════════════════ */}
                 <section>
-                    <SectionHeading icon={HeartPulse} text={`Health Benefits of ${p.name.split(' ')[0]}`} />
+                    <SectionHeading icon={faHeartPulse} text={`Health Benefits of ${enrichedProduct.name.split(' ')[0]}`} />
                     <p className="text-gray-500 mt-2 mb-6 max-w-2xl">
                         Backed by traditional Ayurvedic wisdom and modern nutritional science.
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {p.benefits.map((b, i) => (
+                        {enrichedProduct.benefits?.map((b: any, i: number) => (
                             <div key={i} className="bg-white rounded-2xl p-5 border border-[#e8ddd0] hover:shadow-md transition-shadow">
                                 <div className="w-10 h-10 rounded-xl bg-[#C47F17]/10 flex items-center justify-center mb-3">
-                                    <Sprout className="w-4 h-4 text-[#C17F24]" />
+                                    <FontAwesomeIcon icon={faLeaf} className="w-4 h-4 text-[#C17F24]" />
                                 </div>
                                 <h3 className="font-bold text-[#2C1A0E] mb-2">{b.title}</h3>
                                 <p className="text-sm text-gray-500 leading-relaxed">{b.desc}</p>
@@ -570,13 +626,13 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 4 - CULINARY USES
                 ══════════════════════════════════════════════════ */}
                 <section className="bg-[#2C1A0E] rounded-3xl p-8">
-                    <SectionHeading icon={UtensilsCrossed} text="Culinary Uses & Cooking Tips" dark />
-                    <p className="text-gray-400 mt-2 mb-6">How to use {p.name} like an Indian chef</p>
+                    <SectionHeading icon={faUtensils} text="Culinary Uses & Cooking Tips" dark />
+                    <p className="text-gray-400 mt-2 mb-6">How to use {enrichedProduct.name} like an Indian chef</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {p.culinaryUses.map((u, i) => (
+                        {enrichedProduct.culinaryUses?.map((u: any, i: number) => (
                             <div key={i} className="bg-white/5 rounded-2xl p-5 border border-white/10 hover:bg-white/10 transition-colors">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <UtensilsCrossed className="w-4 h-4 text-[#C17F24]" />
+                                    <FontAwesomeIcon icon={faUtensils} className="w-4 h-4 text-[#C17F24]" />
                                     <h3 className="font-bold text-white">{u.dish}</h3>
                                 </div>
                                 <p className="text-sm text-gray-400 leading-relaxed">{u.tip}</p>
@@ -589,25 +645,22 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 5 - WHY CHOOSE SAVIKA
                 ══════════════════════════════════════════════════ */}
                 <section>
-                    <SectionHeading icon={Award} text="Why Choose Savika?" />
+                    <SectionHeading icon={faAward} text="Why Choose Savika?" />
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
                         {[
-                            { icon: CookingPot, title: 'Stone Ground Fresh', desc: 'Ground in small batches to preserve essential oils and peak flavour' },
-                            { icon: Handshake, title: 'Ethical Direct Sourcing', desc: 'Directly from verified farms - no middlemen, fair farmer prices' },
-                            { icon: Ban, title: 'Zero Preservatives', desc: 'No artificial colour, no salt, no anti-caking agents - ever' },
-                            { icon: Truck, title: 'Pan-India Shipping', desc: 'Delivered to all 28 states within 3-7 business days' },
-                        ].map((f) => {
-                            const Icon = f.icon
-                            return (
-                                <div key={f.title} className="bg-[#FFF8F0] rounded-2xl p-5 border border-[#e8ddd0] text-center">
-                                    <div className="w-12 h-12 rounded-full bg-[#C17F24]/15 flex items-center justify-center mx-auto mb-3">
-                                        <Icon className="w-5 h-5 text-[#C17F24]" />
-                                    </div>
-                                    <h3 className="font-bold text-[#2C1A0E] mb-1">{f.title}</h3>
-                                    <p className="text-xs text-gray-500">{f.desc}</p>
+                            { icon: faUtensils, title: 'Stone Ground Fresh', desc: 'Ground in small batches to preserve essential oils and peak flavour' },
+                            { icon: faHandshake, title: 'Ethical Direct Sourcing', desc: 'Directly from verified farms - no middlemen, fair farmer prices' },
+                            { icon: faBan, title: 'Zero Preservatives', desc: 'No artificial colour, no salt, no anti-caking agents - ever' },
+                            { icon: faTruck, title: 'Pan-India Shipping', desc: 'Delivered to all 28 states within 3-7 business days' },
+                        ].map((f) => (
+                            <div key={f.title} className="bg-[#FFF8F0] rounded-2xl p-5 border border-[#e8ddd0] text-center">
+                                <div className="w-12 h-12 rounded-full bg-[#C17F24]/15 flex items-center justify-center mx-auto mb-3">
+                                    <FontAwesomeIcon icon={f.icon} className="w-5 h-5 text-[#C17F24]" />
                                 </div>
-                            )
-                        })}
+                                <h3 className="font-bold text-[#2C1A0E] mb-1">{f.title}</h3>
+                                <p className="text-xs text-gray-500">{f.desc}</p>
+                            </div>
+                        ))}
                     </div>
                 </section>
 
@@ -617,26 +670,26 @@ export default async function ProductPage({ params }: Props) {
                 <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="bg-white rounded-3xl p-7 border border-[#e8ddd0]">
                         <h2 className="text-xl font-extrabold text-[#2C1A0E] mb-4 flex items-center gap-2">
-                            <Package className="w-5 h-5 text-[#C17F24]" />
+                            <FontAwesomeIcon icon={faBoxOpen} className="w-5 h-5 text-[#C17F24]" />
                             Storage &amp; Shelf Life
                         </h2>
                         <div className="space-y-4">
                             <div className="flex items-start gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-[#C47F17]/10 flex items-center justify-center shrink-0 mt-0.5">
-                                    <Clock className="w-3 h-3 text-[#C17F24]" />
+                                    <FontAwesomeIcon icon={faClock} className="w-3 h-3 text-[#C17F24]" />
                                 </div>
                                 <div>
                                     <p className="font-semibold text-[#2C1A0E] text-sm">Shelf Life</p>
-                                    <p className="text-sm text-gray-500">{p.storageLife}</p>
+                                    <p className="text-sm text-gray-500">{enrichedProduct.storageLife}</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-[#C47F17]/10 flex items-center justify-center shrink-0 mt-0.5">
-                                    <Archive className="w-3 h-3 text-[#C17F24]" />
+                                    <FontAwesomeIcon icon={faArchive} className="w-3 h-3 text-[#C17F24]" />
                                 </div>
                                 <div>
                                     <p className="font-semibold text-[#2C1A0E] text-sm">How to Store</p>
-                                    <p className="text-sm text-gray-500">{p.storageInstructions}</p>
+                                    <p className="text-sm text-gray-500">{enrichedProduct.storageInstructions}</p>
                                 </div>
                             </div>
                         </div>
@@ -645,12 +698,12 @@ export default async function ProductPage({ params }: Props) {
                     {/* ──────── Sourcing Story ──────── */}
                     <section className="bg-[#FFF8F0] rounded-3xl p-7 border border-[#e8ddd0]">
                         <h2 className="text-xl font-extrabold text-[#2C1A0E] mb-4 flex items-center gap-2">
-                            <Leaf className="w-5 h-5 text-[#C17F24]" />
+                            <FontAwesomeIcon icon={faLeaf} className="w-5 h-5 text-[#C17F24]" />
                             Sourcing Story
                         </h2>
-                        <p className="text-sm text-gray-600 leading-relaxed">{p.sourcingStory}</p>
+                        <p className="text-sm text-gray-600 leading-relaxed">{enrichedProduct.sourcingStory}</p>
                         <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-[#C47F17]">
-                            <Leaf className="w-3 h-3" />
+                            <FontAwesomeIcon icon={faLeaf} className="w-3 h-3" />
                             <span>Farm-to-kitchen transparency</span>
                         </div>
                     </section>
@@ -660,16 +713,16 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 7 - FAQ
                 ══════════════════════════════════════════════════ */}
                 <section>
-                    <SectionHeading icon={CircleHelp} text="Frequently Asked Questions" />
+                    <SectionHeading icon={faQuestionCircle} text="Frequently Asked Questions" />
                     <div className="mt-6 space-y-3 max-w-3xl">
-                        {p.faqs.map((faq, i) => (
+                        {enrichedProduct.faqs?.map((faq: any, i: number) => (
                             <details
                                 key={i}
                                 className="group bg-white rounded-2xl border border-[#e8ddd0] overflow-hidden"
                             >
                                 <summary className="flex items-center justify-between p-5 cursor-pointer list-none font-semibold text-[#2C1A0E] hover:bg-[#FFF8F0] transition-colors">
                                     <span>{faq.q}</span>
-                                    <ChevronDown className="w-3 h-3 text-[#C17F24] group-open:rotate-180 transition-transform" />
+                                    <FontAwesomeIcon icon={faChevronDown} className="w-3 h-3 text-[#C17F24] group-open:rotate-180 transition-transform" />
                                 </summary>
                                 <div className="px-5 pb-5 text-sm text-gray-600 leading-relaxed border-t border-[#e8ddd0] pt-4">
                                     {faq.a}
@@ -683,15 +736,15 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 8 - INTERNAL LINKS / RELATED PRODUCTS
                 ══════════════════════════════════════════════════ */}
                 <section className="pb-4">
-                    <SectionHeading icon={Flame} text="You May Also Like" />
+                    <SectionHeading icon={faFire} text="You May Also Like" />
                     <div className="flex flex-wrap gap-4 mt-5">
-                        {p.relatedProducts.map((rp) => (
+                        {enrichedProduct.relatedProducts?.map((rp: any) => (
                             <Link
                                 key={rp.slug}
                                 href={`/product/${rp.slug}`}
                                 className="flex items-center gap-2 bg-white border border-[#e8ddd0] hover:border-[#C47F17] hover:bg-[#FFF8F0] text-[#2C1A0E] font-semibold px-4 py-2.5 rounded-full text-sm transition-all"
                             >
-                                <ArrowRight className="w-3 h-3 text-[#C17F24]" />
+                                <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3 text-[#C17F24]" />
                                 {rp.name}
                             </Link>
                         ))}
@@ -699,7 +752,7 @@ export default async function ProductPage({ params }: Props) {
                             href="/shop"
                             className="flex items-center gap-2 bg-[#C47F17]/10 border border-[#C47F17]/30 hover:bg-[#C47F17] hover:text-white text-[#C47F17] font-semibold px-4 py-2.5 rounded-full text-sm transition-all"
                         >
-                            <Store className="w-3 h-3" />
+                            <FontAwesomeIcon icon={faStore} className="w-3 h-3" />
                             View Complete Indian Spice Collection
                         </Link>
                     </div>
@@ -711,22 +764,22 @@ export default async function ProductPage({ params }: Props) {
 
 // ─── Sub-components ──────────────────────────────────────────────────────
 
-function SectionHeading({ icon: Icon, text, dark }: { icon: LucideIcon; text: string; dark?: boolean }) {
+function SectionHeading({ icon, text, dark }: { icon: any; text: string; dark?: boolean }) {
     return (
         <h2 className={`text-2xl font-extrabold flex items-center gap-3 ${dark ? 'text-white' : 'text-[#2C1A0E]'}`}>
             <div className="w-9 h-9 rounded-xl bg-[#C17F24]/20 flex items-center justify-center">
-                <Icon className="w-4 h-4 text-[#C17F24]" />
+                <FontAwesomeIcon icon={icon} className="w-4 h-4 text-[#C17F24]" />
             </div>
             {text}
         </h2>
     )
 }
 
-function InfoCard({ label, value, icon: Icon, italic }: { label: string; value: string; icon: LucideIcon; italic?: boolean }) {
+function InfoCard({ label, value, icon, italic }: { label: string; value: string; icon: any; italic?: boolean }) {
     return (
         <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#e8ddd0]">
             <div className="flex items-center gap-2 mb-1">
-                <Icon className="w-3 h-3 text-[#C17F24]" />
+                <FontAwesomeIcon icon={icon} className="w-3 h-3 text-[#C17F24]" />
                 <span className="text-xs font-bold text-[#8E562E] uppercase tracking-wider">{label}</span>
             </div>
             <p className={`text-sm text-[#2C1A0E] font-medium ${italic ? 'italic' : ''}`}>{value}</p>

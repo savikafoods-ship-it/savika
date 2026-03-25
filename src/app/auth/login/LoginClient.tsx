@@ -5,8 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
-import { account } from '@/lib/appwrite/client'
-import { OAuthProvider } from 'appwrite'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginClient() {
     const [email, setEmail] = useState('')
@@ -40,12 +39,14 @@ export default function LoginClient() {
         }
     }
 
-    const handleGoogleLogin = () => {
-        account.createOAuth2Session(
-            OAuthProvider.Google,
-            `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
-            `${process.env.NEXT_PUBLIC_APP_URL}/auth/login?error=oauth`,
-        )
+    const handleGoogleLogin = async () => {
+        const supabase = createClient()
+        await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            },
+        })
     }
 
     return (

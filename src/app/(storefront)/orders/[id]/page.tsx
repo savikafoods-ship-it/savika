@@ -1,38 +1,41 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createSessionClient } from '@/lib/appwrite/server'
-import { Query } from 'node-appwrite'
-import { ArrowLeft, Box, Download, MapPin } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+    faArrowLeft, 
+    faBox, 
+    faDownload, 
+    faMapMarkerAlt 
+} from '@fortawesome/free-solid-svg-icons'
+import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
 export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
-    let order = null
-    let user = null
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    try {
-        const { account, databases } = await createSessionClient()
-        user = await account.get()
-
-        order = await databases.getDocument(
-            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-            process.env.NEXT_PUBLIC_APPWRITE_ORDERS_COLLECTION_ID!,
-            id
-        )
-
-        // Security check
-        if (order.userId !== user.$id) {
-            redirect('/orders')
-        }
-    } catch {
+    if (!user) {
         redirect('/auth/login')
     }
+
+    const { data: order } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id)
+        .single()
 
     if (!order) {
         return <div className="min-h-screen flex items-center justify-center">Order not found.</div>
     }
 
-    const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items || []
-    const address = typeof order.shippingAddress === 'string' ? JSON.parse(order.shippingAddress) : order.shippingAddress
+    // Security check
+    if (order.user_id !== user.id) {
+        redirect('/orders')
+    }
+
+    const items = Array.isArray(order.items) ? order.items : []
+    const address = typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address
 
     return (
         <div className="min-h-screen bg-[#F5F0E8] py-8 lg:py-12">
@@ -40,18 +43,18 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                 
                 {/* Back Link */}
                 <Link href="/orders" className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-[#C17F24] mb-6 transition-colors">
-                    <ArrowLeft className="w-4 h-4" /> Back to all orders
+                    <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4" /> Back to all orders
                 </Link>
 
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-extrabold text-[#2E2E2E] mb-2">Order #{order.$id.slice(-8).toUpperCase()}</h1>
+                        <h1 className="text-3xl font-extrabold text-[#2E2E2E] mb-2">Order #{order.id.slice(-8).toUpperCase()}</h1>
                         <p className="text-sm font-medium text-gray-500">
-                            Placed on {new Date(order.$createdAt).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                            Placed on {new Date(order.created_at).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                         </p>
                     </div>
                     <button className="flex items-center justify-center gap-2 bg-white border border-[#e8ddd0] hover:border-[#C17F24] hover:text-[#C17F24] px-5 py-2.5 rounded-xl font-bold text-sm text-[#2E2E2E] transition-all">
-                        <Download className="w-4 h-4" /> Invoice
+                        <FontAwesomeIcon icon={faDownload} className="w-4 h-4" /> Invoice
                     </button>
                 </div>
 
@@ -61,13 +64,17 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                     <div className="md:col-span-2 space-y-6">
                         <div className="bg-white rounded-3xl p-6 lg:p-8 shadow-sm border border-[#e8ddd0]">
                             <h2 className="text-lg font-extrabold text-[#2E2E2E] mb-6 flex items-center gap-2">
-                                <Box className="w-5 h-5 text-[#C17F24]" /> Items Ordered
+                                <FontAwesomeIcon icon={faBox} className="w-5 h-5 text-[#C17F24]" /> Items Ordered
                             </h2>
                             
                             <div className="space-y-6">
                                 {items.map((item: any, i: number) => (
                                     <div key={i} className="flex gap-4 items-center">
-                                        <div className="w-16 h-16 bg-[#F9F4EE] rounded-xl border border-[#e8ddd0] flex-shrink-0" />
+                                        <div className="w-16 h-16 bg-[#F9F4EE] rounded-xl border border-[#e8ddd0] flex-shrink-0 relative overflow-hidden">
+                                            {item.image && (
+                                                <img src={getProductImageUrl(item.image)} alt={item.name} className="object-cover w-full h-full" />
+                                            )}
+                                        </div>
                                         <div className="flex-1">
                                             <h3 className="font-bold text-[#2E2E2E] text-sm md:text-base leading-tight">
                                                 {item.name}
@@ -86,11 +93,11 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                                 </div>
                                 <div className="flex justify-between text-sm text-gray-500">
                                     <span>Shipping</span>
-                                    <span className="font-semibold text-[#2E2E2E]">₹{order.total - order.subtotal + order.discount}</span>
+                                    <span className="font-semibold text-[#2E2E2E]">₹{order.shipping_cost || (order.total - (order.subtotal - (order.discount || 0)))}</span>
                                 </div>
-                                {order.discount > 0 && (
+                                {(order.discount || 0) > 0 && (
                                     <div className="flex justify-between text-sm text-green-600">
-                                        <span>Discount {order.couponCode ? `(${order.couponCode})` : ''}</span>
+                                        <span>Discount {order.coupon_code ? `(${order.coupon_code})` : ''}</span>
                                         <span className="font-semibold">-₹{order.discount}</span>
                                     </div>
                                 )}
@@ -115,17 +122,17 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                         {/* Shipping Card */}
                         <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#e8ddd0]">
                             <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <MapPin className="w-4 h-4" /> Shipping TO
+                                <FontAwesomeIcon icon={faMapMarkerAlt} className="w-4 h-4 text-[#C17F24]" /> Shipping TO
                             </h2>
-                            {address ? (
+                            {address && (
                                 <address className="not-italic text-sm text-[#2E2E2E] space-y-1">
-                                    <p className="font-bold mb-2">{address.fullName || user.name}</p>
-                                    <p>{address.addressLine1}</p>
-                                    {address.addressLine2 && <p>{address.addressLine2}</p>}
+                                    <p className="font-bold mb-2">{address.fullName || address.full_name}</p>
+                                    <p>{address.addressLine1 || address.address_line1}</p>
+                                    {(address.addressLine2 || address.address_line2) && <p>{address.addressLine2 || address.address_line2}</p>}
                                     <p>{address.city}, {address.state} {address.pincode}</p>
                                     <p className="pt-2 text-gray-500 font-medium">Phone: {address.phone}</p>
                                 </address>
-                            ) : null}
+                            )}
                         </div>
                     </div>
 

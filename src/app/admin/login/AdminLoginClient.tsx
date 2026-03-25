@@ -1,11 +1,10 @@
-'use client'
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Shield, Eye, EyeOff, AlertCircle, Loader2, LockOpen } from 'lucide-react'
-import { account } from '@/lib/appwrite/client'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faShieldAlt, faEye, faEyeSlash, faExclamationCircle, faSpinner, faLockOpen } from '@fortawesome/free-solid-svg-icons'
+import { createClient } from '@/lib/supabase/client'
 
 export default function AdminLoginClient() {
     const [email, setEmail] = useState('')
@@ -15,6 +14,7 @@ export default function AdminLoginClient() {
     const [error, setError] = useState('')
     const router = useRouter()
     const searchParams = useSearchParams()
+    const supabase = createClient()
 
     const unauthorizedFromMiddleware = searchParams.get('error') === 'unauthorized'
 
@@ -24,9 +24,12 @@ export default function AdminLoginClient() {
         setError('')
 
         try {
-            await account.createEmailPasswordSession(email, password)
-            // Check if user is admin (Appwrite Team membership check)
-            // For now, redirect to dashboard
+            const { error: loginError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            })
+            if (loginError) throw loginError
+            
             router.push('/admin/dashboard')
             router.refresh()
         } catch (err: unknown) {
@@ -61,7 +64,7 @@ export default function AdminLoginClient() {
                 {/* Middleware redirect error */}
                 {unauthorizedFromMiddleware && (
                     <div className="mb-4 px-4 py-3 rounded-xl bg-red-900/20 border border-red-800 text-red-400 text-sm flex items-start gap-2">
-                        <Shield className="w-4 h-4 mt-0.5 shrink-0" />
+                        <FontAwesomeIcon icon={faShieldAlt} className="w-4 h-4 mt-0.5 shrink-0" />
                         <span>You do not have permission to access the admin panel.</span>
                     </div>
                 )}
@@ -103,14 +106,14 @@ export default function AdminLoginClient() {
                                 onClick={() => setShowPw(!showPw)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#C17F24]"
                             >
-                                {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                <FontAwesomeIcon icon={showPw ? faEyeSlash : faEye} className="w-4 h-4" />
                             </button>
                         </div>
                     </div>
 
                     {error && (
                         <div className="px-4 py-3 rounded-xl bg-red-900/20 border border-red-800 text-red-400 text-sm flex items-start gap-2">
-                            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                            <FontAwesomeIcon icon={faExclamationCircle} className="w-4 h-4 mt-0.5 shrink-0" />
                             <span>{error}</span>
                         </div>
                     )}
@@ -121,9 +124,9 @@ export default function AdminLoginClient() {
                         className="w-full flex items-center justify-center gap-2 bg-[#C17F24] hover:bg-[#8B5E16] text-white py-3.5 rounded-lg font-bold text-sm transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         {loading ? (
-                            <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</>
+                            <><FontAwesomeIcon icon={faSpinner} className="w-4 h-4 animate-spin" /> Verifying...</>
                         ) : (
-                            <><LockOpen className="w-4 h-4" /> Sign In to Admin</>
+                            <><FontAwesomeIcon icon={faLockOpen} className="w-4 h-4" /> Sign In to Admin</>
                         )}
                     </button>
                 </form>

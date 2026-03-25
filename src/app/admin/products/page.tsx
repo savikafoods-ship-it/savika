@@ -1,10 +1,10 @@
 import Link from 'next/link'
-import { Plus, Search, Tag, Edit, Trash2 } from 'lucide-react'
-import { createSessionClient } from '@/lib/appwrite/server'
-import { Query } from 'node-appwrite'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus, faSearch, faTag, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
-import { getProductImageUrl } from '@/lib/appwrite/imageUrl'
+import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,20 +12,22 @@ export default async function AdminProductsPage() {
     let products: any[] = []
 
     try {
-        const { account, databases } = await createSessionClient()
-        const user = await account.get()
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
         
-        // Verify admin (assuming team 'admins' or simple check based on prefs/labels)
-        // For now, if they can get here, they are admin as per layout guard
+        if (!user) redirect('/admin/login')
         
-        const res = await databases.listDocuments(
-            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-            process.env.NEXT_PUBLIC_COL_PRODUCTS!,
-            [Query.orderDesc('$createdAt'), Query.limit(100)]
-        )
-        products = res.documents
-    } catch {
-        redirect('/admin/login')
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(100)
+            
+        if (error) throw error
+        products = data || []
+    } catch (err) {
+        console.error('Error fetching products:', err)
+        // In a real app we might show an error UI, but for now we fallback to empty
     }
 
     return (
@@ -39,14 +41,14 @@ export default async function AdminProductsPage() {
                     href="/admin/products/new" 
                     className="inline-flex items-center gap-2 bg-[#C17F24] hover:bg-[#D4A855] text-white px-5 py-2.5 rounded-lg font-semibold transition-colors w-fit"
                 >
-                    <Plus className="w-5 h-5" /> Add Product
+                    <FontAwesomeIcon icon={faPlus} className="w-4 h-4" /> Add Product
                 </Link>
             </div>
 
             <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
                 <div className="p-4 border-b border-[#27272a] flex flex-col sm:flex-row gap-4 justify-between items-center">
                     <div className="relative w-full sm:w-96">
-                        <Search className="w-4 h-4 text-[#a1a1aa] absolute left-3 top-1/2 -translate-y-1/2" />
+                        <FontAwesomeIcon icon={faSearch} className="w-4 h-4 text-[#a1a1aa] absolute left-3 top-1/2 -translate-y-1/2" />
                         <input 
                             type="text" 
                             placeholder="Search products..." 
@@ -55,7 +57,7 @@ export default async function AdminProductsPage() {
                     </div>
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                         <button className="px-4 py-2 bg-[#27272a] text-[#e4e4e7] hover:text-white text-sm font-medium rounded-lg flex items-center gap-2 transition-colors">
-                            <Tag className="w-4 h-4" /> Filter by Category
+                            <FontAwesomeIcon icon={faTag} className="w-4 h-4" /> Filter by Category
                         </button>
                     </div>
                 </div>
@@ -79,12 +81,12 @@ export default async function AdminProductsPage() {
                                     </td>
                                 </tr>
                             ) : products.map(product => (
-                                <tr key={product.$id} className="hover:bg-[#27272a]/30 transition-colors">
+                                <tr key={product.id} className="hover:bg-[#27272a]/30 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 bg-[#27272a] rounded-lg overflow-hidden shrink-0 relative">
-                                                {product.imageIds?.[0] ? (
-                                                    <Image src={getProductImageUrl(product.imageIds[0], 100, 80)} alt={product.name} fill className="object-cover" />
+                                                {product.images?.[0] ? (
+                                                    <Image src={getProductImageUrl(product.images[0])} alt={product.name} fill className="object-cover" />
                                                 ) : null}
                                             </div>
                                             <div>
@@ -94,8 +96,8 @@ export default async function AdminProductsPage() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${product.isActive ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
-                                            {product.isActive ? 'Active' : 'Draft'}
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${product.is_active ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                                            {product.is_active ? 'Active' : 'Draft'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
@@ -108,11 +110,11 @@ export default async function AdminProductsPage() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2 text-[#a1a1aa]">
-                                            <Link href={`/admin/products/${product.$id}`} className="p-2 hover:bg-[#27272a] hover:text-white rounded-lg transition-colors">
-                                                <Edit className="w-4 h-4" />
+                                            <Link href={`/admin/products/${product.id}`} className="p-2 hover:bg-[#27272a] hover:text-white rounded-lg transition-colors">
+                                                <FontAwesomeIcon icon={faPenToSquare} className="w-4 h-4" />
                                             </Link>
                                             <button className="p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors">
-                                                <Trash2 className="w-4 h-4" />
+                                                <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </td>

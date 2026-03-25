@@ -3,23 +3,23 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Loader2, Image as ImageIcon } from 'lucide-react'
-import { databases, storage } from '@/lib/appwrite/client'
-import { ID } from 'appwrite'
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeft, faSave, faSpinner, faImage } from '@fortawesome/free-solid-svg-icons'
+import { createClient } from '@/lib/supabase/client'
 
 export default function ProductForm({ initialData }: { initialData?: any }) {
     const router = useRouter()
+    const supabase = createClient()
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState({
         name: initialData?.name || '',
         slug: initialData?.slug || '',
         price: initialData?.price?.toString() || '',
-        comparePrice: initialData?.comparePrice?.toString() || '',
+        compare_price: initialData?.compare_price?.toString() || '',
         stock: initialData?.stock?.toString() || '100',
         description: initialData?.description || '',
-        isActive: initialData?.isActive ?? true,
-        categoryId: initialData?.categoryId || '',
+        is_active: initialData?.is_active ?? true,
+        category_id: initialData?.category_id || '',
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -30,27 +30,24 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                 name: formData.name,
                 slug: formData.slug,
                 price: parseFloat(formData.price),
-                comparePrice: formData.comparePrice ? parseFloat(formData.comparePrice) : null,
+                compare_price: formData.compare_price ? parseFloat(formData.compare_price) : null,
                 stock: parseInt(formData.stock),
                 description: formData.description,
-                isActive: formData.isActive,
-                categoryId: formData.categoryId || null,
+                is_active: formData.is_active,
+                category_id: formData.category_id || null,
             }
 
-            if (initialData?.$id) {
-                await databases.updateDocument(
-                    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-                    process.env.NEXT_PUBLIC_COL_PRODUCTS!,
-                    initialData.$id,
-                    dataToSave
-                )
+            if (initialData?.id) {
+                const { error } = await supabase
+                    .from('products')
+                    .update(dataToSave)
+                    .eq('id', initialData.id)
+                if (error) throw error
             } else {
-                await databases.createDocument(
-                    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-                    process.env.NEXT_PUBLIC_COL_PRODUCTS!,
-                    ID.unique(),
-                    dataToSave
-                )
+                const { error } = await supabase
+                    .from('products')
+                    .insert(dataToSave)
+                if (error) throw error
             }
             
             router.push('/admin/products')
@@ -67,7 +64,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Link href="/admin/products" className="p-2 hover:bg-[#27272a] text-[#a1a1aa] hover:text-white rounded-lg transition-colors">
-                        <ArrowLeft className="w-5 h-5" />
+                        <FontAwesomeIcon icon={faArrowLeft} className="w-5 h-5" />
                     </Link>
                     <h1 className="text-2xl font-bold text-white">
                         {initialData ? 'Edit Product' : 'Add New Product'}
@@ -78,7 +75,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                     disabled={loading}
                     className="flex items-center gap-2 bg-[#C17F24] hover:bg-[#D4A855] text-white px-6 py-2.5 rounded-lg font-bold transition-colors disabled:opacity-50"
                 >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    <FontAwesomeIcon icon={loading ? faSpinner : faSave} className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                     Save Product
                 </button>
             </div>
@@ -110,7 +107,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                     <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-6">
                         <h2 className="text-lg font-semibold text-white mb-4">Media</h2>
                         <div className="border-2 border-dashed border-[#3f3f46] rounded-xl p-8 text-center hover:bg-[#27272a]/50 transition-colors cursor-pointer">
-                            <ImageIcon className="w-8 h-8 text-[#a1a1aa] mx-auto mb-3" />
+                            <FontAwesomeIcon icon={faImage} className="w-8 h-8 text-[#a1a1aa] mx-auto mb-3" />
                             <p className="text-sm text-[#e4e4e7] font-medium">Click to upload images</p>
                             <p className="text-xs text-[#a1a1aa] mt-1">SVG, PNG, JPG or WEBP (max. 800x400px)</p>
                         </div>
@@ -124,7 +121,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                         
                         <div className="space-y-1.5">
                             <label className="text-sm font-medium text-[#e4e4e7]">Status</label>
-                            <select value={formData.isActive ? 'active' : 'draft'} onChange={e => setFormData({...formData, isActive: e.target.value === 'active'})} className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 outline-none">
+                            <select value={formData.is_active ? 'active' : 'draft'} onChange={e => setFormData({...formData, is_active: e.target.value === 'active'})} className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 outline-none">
                                 <option value="active">Active</option>
                                 <option value="draft">Draft</option>
                             </select>
@@ -132,7 +129,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
 
                         <div className="space-y-1.5 pt-2">
                             <label className="text-sm font-medium text-[#e4e4e7]">Category ID</label>
-                            <input type="text" value={formData.categoryId} onChange={e => setFormData({...formData, categoryId: e.target.value})} placeholder="Standard Appwrite Doc ID" className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 outline-none" />
+                            <input type="text" value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} placeholder="Supabase UUID" className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 outline-none" />
                         </div>
                     </div>
 
@@ -147,7 +144,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium text-[#e4e4e7]">Compare at (₹)</label>
-                                <input type="number" step="0.01" value={formData.comparePrice} onChange={e => setFormData({...formData, comparePrice: e.target.value})} className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 outline-none" placeholder="Optional" />
+                                <input type="number" step="0.01" value={formData.compare_price} onChange={e => setFormData({...formData, compare_price: e.target.value})} className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 outline-none" placeholder="Optional" />
                             </div>
                         </div>
 

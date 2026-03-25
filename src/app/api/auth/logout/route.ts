@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server'
-import { createSessionClient } from '@/lib/appwrite/server'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST() {
   try {
-    const { account } = await createSessionClient()
-    await account.deleteSession('current')
-  } catch { /* already invalid */ }
-  const cookieStore = await cookies()
-  cookieStore.delete('savika-session')
-  return NextResponse.json({ success: true })
+    const supabase = await createClient()
+    await supabase.auth.signOut()
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
 }

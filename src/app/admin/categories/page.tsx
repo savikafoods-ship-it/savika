@@ -1,7 +1,7 @@
-import { createSessionClient, COL_CATEGORIES, DB_ID } from '@/lib/appwrite/server'
-import { Query } from 'node-appwrite'
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Plus, Edit, Trash2 } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,17 +9,21 @@ export default async function AdminCategoriesPage() {
     let categories: any[] = []
 
     try {
-        const { account, databases } = await createSessionClient()
-        await account.get()
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) redirect('/admin/login')
         
-        const res = await databases.listDocuments(
-            DB_ID,
-            COL_CATEGORIES,
-            [Query.orderAsc('sortOrder'), Query.limit(50)]
-        )
-        categories = res.documents
-    } catch {
-        redirect('/admin/login')
+        const { data, error } = await supabase
+            .from('categories')
+            .select('*')
+            .order('sort_order', { ascending: true })
+            .limit(50)
+            
+        if (error) throw error
+        categories = data || []
+    } catch (err) {
+        console.error('Error fetching categories:', err)
+        // Fallback or redirect
     }
 
     return (
@@ -30,7 +34,7 @@ export default async function AdminCategoriesPage() {
                     <p className="text-[#a1a1aa] text-sm mt-1">Organize your products into navigation categories.</p>
                 </div>
                 <button className="inline-flex items-center gap-2 bg-[#C17F24] hover:bg-[#D4A855] text-white px-4 py-2 rounded-lg font-semibold transition-colors w-fit">
-                    <Plus className="w-4 h-4" /> Add Category
+                    <FontAwesomeIcon icon={faPlus} className="w-4 h-4" /> Add Category
                 </button>
             </div>
 
@@ -49,18 +53,22 @@ export default async function AdminCategoriesPage() {
                                 <td colSpan={3} className="px-6 py-12 text-center text-[#a1a1aa]">No categories found.</td>
                             </tr>
                         ) : categories.map((cat) => (
-                            <tr key={cat.$id} className="hover:bg-[#27272a]/30 transition-colors">
+                            <tr key={cat.id} className="hover:bg-[#27272a]/30 transition-colors">
                                 <td className="px-6 py-4">
                                     <div className="font-bold text-white mb-0.5">{cat.name}</div>
                                     <div className="text-xs text-[#a1a1aa]">/{cat.slug}</div>
                                 </td>
                                 <td className="px-6 py-4 text-[#e4e4e7]">
-                                    {cat.sortOrder || 0}
+                                    {cat.sort_order || 0}
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex justify-end gap-2 text-[#a1a1aa]">
-                                        <button className="p-2 hover:bg-[#27272a] hover:text-white rounded-lg transition-colors"><Edit className="w-4 h-4" /></button>
-                                        <button className="p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                        <button className="p-2 hover:bg-[#27272a] hover:text-white rounded-lg transition-colors">
+                                            <FontAwesomeIcon icon={faPenToSquare} className="w-4 h-4" />
+                                        </button>
+                                        <button className="p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors">
+                                            <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

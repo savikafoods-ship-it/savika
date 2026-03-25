@@ -3,11 +3,12 @@
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faXmark, faMinus, faPlus, faTrash, faShoppingBag } from '@fortawesome/free-solid-svg-icons'
 
 import { useCartStore } from '@/store/cartStore'
 import { formatCurrency } from '@/lib/utils'
-import { getProductImageUrl } from '@/lib/appwrite/imageUrl'
+import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
 export default function CartDrawer() {
     const { items, isOpen, closeCart, removeItem, updateQuantity, total } = useCartStore()
@@ -44,7 +45,7 @@ export default function CartDrawer() {
                         <p className="text-xs text-[#8E562E]">{items.length} item{items.length !== 1 ? 's' : ''}</p>
                     </div>
                     <button onClick={closeCart} className="p-2 rounded-lg hover:bg-[#F9F4EE] text-[#2E2E2E] transition-colors">
-                        <X className="w-5 h-5" />
+                        <FontAwesomeIcon icon={faXmark} className="w-5 h-5" />
                     </button>
                 </div>
 
@@ -53,7 +54,7 @@ export default function CartDrawer() {
                     {items.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center gap-4">
                             <div className="w-20 h-20 rounded-full bg-[#FFF0DC] flex items-center justify-center">
-                                <ShoppingBag className="w-10 h-10 text-[#C47F17]/50" />
+                                <FontAwesomeIcon icon={faShoppingBag} className="w-10 h-10 text-[#C47F17]/50" />
                             </div>
                             <div>
                                 <p className="font-semibold text-[#2E2E2E]">Your cart is empty</p>
@@ -70,11 +71,16 @@ export default function CartDrawer() {
                                 return (
                                     <div key={`${item.productId}-${item.weight}`} className="flex gap-4 p-3 rounded-xl bg-[#F9F4EE]">
                                         <div className="relative w-18 h-18 rounded-lg overflow-hidden bg-white shrink-0">
-                                            {item.product.imageIds?.[0] ? (
-                                                <Image src={item.product.imageIds[0].startsWith('/') ? item.product.imageIds[0] : getProductImageUrl(item.product.imageIds[0], 100, 80)} alt={item.product.name} fill className="object-cover" />
+                                            {item.product.image_urls?.[0] ? (
+                                                <Image 
+                                                    src={item.product.image_urls[0].startsWith('/') ? item.product.image_urls[0] : getProductImageUrl(item.product.image_urls[0])} 
+                                                    alt={item.product.name} 
+                                                    fill 
+                                                    className="object-cover" 
+                                                />
                                             ) : (
                                                 <div className="w-full h-full bg-[#e8ddd0] flex items-center justify-center">
-                                                    <ShoppingBag className="w-6 h-6 text-[#C47F17]/50" />
+                                                    <FontAwesomeIcon icon={faShoppingBag} className="w-6 h-6 text-[#C47F17]/50" />
                                                 </div>
                                             )}
                                         </div>
@@ -87,20 +93,20 @@ export default function CartDrawer() {
                                                     onClick={() => updateQuantity(item.productId, item.quantity - 1, item.weight)}
                                                     className="w-7 h-7 rounded-lg border border-[#C47F17]/40 flex items-center justify-center text-[#C47F17] hover:bg-[#C47F17] hover:text-white transition-colors"
                                                 >
-                                                    <Minus className="w-3 h-3" />
+                                                    <FontAwesomeIcon icon={faMinus} className="w-3 h-3" />
                                                 </button>
                                                 <span className="text-sm font-bold text-[#2E2E2E] w-6 text-center">{item.quantity}</span>
                                                 <button
                                                     onClick={() => updateQuantity(item.productId, item.quantity + 1, item.weight)}
                                                     className="w-7 h-7 rounded-lg border border-[#C47F17]/40 flex items-center justify-center text-[#C47F17] hover:bg-[#C47F17] hover:text-white transition-colors"
                                                 >
-                                                    <Plus className="w-3 h-3" />
+                                                    <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
                                                 </button>
                                                 <button
                                                     onClick={() => removeItem(item.productId, item.weight)}
                                                     className="ml-auto p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors"
                                                 >
-                                                    <Trash2 className="w-4 h-4" />
+                                                    <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         </div>

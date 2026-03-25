@@ -4,22 +4,24 @@ import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import {
-    LayoutDashboard, Package, ShoppingCart, Users, Tag, BarChart3,
-    Settings, FileText, LogOut, ChevronLeft, ChevronRight, Bell, UserCircle, Loader2,
-    Menu, X
-} from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+    faColumns, faBox, faCartShopping, faUsers, faTag, faChartLine, 
+    faGear, faFileLines, faRightFromBracket, faBell, faCircleUser, faSpinner,
+    faBars, faXmark
+} from '@fortawesome/free-solid-svg-icons'
+import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/admin/dashboard' },
-    { icon: ShoppingCart, label: 'Orders', href: '/admin/orders' },
-    { icon: Package, label: 'Products', href: '/admin/products' },
-    { icon: Tag, label: 'Categories', href: '/admin/categories' },
-    { icon: Users, label: 'Customers', href: '/admin/customers' },
-    { icon: Tag, label: 'Coupons', href: '/admin/coupons' },
-    { icon: BarChart3, label: 'Analytics', href: '/admin/analytics' },
-    { icon: FileText, label: 'Updates', href: '/admin/updates' },
-    { icon: Settings, label: 'Settings', href: '/admin/settings' },
+    { icon: faColumns, label: 'Dashboard', href: '/admin/dashboard' },
+    { icon: faCartShopping, label: 'Orders', href: '/admin/orders' },
+    { icon: faBox, label: 'Products', href: '/admin/products' },
+    { icon: faTag, label: 'Categories', href: '/admin/categories' },
+    { icon: faUsers, label: 'Customers', href: '/admin/customers' },
+    { icon: faTag, label: 'Coupons', href: '/admin/coupons' },
+    { icon: faChartLine, label: 'Analytics', href: '/admin/analytics' },
+    { icon: faFileLines, label: 'Updates', href: '/admin/updates' },
+    { icon: faGear, label: 'Settings', href: '/admin/settings' },
 ]
 
 interface AdminLayoutClientProps {
@@ -32,6 +34,7 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
     const [signingOut, setSigningOut] = useState(false)
     const pathname = usePathname()
     const router = useRouter()
+    const supabase = createClient()
 
     // Close mobile sidebar on route change
     useEffect(() => {
@@ -41,11 +44,12 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
     const handleSignOut = async () => {
         setSigningOut(true)
         try {
-            await fetch('/api/auth/logout', { method: 'POST' })
+            await supabase.auth.signOut()
         } catch {
             // Session may already be expired
         }
         router.push('/admin/login')
+        router.refresh()
     }
 
     return (
@@ -77,14 +81,13 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                         onClick={() => setSidebarOpen(false)}
                         className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 md:hidden"
                     >
-                        <X className="w-5 h-5" />
+                        <FontAwesomeIcon icon={faXmark} className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Nav Items */}
                 <nav className="flex-1 py-3 px-1.5 space-y-0.5 overflow-y-auto">
                     {navItems.map((item) => {
-                        const Icon = item.icon
                         const isActive = pathname.startsWith(item.href)
                         return (
                             <Link
@@ -98,7 +101,7 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
-                                <Icon className="w-5 h-5 shrink-0" />
+                                <FontAwesomeIcon icon={item.icon} className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
                                 <span className="whitespace-nowrap md:hidden lg:inline">{item.label}</span>
                             </Link>
                         )
@@ -112,7 +115,7 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                         disabled={signingOut}
                         className="w-full flex items-center gap-2 px-2.5 py-2 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-900/20 transition-colors text-sm md:justify-center lg:justify-start"
                     >
-                        {signingOut ? <Loader2 className="w-5 h-5 shrink-0 animate-spin" /> : <LogOut className="w-5 h-5 shrink-0" />}
+                        <FontAwesomeIcon icon={signingOut ? faSpinner : faRightFromBracket} className={`w-4 h-4 shrink-0 ${signingOut ? 'animate-spin' : ''}`} />
                         <span className="md:hidden lg:inline">{signingOut ? 'Signing out...' : 'Sign Out'}</span>
                     </button>
                 </div>
@@ -126,15 +129,15 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                         onClick={() => setSidebarOpen(true)}
                         className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 md:hidden"
                     >
-                        <Menu className="w-5 h-5" />
+                        <FontAwesomeIcon icon={faBars} className="w-5 h-5" />
                     </button>
                     <div className="hidden md:block" />
                     <div className="flex items-center gap-4">
                         <button className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors relative">
-                            <Bell className="w-5 h-5" />
+                            <FontAwesomeIcon icon={faBell} className="w-5 h-5" />
                         </button>
                         <div className="flex items-center gap-2">
-                            <UserCircle className="w-8 h-8 text-gray-500" />
+                            <FontAwesomeIcon icon={faCircleUser} className="w-7 h-7 text-gray-500" />
                             <div className="text-right hidden sm:block">
                                 <p className="text-sm font-semibold text-white leading-tight">{user.name}</p>
                                 <p className="text-[11px] text-gray-500">{user.email}</p>

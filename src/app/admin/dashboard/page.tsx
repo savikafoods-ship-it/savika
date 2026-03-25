@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { TrendingUp, ShoppingBag, Users, Package } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowUp, faShoppingBag, faUsers, faBox } from '@fortawesome/free-solid-svg-icons'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts'
 
 const revenueData = [
@@ -37,10 +38,10 @@ const statusColors: Record<string, string> = {
 }
 
 const stats = [
-    { label: 'Total Revenue', value: 'Rs.4,79,000', change: '+18%', icon: TrendingUp, color: 'text-[#C17F24]' },
-    { label: 'Total Orders', value: '891', change: '+12%', icon: ShoppingBag, color: 'text-blue-400' },
-    { label: 'Total Customers', value: '634', change: '+8%', icon: Users, color: 'text-purple-400' },
-    { label: 'Active Products', value: '52', change: '+4', icon: Package, color: 'text-green-400' },
+    { label: 'Total Revenue', value: 'Rs.4,79,000', change: '+18%', icon: faArrowUp, color: 'text-[#C17F24]' },
+    { label: 'Total Orders', value: '891', change: '+12%', icon: faShoppingBag, color: 'text-blue-400' },
+    { label: 'Total Customers', value: '634', change: '+8%', icon: faUsers, color: 'text-purple-400' },
+    { label: 'Active Products', value: '52', change: '+4', icon: faBox, color: 'text-green-400' },
 ]
 
 export default function AdminDashboard() {
@@ -61,7 +62,7 @@ export default function AdminDashboard() {
                     return (
                         <div key={stat.label} className="bg-[#1A1A1A] rounded-xl p-3 sm:p-4 lg:p-5 border border-white/5">
                             <div className="flex items-center justify-between mb-3">
-                                <Icon className={`w-5 h-5 ${stat.color}`} />
+                                <FontAwesomeIcon icon={stat.icon} className={`w-4 h-4 ${stat.color}`} />
                                 <span className="text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">{stat.change}</span>
                             </div>
                             <p className="text-xl sm:text-2xl font-bold text-white mt-1">{stat.value}</p>

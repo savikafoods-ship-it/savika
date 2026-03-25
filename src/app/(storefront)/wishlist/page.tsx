@@ -2,42 +2,46 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { account, databases } from '@/lib/appwrite/client'
-import { Query } from 'node-appwrite' // Technically appwrite web SDK Query is exported from 'appwrite', but Node works fine. Actually using 'appwrite' is safer.
-import { Heart, SearchX, ShoppingBag } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+    faHeart, 
+    faSearch, 
+    faShoppingBag 
+} from '@fortawesome/free-solid-svg-icons'
 import ProductCard from '@/components/product/ProductCard'
 import type { Product } from '@/types'
 
-// Re-using the appwrite sdk to fetch user's wishlist
 export default function WishlistPage() {
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(true)
+    const supabase = createClient()
 
     useEffect(() => {
         async function fetchWishlist() {
             try {
-                // To fetch wishlist, we would ideally store an array of Product IDs on the user profile
-                // For this demo structure, if localstorage is used or a profile document:
-                const user = await account.get()
-                
-                // Example Fetch: user's profile which contains `wishlistIds`
-                // This assumes `wishlistIds` array exists on `profiles` collection
-                const profileRes = await databases.listDocuments(
-                    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-                    process.env.NEXT_PUBLIC_COL_PROFILES!,
-                    [Query.equal('userId', user.$id)]
-                )
-                
-                const profile = profileRes.documents[0]
-                const ids = profile?.wishlistIds || []
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user) {
+                    setLoading(false)
+                    return
+                }
+
+                // Fetch user profile to get wishlist_ids
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('wishlist_ids')
+                    .eq('id', user.id)
+                    .single()
+
+                const ids = profile?.wishlist_ids || []
 
                 if (ids.length > 0) {
-                    const productsRes = await databases.listDocuments(
-                        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-                        process.env.NEXT_PUBLIC_COL_PRODUCTS!,
-                        [Query.equal('$id', ids)]
-                    )
-                    setProducts(productsRes.documents as any as Product[])
+                    const { data: productsData } = await supabase
+                        .from('products')
+                        .select('*, category:categories(*)')
+                        .in('id', ids)
+                    
+                    setProducts(productsData || [])
                 }
             } catch (err) {
                 console.error("Wishlist fetch error:", err)
@@ -47,7 +51,7 @@ export default function WishlistPage() {
         }
         
         fetchWishlist()
-    }, [])
+    }, [supabase])
 
     return (
         <div className="min-h-screen bg-[#F5F0E8] py-12">
@@ -55,7 +59,7 @@ export default function WishlistPage() {
                 
                 <div className="flex items-center gap-3 mb-8 border-b border-[#e8ddd0] pb-6">
                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
-                        <Heart className="w-6 h-6 text-[#C17F24] fill-[#C17F24]" />
+                        <FontAwesomeIcon icon={faHeart} className="w-6 h-6 text-[#C17F24]" />
                     </div>
                     <div>
                         <h1 className="text-3xl font-extrabold text-[#2E2E2E]">My Wishlist</h1>
@@ -72,21 +76,21 @@ export default function WishlistPage() {
                 ) : products.length === 0 ? (
                     <div className="bg-white rounded-3xl border border-[#e8ddd0] p-12 text-center max-w-2xl mx-auto">
                         <div className="w-24 h-24 bg-[#F9F4EE] rounded-full flex items-center justify-center mx-auto mb-6">
-                            <SearchX className="w-10 h-10 text-[#C17F24]/40" />
+                            <FontAwesomeIcon icon={faSearch} className="w-10 h-10 text-[#C17F24]/40" />
                         </div>
                         <h2 className="text-2xl font-bold text-[#2E2E2E] mb-3">Your wishlist is empty</h2>
                         <p className="text-gray-500 mb-8 max-w-sm mx-auto leading-relaxed">
                             Looking for some inspiration? Explore our premium Indian spices and click the heart icon to save them for later.
                         </p>
                         <Link href="/shop" className="inline-flex items-center justify-center gap-2 bg-[#111] hover:bg-[#C17F24] text-white px-8 py-4 rounded-xl font-bold transition-all hover:scale-[1.02]">
-                            <ShoppingBag className="w-5 h-5" />
+                            <FontAwesomeIcon icon={faShoppingBag} className="w-5 h-5" />
                             Discover Spices
                         </Link>
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
                         {products.map((product) => (
-                            <ProductCard key={product.$id} product={product} />
+                            <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
                 )}

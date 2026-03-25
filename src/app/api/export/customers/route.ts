@@ -1,23 +1,24 @@
-import { createAdminClient } from '@/lib/appwrite/server'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { Query } from 'node-appwrite'
 
 export async function GET() {
     try {
-        const { users } = await createAdminClient()
-        
-        const response = await users.list([
-            Query.orderDesc('$createdAt'),
-            Query.limit(100) // Temporary limit
-        ])
+        const supabase = await createClient()
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(100)
+            
+        if (error) throw error
         
         const csv = [
             ['Name', 'Email', 'Mobile', 'Joined'].join(','),
-            ...response.users.map(u => [
-                u.name || '', 
+            ...data.map(u => [
+                u.full_name || '', 
                 u.email || '', 
                 u.phone || '',
-                u.$createdAt
+                u.created_at
             ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
         ].join('\n')
 

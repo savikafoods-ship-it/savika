@@ -1,7 +1,7 @@
-import { createSessionClient, COL_COUPONS, DB_ID } from '@/lib/appwrite/server'
-import { Query } from 'node-appwrite'
+import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Ticket, Plus } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faTicket, faPlus } from '@fortawesome/free-solid-svg-icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,18 +9,21 @@ export default async function AdminCouponsPage() {
     let coupons: any[] = []
 
     try {
-        const { account, databases } = await createSessionClient()
-        await account.get()
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) redirect('/admin/login')
         
-        const res = await databases.listDocuments(
-            DB_ID,
-            COL_COUPONS,
-            [Query.orderDesc('$createdAt'), Query.limit(50)]
-        )
-        coupons = res.documents
-    } catch {
-        // Just empty if error or redirect
-        redirect('/admin/login')
+        const { data, error } = await supabase
+            .from('coupons')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(50)
+            
+        if (error) throw error
+        coupons = data || []
+    } catch (err) {
+        console.error('Error fetching coupons:', err)
+        // Fallback
     }
 
     return (
@@ -31,7 +34,7 @@ export default async function AdminCouponsPage() {
                     <p className="text-[#a1a1aa] text-sm mt-1">Manage promotional codes and cart rules.</p>
                 </div>
                 <button className="inline-flex items-center gap-2 bg-[#C17F24] hover:bg-[#D4A855] text-white px-5 py-2.5 rounded-lg font-semibold transition-colors w-fit">
-                    <Plus className="w-5 h-5" /> Create Coupon
+                    <FontAwesomeIcon icon={faPlus} className="w-4 h-4" /> Create Coupon
                 </button>
             </div>
 
@@ -50,12 +53,12 @@ export default async function AdminCouponsPage() {
                         {coupons.length === 0 ? (
                             <tr>
                                 <td colSpan={5} className="px-6 py-12 text-center text-[#a1a1aa]">
-                                    <Ticket className="w-8 h-8 mx-auto mb-3 opacity-20" />
-                                    No coupons found. Create your first discount code!
+                                    <FontAwesomeIcon icon={faTicket} className="w-8 h-8 mx-auto mb-3 opacity-20" />
+                                    <p>No coupons found. Create your first discount code!</p>
                                 </td>
                             </tr>
                         ) : coupons.map((coupon) => (
-                            <tr key={coupon.$id} className="hover:bg-[#27272a]/30 transition-colors">
+                            <tr key={coupon.id} className="hover:bg-[#27272a]/30 transition-colors">
                                 <td className="px-6 py-4 font-mono font-bold text-white">
                                     {coupon.code}
                                 </td>
@@ -63,15 +66,15 @@ export default async function AdminCouponsPage() {
                                     {coupon.type === 'percentage' ? `${coupon.value}%` : `₹${coupon.value}`} off
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${coupon.isActive ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-500'}`}>
-                                        {coupon.isActive ? 'Active' : 'Inactive'}
+                                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${coupon.is_active ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-500'}`}>
+                                        {coupon.is_active ? 'Active' : 'Inactive'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-[#a1a1aa]">
-                                    {coupon.expiryDate ? new Date(coupon.expiryDate).toLocaleDateString('en-IN') : 'Never'}
+                                    {coupon.expiry_date ? new Date(coupon.expiry_date).toLocaleDateString('en-IN') : 'Never'}
                                 </td>
                                 <td className="px-6 py-4 text-right text-[#a1a1aa]">
-                                    {coupon.usageCount || 0} / {coupon.maxUses || '∞'}
+                                    {coupon.usage_count || 0} / {coupon.max_uses || '∞'}
                                 </td>
                             </tr>
                         ))}

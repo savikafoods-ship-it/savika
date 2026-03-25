@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ShoppingBag, Heart, Truck, Shield, RotateCcw } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faShoppingBag, faHeart, faTruck, faShieldAlt, faRotateLeft } from '@fortawesome/free-solid-svg-icons'
 import { useCartStore } from '@/store/cartStore'
 import type { Product } from '@/types'
 
@@ -19,15 +20,15 @@ export default function ProductCommercePanel({ productData }: { productData: any
         setAdding(true)
         
         const cartProduct: Product = {
-            $id: productData.slug,
+            id: productData.id || productData.slug, // Use real ID if available, otherwise slug for now
             name: productData.name,
             slug: productData.slug,
             price: currentSalePrice ?? currentPrice,
-            comparePrice: currentSalePrice ? currentPrice : undefined,
+            compare_price: currentSalePrice ? currentPrice : undefined,
             stock: productData.stock,
-            isActive: true,
-            categoryId: productData.category.slug,
-            imageIds: []
+            is_active: true,
+            category_id: productData.category?.id || productData.category?.slug,
+            image_urls: productData.image_urls || [productData.image]
         }
         
         addItem(cartProduct, 1, selectedVariant.label) 
@@ -88,14 +89,14 @@ export default function ProductCommercePanel({ productData }: { productData: any
                     disabled={productData.stock === 0}
                     className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#C17F24]/30 ${adding ? 'bg-green-500 text-white' : 'bg-[#C17F24] hover:bg-[#8B5E16] text-white'}`}
                 >
-                    <ShoppingBag className="w-5 h-5" />
+                    <FontAwesomeIcon icon={faShoppingBag} className="w-5 h-5" />
                     {adding ? 'Added to Cart!' : 'Add to Cart'}
                 </button>
                 <button 
                     className="flex items-center justify-center gap-2 border-2 border-[#C17F24] text-[#C17F24] hover:bg-[#C17F24] hover:text-white px-5 py-4 rounded-2xl font-bold text-base transition-all duration-300"
                     onClick={() => alert(`Added ${productData.name} to wishlist!`)}
                 >
-                    <Heart className="w-5 h-5" />
+                    <FontAwesomeIcon icon={faHeart} className="w-5 h-5" />
                     Wishlist
                 </button>
             </div>
@@ -103,31 +104,26 @@ export default function ProductCommercePanel({ productData }: { productData: any
             {/* Delivery estimate */}
             <div className="bg-white rounded-2xl border border-[#e8ddd0] p-4 space-y-3">
                 <div className="flex items-center gap-3">
-                    <Truck className="w-5 h-5 text-[#C17F24]" />
+                    <FontAwesomeIcon icon={faTruck} className="w-5 h-5 text-[#C17F24]" />
                     <div>
                         <p className="text-sm font-semibold text-[#2E2E2E]">Free delivery on orders ₹599+</p>
                         <p className="text-xs text-gray-500">Delivered in 3–7 business days across India</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <RotateCcw className="w-5 h-5 text-[#C17F24]" />
+                    <FontAwesomeIcon icon={faRotateLeft} className="w-5 h-5 text-[#C17F24]" />
                     <div>
                         <p className="text-sm font-semibold text-[#2E2E2E]">7-Day Easy Returns</p>
                         <p className="text-xs text-gray-500">Not satisfied? Return hassle-free.</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Shield className="w-5 h-5 text-[#C17F24]" />
+                    <FontAwesomeIcon icon={faShieldAlt} className="w-5 h-5 text-[#C17F24]" />
                     <div>
                         <p className="text-sm font-semibold text-[#2E2E2E]">100% Authentic & FSSAI Certified</p>
                         <p className="text-xs text-gray-500">Tested for purity, adulteration & pesticides</p>
                     </div>
                 </div>
-            </div>
-
-            {/* Hero Intro (SEO text) */}
-            <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed">
-                <p>{productData.heroIntro}</p>
             </div>
         </div>
     )

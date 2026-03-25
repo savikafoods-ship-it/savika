@@ -1,39 +1,42 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createSessionClient } from '@/lib/appwrite/server'
-import { Query } from 'node-appwrite'
-import { Package, ArrowRight, Clock, CheckCircle2, RotateCcw, Truck } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+    faBox, 
+    faArrowRight, 
+    faClock, 
+    faCheckCircle, 
+    faSync, 
+    faTruck, 
+    faTimesCircle 
+} from '@fortawesome/free-solid-svg-icons'
 
 // Map status to visual configs
-const STATUS_CONFIG: Record<string, { color: string, icon: React.FC<any>, label: string }> = {
-    pending: { color: 'text-amber-500 bg-amber-50', icon: Clock, label: 'Payment Pending' },
-    processing: { color: 'text-blue-500 bg-blue-50', icon: RotateCcw, label: 'Processing' },
-    shipped: { color: 'text-indigo-500 bg-indigo-50', icon: Truck, label: 'Shipped' },
-    delivered: { color: 'text-green-600 bg-green-50', icon: CheckCircle2, label: 'Delivered' },
-    cancelled: { color: 'text-red-500 bg-red-50', icon: RotateCcw, label: 'Cancelled' }
+const STATUS_CONFIG: Record<string, { color: string, icon: any, label: string }> = {
+    pending: { color: 'text-amber-500 bg-amber-50', icon: faClock, label: 'Payment Pending' },
+    processing: { color: 'text-blue-500 bg-blue-50', icon: faSync, label: 'Processing' },
+    shipped: { color: 'text-indigo-500 bg-indigo-50', icon: faTruck, label: 'Shipped' },
+    delivered: { color: 'text-green-600 bg-green-50', icon: faCheckCircle, label: 'Delivered' },
+    cancelled: { color: 'text-red-500 bg-red-50', icon: faTimesCircle, label: 'Cancelled' }
 }
 
 export default async function OrdersPage() {
-    let user = null
-    let orders: any[] = []
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    try {
-        const { account, databases } = await createSessionClient()
-        user = await account.get()
-
-        const response = await databases.listDocuments(
-            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-            process.env.NEXT_PUBLIC_APPWRITE_ORDERS_COLLECTION_ID!,
-            [
-                Query.equal('userId', user.$id),
-                Query.orderDesc('$createdAt'),
-                Query.limit(20)
-            ]
-        )
-        orders = response.documents
-    } catch {
+    if (!user) {
         redirect('/auth/login')
     }
+
+    const { data: orders } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+
+    const orderList = orders || []
 
     return (
         <div className="min-h-screen bg-[#F5F0E8] py-12">
@@ -41,15 +44,15 @@ export default async function OrdersPage() {
                 
                 <div className="flex items-center gap-3 mb-8">
                     <Link href="/account" className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-[#e8ddd0] hover:bg-gray-50 transition-colors">
-                        <ArrowRight className="w-5 h-5 text-[#2E2E2E] rotate-180" />
+                        <FontAwesomeIcon icon={faArrowRight} className="w-5 h-5 text-[#2E2E2E] rotate-180" />
                     </Link>
                     <h1 className="text-3xl font-extrabold text-[#2E2E2E]">My Orders</h1>
                 </div>
 
-                {orders.length === 0 ? (
+                {orderList.length === 0 ? (
                     <div className="bg-white rounded-3xl border border-[#e8ddd0] p-12 text-center">
                         <div className="w-20 h-20 bg-[#F9F4EE] rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Package className="w-10 h-10 text-[#C17F24]/50" />
+                            <FontAwesomeIcon icon={faBox} className="w-10 h-10 text-[#C17F24]/50" />
                         </div>
                         <h2 className="text-xl font-bold text-[#2E2E2E] mb-2">No orders yet</h2>
                         <p className="text-gray-500 mb-8 max-w-sm mx-auto">Looks like you haven&apos;t placed any orders with us yet. Ready to start your spice journey?</p>
@@ -59,27 +62,26 @@ export default async function OrdersPage() {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {orders.map((order) => {
+                        {orderList.map((order) => {
                             const status = STATUS_CONFIG[order.status] || STATUS_CONFIG.processing
-                            const StatusIcon = status.icon
                             
                             return (
                                 <Link 
-                                    key={order.$id} 
-                                    href={`/orders/${order.$id}`}
+                                    key={order.id} 
+                                    href={`/orders/${order.id}`}
                                     className="block bg-white rounded-2xl border border-[#e8ddd0] p-6 hover:shadow-md hover:border-[#C17F24]/50 transition-all group"
                                 >
                                     <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
                                         <div>
                                             <p className="text-sm font-semibold text-gray-500 mb-1">
-                                                Order #{order.$id.slice(-8).toUpperCase()}
+                                                Order #{order.id.slice(-8).toUpperCase()}
                                             </p>
                                             <p className="text-xs text-gray-400">
-                                                Placed on {new Date(order.$createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                Placed on {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                             </p>
                                         </div>
                                         <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold w-fit ${status.color}`}>
-                                            <StatusIcon className="w-3.5 h-3.5" />
+                                            <FontAwesomeIcon icon={status.icon} className="w-3.5 h-3.5" />
                                             {status.label}
                                         </div>
                                     </div>
@@ -90,7 +92,7 @@ export default async function OrdersPage() {
                                             <p className="text-lg font-extrabold text-[#2E2E2E]">₹{order.total}</p>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm font-bold text-[#C17F24] group-hover:translate-x-1 transition-transform">
-                                            View Details <ArrowRight className="w-4 h-4" />
+                                            View Details <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />
                                         </div>
                                     </div>
                                 </Link>

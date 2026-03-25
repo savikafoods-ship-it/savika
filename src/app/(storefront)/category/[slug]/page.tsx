@@ -1,14 +1,28 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ChevronRight, Flame as PepperHot, ArrowRight, PackageOpen, Store, Sprout, Trophy, Truck, RotateCcw, CircleHelp, ChevronDown } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { 
+    faChevronRight, 
+    faFire, 
+    faArrowRight, 
+    faBoxOpen, 
+    faStore, 
+    faLeaf, 
+    faTrophy, 
+    faTruck, 
+    faRotateLeft, 
+    faQuestionCircle, 
+    faChevronDown 
+} from '@fortawesome/free-solid-svg-icons'
 import ProductCard from '@/components/product/ProductCard'
+import { createClient } from '@/lib/supabase/server'
 import type { Product } from '@/types'
 
 // ─── ISR: revalidate every hour ─────────────────────────────────────────
 export const revalidate = 3600
 
-// ─── Category definitions ────────────────────────────────────────────────
+// ─── Category definitions (SEO Metadata) ──────────────────────────────────
 interface CategoryMeta {
     slug: string
     name: string
@@ -37,7 +51,6 @@ const CATEGORIES: Record<string, CategoryMeta> = {
             { q: 'Do your whole spices have any preservatives?', a: 'None. All Savika whole spices are packed as-is - cleaned, sorted, and sealed. No preservatives, no artificial colour, no anti-caking agents.' },
         ],
     },
-    // ...other categories would go here, omitting them for brevity but keeping structure
     'ground-powdered': {
         slug: 'ground-powdered',
         name: 'Ground & Powdered Spices',
@@ -94,23 +107,6 @@ const CATEGORIES: Record<string, CategoryMeta> = {
     },
 }
 
-// ─── Mock products per category - replace with Appwrite fetch ───────────
-const CATEGORY_PRODUCTS: Record<string, Product[]> = {
-    'whole-spices': [
-        { $id: '1', slug: 'kashmiri-mirch-whole', name: 'Kashmiri Mirch Whole', description: 'Hand-picked from the valleys of Kashmir - vibrant red colour, mild heat.', price: 199, comparePrice: 299, stock: 50, categoryId: 'cat1', imageIds: [], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat1', slug: 'whole-spices', name: 'Whole Spices', imageId: '', sortOrder: 0, $createdAt: '', $updatedAt: '' } },
-    ],
-    'ground-powdered': [
-        { $id: '2', slug: 'premium-turmeric-powder', name: 'Premium Turmeric Powder', description: 'Single-origin Lakadong turmeric, freshly milled for maximum curcumin.', price: 249, stock: 80, categoryId: 'cat2', imageIds: [], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' } },
-    ],
-    'blends-masalas': [
-        { $id: '3', slug: 'garam-masala-artisan', name: 'Artisan Garam Masala', description: 'Complex 14-spice blend, slow-roasted and stone-ground.', price: 349, comparePrice: 399, stock: 35, categoryId: 'cat3', imageIds: [], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' } },
-    ],
-    'exotics-rare': [
-        { $id: '8', slug: 'kashmiri-saffron', name: 'Kashmiri Saffron Grade A', description: 'Hand-harvested from Pampore fields.', price: 1299, stock: 15, categoryId: 'cat5', imageIds: [], isActive: true, $createdAt: '', $updatedAt: '', category: { $id: 'cat5', slug: 'exotics-rare', name: 'Exotics & Rare', imageId: '', sortOrder: 4, $createdAt: '', $updatedAt: '' } },
-    ],
-    'gift-packs': [],
-}
-
 type Props = { params: Promise<{ slug: string }> }
 
 // ─── generateStaticParams ──────────────────────────────────────────────
@@ -153,7 +149,30 @@ export default async function CategoryPage({ params }: Props) {
     const cat = CATEGORIES[slug]
     if (!cat) notFound()
 
-    const products = CATEGORY_PRODUCTS[slug] ?? []
+    const supabase = await createClient()
+    
+    // Fetch Category from DB
+    const { data: categoryData } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('slug', slug)
+        .single()
+
+    let products: Product[] = []
+    
+    if (categoryData) {
+        // Fetch Products for this category
+        const { data: productsData } = await supabase
+            .from('products')
+            .select('*, category:categories(*)')
+            .eq('category_id', categoryData.id)
+            .eq('is_active', true)
+            .order('created_at', { ascending: false })
+
+        if (productsData) {
+            products = productsData as unknown as Product[]
+        }
+    }
 
     const breadcrumbSchema = {
         '@context': 'https://schema.org',
@@ -196,9 +215,9 @@ export default async function CategoryPage({ params }: Props) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-gray-400">
                         <Link href="/" className="hover:text-[#C17F24] transition-colors">Home</Link>
-                        <ChevronRight className="w-2 h-2" />
+                        <FontAwesomeIcon icon={faChevronRight} className="w-2 h-2" />
                         <Link href="/shop" className="hover:text-[#C17F24] transition-colors">Shop</Link>
-                        <ChevronRight className="w-2 h-2" />
+                        <FontAwesomeIcon icon={faChevronRight} className="w-2 h-2" />
                         <span className="text-[#C17F24] font-medium">{cat.name}</span>
                     </nav>
                 </div>
@@ -209,7 +228,7 @@ export default async function CategoryPage({ params }: Props) {
                 {/* ── Hero Header ── */}
                 <section className="max-w-3xl">
                     <p className="text-xs font-bold text-[#C17F24] uppercase tracking-widest mb-2 flex items-center gap-1">
-                        <PepperHot className="w-3 h-3" /> Savika - {cat.name}
+                        <FontAwesomeIcon icon={faFire} className="w-3 h-3" /> Savika - {cat.name}
                     </p>
                     <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2E2E2E] leading-tight mb-4">
                         {cat.headline}
@@ -244,22 +263,22 @@ export default async function CategoryPage({ params }: Props) {
                             {products.length > 0 ? `${products.length} Products` : 'Products'}
                         </h2>
                         <Link href="/shop" className="text-sm text-[#C17F24] font-semibold hover:underline flex items-center gap-1">
-                            View All <ArrowRight className="w-3 h-3" />
+                            View All <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3" />
                         </Link>
                     </div>
 
                     {products.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
                             {products.map((product) => (
-                                <ProductCard key={product.$id} product={product} />
+                                <ProductCard key={product.id} product={product} />
                             ))}
                         </div>
                     ) : (
                         <div className="text-center py-20 bg-white rounded-3xl border border-[#e8ddd0]">
-                            <PackageOpen className="w-10 h-10 text-[#C17F24]/40 mb-4 mx-auto" />
+                            <FontAwesomeIcon icon={faBoxOpen} className="w-10 h-10 text-[#C17F24]/40 mb-4 mx-auto" />
                             <p className="text-gray-500 font-medium">Products coming soon.</p>
                             <Link href="/shop" className="mt-4 inline-flex items-center justify-center gap-2 text-[#C17F24] font-semibold text-sm hover:underline">
-                                <Store className="w-4 h-4" /> Browse all spices
+                                <FontAwesomeIcon icon={faStore} className="w-4 h-4" /> Browse all spices
                             </Link>
                         </div>
                     )}
@@ -270,16 +289,16 @@ export default async function CategoryPage({ params }: Props) {
                     <h2 className="text-lg font-extrabold text-white mb-6 text-center">Why Buy From Savika?</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
                         {[
-                            { icon: Sprout, title: '100% Natural', sub: 'No additives or preservatives' },
-                            { icon: Trophy, title: 'FSSAI Certified', sub: 'Safety & quality tested' },
-                            { icon: Truck, title: 'Pan-India Delivery', sub: '3-7 business days' },
-                            { icon: RotateCcw, title: 'Easy Returns', sub: '7-day hassle-free' },
+                            { icon: faLeaf, title: '100% Natural', sub: 'No additives or preservatives' },
+                            { icon: faTrophy, title: 'FSSAI Certified', sub: 'Safety & quality tested' },
+                            { icon: faTruck, title: 'Pan-India Delivery', sub: '3-7 business days' },
+                            { icon: faRotateLeft, title: 'Easy Returns', sub: '7-day hassle-free' },
                         ].map((b) => {
-                            const Icon = b.icon
+                            const icon = b.icon
                             return (
                                 <div key={b.title} className="flex flex-col items-center gap-2">
                                     <div className="w-11 h-11 rounded-full bg-[#C17F24]/20 flex items-center justify-center">
-                                        <Icon className="w-5 h-5 text-[#C17F24]" />
+                                        <FontAwesomeIcon icon={icon} className="w-5 h-5 text-[#C17F24]" />
                                     </div>
                                     <p className="text-xs font-bold text-white">{b.title}</p>
                                     <p className="text-[11px] text-gray-400">{b.sub}</p>
@@ -293,7 +312,7 @@ export default async function CategoryPage({ params }: Props) {
                 <section className="max-w-3xl">
                     <h2 className="text-2xl font-extrabold text-[#2E2E2E] mb-6 flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#C17F24]/20 flex items-center justify-center">
-                            <CircleHelp className="w-4 h-4 text-[#C17F24]" />
+                            <FontAwesomeIcon icon={faQuestionCircle} className="w-4 h-4 text-[#C17F24]" />
                         </div>
                         Frequently Asked Questions
                     </h2>
@@ -305,7 +324,7 @@ export default async function CategoryPage({ params }: Props) {
                             >
                                 <summary className="flex items-center justify-between p-5 cursor-pointer list-none font-semibold text-[#2E2E2E] hover:bg-[#F9F4EE] transition-colors">
                                     <span>{faq.q}</span>
-                                    <ChevronDown className="w-4 h-4 text-[#C17F24] group-open:rotate-180 transition-transform" />
+                                    <FontAwesomeIcon icon={faChevronDown} className="w-3 h-3 text-[#C17F24] group-open:rotate-180 transition-transform" />
                                 </summary>
                                 <div className="px-5 pb-5 pt-4 text-sm text-gray-600 leading-relaxed border-t border-[#e8ddd0]">
                                     {faq.a}
@@ -327,7 +346,7 @@ export default async function CategoryPage({ params }: Props) {
                                     href={`/category/${c.slug}`}
                                     className="flex items-center gap-2 bg-white border border-[#e8ddd0] hover:border-[#C17F24] text-[#2E2E2E] hover:text-[#C17F24] font-semibold px-4 py-2.5 rounded-full text-sm transition-all"
                                 >
-                                    <ArrowRight className="w-4 h-4 text-[#C17F24]" />
+                                    <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4 text-[#C17F24]" />
                                     {c.name}
                                 </Link>
                             ))}
@@ -335,7 +354,7 @@ export default async function CategoryPage({ params }: Props) {
                             href="/shop"
                             className="flex items-center gap-2 bg-[#C17F24]/10 border border-[#C17F24]/30 hover:bg-[#C17F24] hover:text-white text-[#C17F24] font-semibold px-4 py-2.5 rounded-full text-sm transition-all"
                         >
-                            <Store className="w-4 h-4" />
+                            <FontAwesomeIcon icon={faStore} className="w-4 h-4" />
                             Complete Spice Collection
                         </Link>
                     </div>

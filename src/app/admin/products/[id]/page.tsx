@@ -1,4 +1,4 @@
-import { createSessionClient } from '@/lib/appwrite/server'
+import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import ProductForm from '@/components/admin/ProductForm'
 
@@ -7,14 +7,17 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     let product = null
 
     try {
-        const { databases } = await createSessionClient()
-        product = await databases.getDocument(
-            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-            process.env.NEXT_PUBLIC_COL_PRODUCTS!,
-            id
-        )
+        const supabase = await createClient()
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', id)
+            .single()
+
+        if (error || !data) throw error
+        product = data
     } catch (error: any) {
-        if (error.code === 404) notFound()
+        console.error('Error fetching product:', error)
         redirect('/admin/products')
     }
 

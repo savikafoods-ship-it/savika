@@ -31,8 +31,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={poppins.variable}>
       <head>
-        <link rel="preconnect" href="https://cloud.appwrite.io" />
-        <link rel="dns-prefetch" href="https://cloud.appwrite.io" />
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link
           rel="stylesheet"

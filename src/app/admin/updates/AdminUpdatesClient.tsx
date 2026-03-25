@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Save, Eye, Flame, Star, Megaphone, Loader2, Check } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSave, faEye, faFire, faStar, faBullhorn, faSpinner, faCheck } from '@fortawesome/free-solid-svg-icons'
 
 interface PromoCard {
   badge: string
@@ -94,11 +95,11 @@ function SaveButton({ onClick, saving, saved }: {
                  disabled:opacity-60 disabled:cursor-not-allowed transition-all"
     >
       {saving ? (
-        <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
+        <><FontAwesomeIcon icon={faSpinner} className="w-4 h-4 animate-spin" /> Saving...</>
       ) : saved ? (
-        <><Check className="w-4 h-4" /> Saved!</>
+        <><FontAwesomeIcon icon={faCheck} className="w-4 h-4" /> Saved!</>
       ) : (
-        <><Save className="w-4 h-4" /> Save Changes</>
+        <><FontAwesomeIcon icon={faSave} className="w-4 h-4" /> Save Changes</>
       )}
     </button>
   )
@@ -140,8 +141,8 @@ function PromoCardEditor({
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-800">
         <div className="flex items-center gap-2.5">
           {isCard1
-            ? <Flame className="w-4 h-4 text-amber-500" />
-            : <Star className="w-4 h-4 text-amber-400" />
+            ? <FontAwesomeIcon icon={faFire} className="w-4 h-4 text-amber-500" />
+            : <FontAwesomeIcon icon={faStar} className="w-4 h-4 text-amber-400" />
           }
           <h2 className="text-white font-[600] text-base">{title}</h2>
         </div>
@@ -160,15 +161,15 @@ function PromoCardEditor({
         </div>
         <div>
           <div className="flex items-center gap-1.5 mb-3">
-            <Eye className="w-3.5 h-3.5 text-gray-500" />
+            <FontAwesomeIcon icon={faEye} className="w-3.5 h-3.5 text-gray-500" />
             <span className="text-xs text-gray-500 font-[500] uppercase tracking-wider">Live Preview</span>
           </div>
           <div className={`relative rounded-2xl bg-gradient-to-br ${previewBg} p-6 overflow-hidden min-h-[180px]`}>
             <div className="absolute right-6 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-white/10 flex items-center justify-center">
-              {isCard1 ? <Flame className="w-8 h-8 text-white/40" /> : <Star className="w-8 h-8 text-white/40" />}
+              {isCard1 ? <FontAwesomeIcon icon={faFire} className="w-8 h-8 text-white/40" /> : <FontAwesomeIcon icon={faStar} className="w-8 h-8 text-white/40" />}
             </div>
             <span className="inline-flex items-center gap-1.5 bg-gray-950/50 text-white text-xs font-[600] px-3 py-1 rounded-full mb-3">
-              {isCard1 ? <Flame className="w-3 h-3 text-amber-400" /> : <Star className="w-3 h-3 text-amber-300" />}
+              {isCard1 ? <FontAwesomeIcon icon={faFire} className="w-3 h-3 text-amber-400" /> : <FontAwesomeIcon icon={faStar} className="w-3 h-3 text-amber-300" />}
               {data.badge || 'Badge'}
             </span>
             <div className="text-white font-[800] text-3xl mb-1">{data.headline || 'Headline'}</div>
@@ -207,7 +208,7 @@ function AnnouncementEditor({ data, onChange }: {
     <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
       <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-800">
         <div className="flex items-center gap-2.5">
-          <Megaphone className="w-4 h-4 text-amber-500" />
+          <FontAwesomeIcon icon={faBullhorn} className="w-4 h-4 text-amber-500" />
           <h2 className="text-white font-[600] text-base">Announcement Bar</h2>
         </div>
         <SaveButton onClick={handleSave} saving={saving} saved={saved} />
@@ -222,7 +223,7 @@ function AnnouncementEditor({ data, onChange }: {
         />
         <div>
           <div className="flex items-center gap-1.5 mb-2">
-            <Eye className="w-3.5 h-3.5 text-gray-500" />
+            <FontAwesomeIcon icon={faEye} className="w-3.5 h-3.5 text-gray-500" />
             <span className="text-xs text-gray-500 font-[500] uppercase tracking-wider">Preview</span>
           </div>
           <div className="bg-amber-700 text-white text-sm font-[500] text-center py-2.5 px-4 rounded-lg truncate">
@@ -259,7 +260,7 @@ export default function AdminUpdatesClient() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 text-amber-600 animate-spin" />
+        <FontAwesomeIcon icon={faSpinner} className="w-8 h-8 text-amber-600 animate-spin" />
       </div>
     )
   }

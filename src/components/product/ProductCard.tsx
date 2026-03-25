@@ -7,7 +7,7 @@ import { Heart, ShoppingCart, Check, Star } from 'lucide-react'
 import type { Product } from '@/types'
 import { formatCurrency, getDiscountPercent } from '@/lib/utils'
 import { useCartStore } from '@/store/cartStore'
-import { getProductImageUrl } from '@/lib/appwrite/imageUrl'
+import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
 interface ProductCardProps {
     product: Product
@@ -27,16 +27,16 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
         setTimeout(() => setAdding(false), 900)
     }
 
-    const discountPercent = product.comparePrice ? getDiscountPercent(product.comparePrice, product.price) : 0
+    const discountPercent = product.compare_price ? getDiscountPercent(product.compare_price, product.price) : 0
 
     return (
         <div className={`product-card ${className}`}>
             <Link href={`/product/${product.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
                 {/* Image */}
                 <div className="product-card-img">
-                    {product.imageIds?.[0] && !imgError ? (
+                    {product.image_urls?.[0] && !imgError ? (
                         <Image
-                            src={product.imageIds[0].startsWith('/') ? product.imageIds[0] : getProductImageUrl(product.imageIds[0], 400, 80)}
+                            src={product.image_urls[0].startsWith('/') ? product.image_urls[0] : getProductImageUrl(product.image_urls[0])}
                             alt={product.name}
                             fill
                             className="object-contain"
@@ -57,7 +57,7 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
                             padding: '2px 7px', borderRadius: '9999px'
                         }}>-{discountPercent}%</span>
                     )}
-                    {product.isActive && !discountPercent && (
+                    {product.is_active && !discountPercent && (
                         <span style={{
                             position: 'absolute', top: '0.625rem', left: '0.625rem', zIndex: 10,
                             background: '#C17F24', color: '#fff', fontSize: '10px', fontWeight: 700,
@@ -103,9 +103,9 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
                         <span style={{ fontSize: '1rem', fontWeight: 700, color: '#C17F24' }}>
                             {formatCurrency(product.price)}
                         </span>
-                        {product.comparePrice && (
+                        {product.compare_price && (
                             <span style={{ fontSize: '0.8125rem', textDecoration: 'line-through', color: '#aaa' }}>
-                                {formatCurrency(product.comparePrice)}
+                                {formatCurrency(product.compare_price)}
                             </span>
                         )}
                     </div>

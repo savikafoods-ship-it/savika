@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { X, Search, Loader2 } from 'lucide-react'
-import { databases } from '@/lib/appwrite/client'
-import { Query } from 'appwrite'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faXmark, faSearch, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { createClient } from '@/lib/supabase/client'
 
 interface SearchModalProps {
     isOpen: boolean
@@ -17,6 +17,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     const [loading, setLoading] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
+    const supabase = createClient()
 
     useEffect(() => {
         if (isOpen) {
@@ -39,20 +40,15 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         const debounceTimer = setTimeout(async () => {
             setLoading(true)
             try {
-                // Using Appwrite search query with better matching
-                const res = await databases.listDocuments(
-                    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-                    process.env.NEXT_PUBLIC_COL_PRODUCTS!,
-                    [
-                        Query.or([
-                            Query.contains('name', query),
-                            Query.contains('description', query),
-                            Query.search('name', query)
-                        ]),
-                        Query.limit(8)
-                    ]
-                )
-                setResults(res.documents)
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('id, name, description, price, slug')
+                    .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+                    .eq('is_active', true)
+                    .limit(8)
+
+                if (error) throw error
+                setResults(data || [])
             } catch (err) {
                 console.error('Search error:', err)
             } finally {
@@ -61,7 +57,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         }, 300)
 
         return () => clearTimeout(debounceTimer)
-    }, [query])
+    }, [query, supabase])
 
     if (!isOpen) return null
 
@@ -72,12 +68,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     onClick={onClose}
                     className="absolute -top-12 right-0 bg-white/50 hover:bg-white text-[#2E2E2E] p-2 rounded-full transition-colors"
                 >
-                    <X className="w-5 h-5" />
+                    <FontAwesomeIcon icon={faXmark} className="w-5 h-5" />
                 </button>
 
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-[#e8ddd0]">
                     <div className="p-4 flex items-center gap-3 border-b border-[#e8ddd0]">
-                        <Search className="w-6 h-6 text-gray-400" />
+                        <FontAwesomeIcon icon={faSearch} className="w-5 h-5 text-gray-400" />
                         <input 
                             ref={inputRef}
                             type="text"
@@ -86,7 +82,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                             placeholder="Search for spices, blends, categories..."
                             className="flex-1 bg-transparent border-none outline-none text-lg text-[#2E2E2E] placeholder:text-gray-400"
                         />
-                        {loading && <Loader2 className="w-5 h-5 animate-spin text-[#C17F24]" />}
+                        {loading && <FontAwesomeIcon icon={faSpinner} className="w-5 h-5 animate-spin text-[#C17F24]" />}
                     </div>
 
                     {query.length >= 2 && !loading && results.length === 0 && (
@@ -99,7 +95,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         <div className="p-2">
                             {results.map((product) => (
                                 <button
-                                    key={product.$id}
+                                    key={product.id}
                                     onClick={() => {
                                         onClose()
                                         router.push(`/product/${product.slug}`)

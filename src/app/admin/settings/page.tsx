@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Save, Loader2, Store, CreditCard, Truck, Bell } from 'lucide-react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSave, faSpinner, faStore, faCreditCard, faTruck, faBell } from '@fortawesome/free-solid-svg-icons'
 
 export default function AdminSettingsPage() {
     const [loading, setLoading] = useState(false)
@@ -24,7 +25,7 @@ export default function AdminSettingsPage() {
                 {/* Store Profile */}
                 <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
                     <div className="border-b border-[#27272a] p-5 flex items-center gap-3 bg-[#27272a]/30">
-                        <Store className="w-5 h-5 text-[#C17F24]" />
+                        <FontAwesomeIcon icon={faStore} className="w-5 h-5 text-[#C17F24]" />
                         <h2 className="font-semibold text-white">Store Profile</h2>
                     </div>
                     <div className="p-6 space-y-4">
@@ -48,7 +49,7 @@ export default function AdminSettingsPage() {
                 {/* Shipping Configuration */}
                 <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
                     <div className="border-b border-[#27272a] p-5 flex items-center gap-3 bg-[#27272a]/30">
-                        <Truck className="w-5 h-5 text-[#C17F24]" />
+                        <FontAwesomeIcon icon={faTruck} className="w-5 h-5 text-[#C17F24]" />
                         <h2 className="font-semibold text-white">Shipping & Fulfilment</h2>
                     </div>
                     <div className="p-6 space-y-4">
@@ -68,7 +69,7 @@ export default function AdminSettingsPage() {
                 {/* Taxes */}
                 <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
                     <div className="border-b border-[#27272a] p-5 flex items-center gap-3 bg-[#27272a]/30">
-                        <CreditCard className="w-5 h-5 text-[#C17F24]" />
+                        <FontAwesomeIcon icon={faCreditCard} className="w-5 h-5 text-[#C17F24]" />
                         <h2 className="font-semibold text-white">Taxes & Payment</h2>
                     </div>
                     <div className="p-6 space-y-4">
@@ -96,7 +97,7 @@ export default function AdminSettingsPage() {
                 {/* Notifications */}
                 <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
                     <div className="border-b border-[#27272a] p-5 flex items-center gap-3 bg-[#27272a]/30">
-                        <Bell className="w-5 h-5 text-[#C17F24]" />
+                        <FontAwesomeIcon icon={faBell} className="w-5 h-5 text-[#C17F24]" />
                         <h2 className="font-semibold text-white">Admin Notifications</h2>
                     </div>
                     <div className="p-6 space-y-4 border-b border-[#27272a] flex items-center justify-between hover:bg-[#27272a]/20 transition-colors">
@@ -117,7 +118,7 @@ export default function AdminSettingsPage() {
                         disabled={loading}
                         className="flex items-center gap-2 bg-[#C17F24] hover:bg-[#D4A855] text-white px-8 py-3 rounded-xl font-bold transition-all disabled:opacity-50"
                     >
-                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                        <FontAwesomeIcon icon={loading ? faSpinner : faSave} className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
                         Save All Settings
                     </button>
                 </div>
