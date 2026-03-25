@@ -27,3 +27,14 @@ export async function createClient() {
     }
   )
 }
+
+/**
+ * Client for static generation (build-time) that doesn't depend on cookies
+ */
+export function createStaticClient() {
+  const { createClient } = require('@supabase/supabase-js')
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}

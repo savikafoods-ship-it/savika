@@ -33,7 +33,7 @@ import {
     faArchive 
 } from '@fortawesome/free-solid-svg-icons'
 import ProductCommercePanel from '@/components/product/ProductCommercePanel'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createStaticClient } from '@/lib/supabase/server'
 import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
 // ─── ISR: revalidate every hour ─────────────────────────────────────────
@@ -358,8 +358,16 @@ const PRODUCT_METADATA: Record<string, any> = {
     }
 };
 
+
 async function getProduct(slug: string) {
-    const supabase = await createClient()
+    // We try to catch scope errors if called incorrectly
+    let supabase;
+    try {
+        supabase = await createClient()
+    } catch {
+        supabase = createStaticClient()
+    }
+    
     const { data: product } = await supabase
         .from('products')
         .select('*, category:categories(*)')
@@ -371,9 +379,9 @@ async function getProduct(slug: string) {
 type Props = { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
-    const supabase = await createClient()
-    const { data: products } = await supabase.from('products').select('slug')
-    return (products || []).map((p) => ({ slug: p.slug }))
+    const supabase = createStaticClient()
+    const { data: products } = await supabase.from('products').select('slug') as { data: { slug: string }[] | null }
+    return (products || []).map((p: { slug: string }) => ({ slug: p.slug }))
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
