@@ -18,6 +18,7 @@ export interface Product {
   id: string
   name: string
   tagline?: string
+  local_name?: string
   slug: string
   description?: string
   price: number
@@ -26,6 +27,10 @@ export interface Product {
   category_id?: string
   category?: Category
   image_urls?: string[]
+  weight_options?: any[]
+  metadata?: any
+  rating?: number
+  review_count?: number
   is_active: boolean
   tags?: string[]
   created_at?: string

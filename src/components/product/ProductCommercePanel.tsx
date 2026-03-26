@@ -7,12 +7,16 @@ import { useCartStore } from '@/store/cartStore'
 import type { Product } from '@/types'
 
 export default function ProductCommercePanel({ productData }: { productData: any }) {
-    const [selectedVariant, setSelectedVariant] = useState(productData.weightOptions[0])
+    const weightOptions = (productData.weightOptions || []).map((opt: any) => 
+        typeof opt === 'string' ? JSON.parse(opt) : opt
+    )
+
+    const [selectedVariant, setSelectedVariant] = useState(weightOptions[0] || { label: '100g', price: productData.price, salePrice: productData.sale_price })
     const [adding, setAdding] = useState(false)
     const { addItem } = useCartStore()
 
-    const currentPrice = selectedVariant.price
-    const currentSalePrice = selectedVariant.salePrice
+    const currentPrice = selectedVariant?.price || productData.price
+    const currentSalePrice = selectedVariant?.salePrice || productData.sale_price
     const savings = currentSalePrice ? currentPrice - currentSalePrice : 0
     const savingsPct = savings > 0 ? Math.round((savings / currentPrice) * 100) : 0
 
@@ -20,7 +24,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
         setAdding(true)
         
         const cartProduct: Product = {
-            id: productData.id || productData.slug, // Use real ID if available, otherwise slug for now
+            id: productData.id || productData.slug,
             name: productData.name,
             slug: productData.slug,
             price: currentSalePrice ?? currentPrice,
@@ -31,7 +35,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
             image_urls: productData.image_urls || [productData.image]
         }
         
-        addItem(cartProduct, 1, selectedVariant.label) 
+        addItem(cartProduct, 1, selectedVariant?.label || '100g') 
         setTimeout(() => setAdding(false), 1000)
     }
 
@@ -43,7 +47,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
                     <span className="text-3xl font-extrabold text-[#2C1A0E]">
                         ₹{currentSalePrice ?? currentPrice}
                     </span>
-                    {currentSalePrice && (
+                    {currentSalePrice && currentSalePrice < currentPrice && (
                         <>
                             <span className="text-xl text-gray-400 line-through">₹{currentPrice}</span>
                             <span className="text-sm bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">
@@ -58,17 +62,17 @@ export default function ProductCommercePanel({ productData }: { productData: any
             <div>
                 <p className="text-sm font-semibold text-[#2E2E2E] mb-2">Select Weight</p>
                 <div className="flex flex-wrap gap-2">
-                    {productData.weightOptions.map((opt: any) => (
+                    {weightOptions.map((opt: any, i: number) => (
                         <button
-                            key={opt.label}
+                            key={i}
                             onClick={() => setSelectedVariant(opt)}
                             className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
-                                selectedVariant.label === opt.label
+                                selectedVariant?.label === opt.label
                                     ? 'border-[#C47F17] bg-[#C47F17] text-white'
                                     : 'border-[#e8ddd0] bg-white text-[#2E2E2E] hover:border-[#C47F17]'
                             }`}
                         >
-                            {opt.label}
+                            {opt.label || opt.weight || '100g'}
                         </button>
                     ))}
                 </div>

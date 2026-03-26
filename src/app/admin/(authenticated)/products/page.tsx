@@ -85,8 +85,8 @@ export default async function AdminProductsPage() {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 bg-[#27272a] rounded-lg overflow-hidden shrink-0 relative">
-                                                {product.images?.[0] ? (
-                                                    <Image src={getProductImageUrl(product.images[0])} alt={product.name} fill className="object-cover" />
+                                                {product.image_urls?.[0] ? (
+                                                    <Image src={getProductImageUrl(product.image_urls[0])} alt={product.name} fill className="object-cover" />
                                                 ) : null}
                                             </div>
                                             <div>
