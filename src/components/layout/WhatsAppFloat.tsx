@@ -1,9 +1,17 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919898176667'
 const WHATSAPP_MESSAGE = encodeURIComponent('Hi, I need help with my Savika Foods order')
 
 export default function WhatsAppFloat() {
+  const pathname = usePathname()
+  
+  // Hide WhatsApp button on admin routes
+  if (pathname?.startsWith('/admin')) return null
+
   return (
     <div className="fixed bottom-6 right-6 z-50 group">
       {/* Tooltip */}

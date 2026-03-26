@@ -4,24 +4,24 @@ import type { Product } from '@/types'
 
 const BESTSELLERS: Product[] = [
     {
-        $id: '5', name: 'Chicken Masala', tagline: 'Perfect Non-Veg Taste', slug: 'chicken-masala',
-        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
-        categoryId: 'cat3', price: 225, stock: 150, isActive: true,
-        imageIds: ['/images/products/biryani-masala.jpg'],
+        id: '5', name: 'Chicken Masala', tagline: 'Perfect Non-Veg Taste', slug: 'chicken-masala',
+        category: { id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', sort_order: 2 },
+        category_id: 'cat3', price: 225, stock: 150, is_active: true,
+        image_urls: ['/images/products/biryani-masala.jpg'],
         description: 'Specially crafted masala blend for chicken curries, tikka, and gravies. Every spice chosen for its role - delivering the perfect non-veg taste every time.'
     },
     {
-        $id: '6', name: 'Meat Masala', tagline: 'Dumdar Flavour', slug: 'meat-masala',
-        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
-        categoryId: 'cat3', price: 245, stock: 120, isActive: true,
-        imageIds: ['/images/products/black-pepper-malabar.jpg'],
+        id: '6', name: 'Meat Masala', tagline: 'Dumdar Flavour', slug: 'meat-masala',
+        category: { id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', sort_order: 2 },
+        category_id: 'cat3', price: 245, stock: 120, is_active: true,
+        image_urls: ['/images/products/black-pepper-malabar.jpg'],
         description: 'A bold, robust blend for mutton, lamb, and beef preparations. Deep, complex, and uncompromisingly dumdar - this masala means serious cooking.'
     },
     {
-        $id: '7', name: 'Deshi Ghati Masala', tagline: 'Special Traditional Blend', slug: 'deshi-ghati-masala',
-        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
-        categoryId: 'cat3', price: 325, stock: 40, isActive: true,
-        imageIds: ['/images/products/star-anise-whole.jpg'],
+        id: '7', name: 'Deshi Ghati Masala', tagline: 'Special Traditional Blend', slug: 'deshi-ghati-masala',
+        category: { id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', sort_order: 2 },
+        category_id: 'cat3', price: 325, stock: 40, is_active: true,
+        image_urls: ['/images/products/star-anise-whole.jpg'],
         description: 'A rare traditional masala from the Ghati region, crafted from a secret family recipe. The special traditional blend that carries decades of culinary heritage in every spoon.'
     },
 ]
@@ -43,7 +43,7 @@ export default function BestSellers() {
                 </div>
                 <div className="grid-products">
                     {BESTSELLERS.map((product) => (
-                        <ProductCard key={product.$id} product={product} />
+                        <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
             </div>

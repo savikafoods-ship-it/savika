@@ -9,6 +9,10 @@ interface PromoCard {
   buttonLabel: string
   buttonUrl: string
   icon: 'flame' | 'star' | 'diamond' | 'jar'
+  imageUrl?: string
+  bgStart?: string
+  bgEnd?: string
+  textColor?: string
 }
 
 const iconMap = {
@@ -27,6 +31,9 @@ const fallbackCards: PromoCard[] = [
     buttonLabel: 'Buy Now',
     buttonUrl: '/shop',
     icon: 'flame',
+    bgStart: '#3B1E08',
+    bgEnd: '#7A3D15',
+    textColor: '#FFFFFF',
   },
   {
     badge: 'Fan Favourite',
@@ -36,6 +43,9 @@ const fallbackCards: PromoCard[] = [
     buttonLabel: 'Buy Now',
     buttonUrl: '/shop?category=exotic',
     icon: 'star',
+    bgStart: '#C17F24',
+    bgEnd: '#E6C672',
+    textColor: '#FFFFFF',
   },
 ]
 
@@ -64,44 +74,46 @@ export default async function SaleBanners() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         {cards.map((card, i) => {
           const Icon = iconMap[card.icon] || Flame
-          const isDark = i === 0
+          const bgStyle = {
+            background: `linear-gradient(to bottom right, ${card.bgStart || (i === 0 ? '#3B1E08' : '#C17F24')}, ${card.bgEnd || (i === 0 ? '#7A3D15' : '#E6C672')})`,
+            color: card.textColor || '#FFFFFF'
+          }
+
           return (
             <div
               key={i}
-              className={`relative rounded-2xl p-6 sm:p-8 overflow-hidden transition-transform duration-300 hover:scale-[1.01] ${
-                isDark
-                  ? 'bg-gradient-to-br from-[#3B1E08] via-[#5A2D10] to-[#7A3D15]'
-                  : 'bg-gradient-to-br from-[#C17F24] via-[#D4A855] to-[#E6C672]'
-              }`}
+              style={bgStyle}
+              className="relative rounded-2xl p-6 sm:p-8 overflow-hidden transition-transform duration-300 hover:scale-[1.01]"
             >
-              {/* Background icon */}
-              <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
-                <Icon className="w-28 h-28 sm:w-32 sm:h-32" />
+              {/* Background Art (Image or Icon) */}
+              <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none scale-110 sm:scale-125">
+                {card.imageUrl ? (
+                  <img src={card.imageUrl} alt="" className="w-28 h-28 sm:w-36 sm:h-36 object-contain" />
+                ) : (
+                  <Icon className="w-28 h-28 sm:w-32 sm:h-32" />
+                )}
               </div>
 
-              {/* Badge */}
-              <span className="inline-flex items-center gap-1.5 bg-black/30 text-white text-xs font-bold px-3 py-1 rounded-full mb-3">
-                <Icon className="w-3 h-3 text-amber-300" />
-                {card.badge}
-              </span>
-
+              {/* Content */}
               <div className="relative z-10">
-                <h3 className="text-white text-4xl sm:text-5xl font-[800] leading-none mb-1">
+                {/* Badge */}
+                <span className="inline-flex items-center gap-1.5 bg-black/20 backdrop-blur-sm text-white text-xs font-bold px-3 py-1 rounded-full mb-3">
+                  <Icon className="w-3 h-3" style={{ color: i === 0 ? '#FCD34D' : '#FDE68A' }} />
+                  {card.badge}
+                </span>
+
+                <h3 className="text-4xl sm:text-5xl font-[800] leading-none mb-1">
                   {card.headline}
                 </h3>
-                <p className={`text-sm font-bold mb-1 ${isDark ? 'text-amber-200' : 'text-white'}`}>
+                <p className="text-sm font-bold mb-1 opacity-90">
                   {card.subheading}
                 </p>
-                <p className={`text-sm mb-5 ${isDark ? 'text-amber-300/80' : 'text-white/80'}`}>
+                <p className="text-sm mb-5 opacity-80 max-w-[240px]">
                   {card.body}
                 </p>
                 <Link
                   href={card.buttonUrl}
-                  className={`inline-flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-full transition-all duration-200 hover:scale-105 ${
-                    isDark
-                      ? 'bg-white text-[#3B1E08] hover:bg-amber-100'
-                      : 'bg-white text-[#C17F24] hover:bg-amber-50'
-                  }`}
+                  className="inline-flex items-center gap-2 bg-white text-gray-900 text-sm font-bold px-5 py-2.5 rounded-full transition-all duration-200 hover:scale-105 shadow-lg"
                 >
                   {card.buttonLabel}
                   <ArrowRight className="w-3.5 h-3.5" />

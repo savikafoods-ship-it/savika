@@ -11,7 +11,7 @@ export default function ContactPage() {
         e.preventDefault()
         setLoading(true)
         
-        // This simulates hooking into Appwrite Functions or a Serverless backend
+        // This simulates hooking into a serverless backend
         await new Promise(r => setTimeout(r, 1500))
         
         setLoading(false)

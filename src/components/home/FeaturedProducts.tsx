@@ -4,31 +4,31 @@ import type { Product } from '@/types'
 
 const MOCK_PRODUCTS: Product[] = [
     {
-        $id: '1', name: 'Red Chilli Powder', tagline: 'Tikha Swad', slug: 'kashmiri-mirch-whole',
-        category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' },
-        categoryId: 'cat2', price: 185, stock: 100, isActive: true,
-        imageIds: ['/images/products/kashmiri-mirch-whole.jpg'],
+        id: '1', name: 'Red Chilli Powder', tagline: 'Tikha Swad', slug: 'kashmiri-mirch-whole',
+        category: { id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', sort_order: 1 },
+        category_id: 'cat2', price: 185, stock: 100, is_active: true,
+        image_urls: ['/images/products/kashmiri-mirch-whole.jpg'],
         description: 'Pure red chilli powder with the authentic fiery heat of Indian kitchens. No fillers, no artificial color. Just the real tikha swad that elevates every dish.'
     },
     {
-        $id: '2', name: 'Garam Masala', tagline: 'Rich Aroma', slug: 'garam-masala-artisan',
-        category: { $id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', imageId: '', sortOrder: 2, $createdAt: '', $updatedAt: '' },
-        categoryId: 'cat3', price: 295, stock: 80, isActive: true,
-        imageIds: ['/images/products/garam-masala-artisan.jpg'],
+        id: '2', name: 'Garam Masala', tagline: 'Rich Aroma', slug: 'garam-masala-artisan',
+        category: { id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', sort_order: 2 },
+        category_id: 'cat3', price: 295, stock: 80, is_active: true,
+        image_urls: ['/images/products/garam-masala-artisan.jpg'],
         description: 'A perfectly balanced blend of whole spices, slow-roasted and stone-ground. The rich aroma of Savika Garam Masala transforms ordinary meals into unforgettable ones.'
     },
     {
-        $id: '3', name: 'Turmeric Powder', tagline: 'Rang Aur Shuddhta', slug: 'premium-turmeric-powder',
-        category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' },
-        categoryId: 'cat2', price: 145, stock: 120, isActive: true,
-        imageIds: ['/images/products/premium-turmeric-powder.jpg'],
+        id: '3', name: 'Turmeric Powder', tagline: 'Rang Aur Shuddhta', slug: 'premium-turmeric-powder',
+        category: { id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', sort_order: 1 },
+        category_id: 'cat2', price: 145, stock: 120, is_active: true,
+        image_urls: ['/images/products/premium-turmeric-powder.jpg'],
         description: 'Cold-ground pure turmeric with high curcumin content. The vibrant rang and shuddhta of this turmeric is unmatched - sourced directly from Erode, Tamil Nadu.'
     },
     {
-        $id: '4', name: 'Coriander Powder', tagline: 'Khushboo Bhara Taste', slug: 'coriander-powder',
-        category: { $id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', imageId: '', sortOrder: 1, $createdAt: '', $updatedAt: '' },
-        categoryId: 'cat2', price: 165, stock: 90, isActive: true,
-        imageIds: ['/images/products/coriander-powder.jpg'],
+        id: '4', name: 'Coriander Powder', tagline: 'Khushboo Bhara Taste', slug: 'coriander-powder',
+        category: { id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', sort_order: 1 },
+        category_id: 'cat2', price: 165, stock: 90, is_active: true,
+        image_urls: ['/images/products/coriander-powder.jpg'],
         description: 'Freshly ground coriander with an unmistakable khushboo. Adds a warm, citrusy depth to curries, dals, and marinades. 100% pure, no mixing.'
     },
 ]
@@ -50,7 +50,7 @@ export default function FeaturedProducts() {
                 </div>
                 <div className="grid-products">
                     {MOCK_PRODUCTS.map((product) => (
-                        <ProductCard key={product.$id} product={product} />
+                        <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
             </div>

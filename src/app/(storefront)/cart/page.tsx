@@ -7,6 +7,7 @@ import { ShoppingBag, Minus, Plus, Trash2, Tag } from 'lucide-react'
 
 import { useCartStore } from '@/store/cartStore'
 import { formatCurrency } from '@/lib/utils'
+import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
 export default function CartPage() {
     const { items, removeItem, updateQuantity, total, clearCart } = useCartStore()
@@ -47,8 +48,13 @@ export default function CartPage() {
                             return (
                                 <div key={`${item.productId}-${item.weight}`} className="bg-white rounded-2xl p-4 flex gap-4 shadow-sm">
                                     <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-[#F9F4EE] shrink-0">
-                                        {item.product.imageIds?.[0] ? (
-                                            <Image src={item.product.imageIds[0].startsWith('/') ? item.product.imageIds[0] : `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || ''}/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_PRODUCTS || ''}/files/${item.product.imageIds[0]}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || ''}`} alt={item.product.name} fill className="object-cover" />
+                                        {item.product.image_urls?.[0] ? (
+                                            <Image 
+                                              src={item.product.image_urls[0].startsWith('http') ? item.product.image_urls[0] : getProductImageUrl(item.product.image_urls[0])} 
+                                              alt={item.product.name} 
+                                              fill 
+                                              className="object-cover" 
+                                            />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center">
                                                 <ShoppingBag className="w-8 h-8 text-[#C17F24]/40" />

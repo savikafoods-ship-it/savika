@@ -16,8 +16,7 @@ export async function GET() {
             ['Order ID', 'Customer Name', 'Email', 'Status', 'Total', 'Date', 'Items'].join(','),
             ...data.map(r => {
                 // Determine name and email
-                // Note: The original Supabase query fetched from profiles. 
-                // Appwrite might store this directly on the order or need a separate fetch.
+                // Note: The original query fetched from profiles. 
                 // Assuming customerName and customerEmail exist on the document or using Fallbacks.
                 const name = r.shipping_address?.fullName || r.customer_name || ''
                 const email = r.customer_email || ''
