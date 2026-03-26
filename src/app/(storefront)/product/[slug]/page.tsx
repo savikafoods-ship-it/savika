@@ -355,6 +355,46 @@ const PRODUCT_METADATA: Record<string, any> = {
         metaDescription: 'Authentic Maharashtrian Ghati spice blend.',
         relatedProducts: [{ slug: 'garam-masala-artisan', name: 'Artisan Garam Masala' }],
         image: '/images/products/star-anise-whole.jpg'
+    },
+    '50gm-masala-combo': {
+        slug: '50gm-masala-combo',
+        name: '50gm Masala Combo Pack',
+        localName: 'Chota Masala Combo (Pack of 3/4)',
+        category: { slug: 'blends-masalas', name: 'Blends & Masalas' },
+        price: 117, salePrice: 105,
+        weightOptions: [
+            { label: '3-Pack (50gm x 3)', price: 117, salePrice: 105 },
+            { label: '4-Pack (50gm x 4)', price: 156, salePrice: 135 },
+        ],
+        stock: 100, rating: 5.0, reviewCount: 42,
+        heroIntro: 'Experience the pure, stone-ground difference of Savika with our 50gm Masala Combo Pack. Perfect for a trial or a thoughtful gift, this bundle allows you to pick your favorite 50gm blends at a special price.',
+        whatIsThis: 'Our 50gm Masala Combo Pack is a curated bundle of our best-selling spice blends in smaller trial sizes. We believe that once you taste the freshness of stone-ground spices, you will never go back to mass-produced ones. This combo pack is designed to give you a taste of everything we offer at an unbeatable price.',
+        origin: 'India',
+        botanicalName: 'Spice Blend',
+        culturalImportance: 'Tailored for small families and gift-giving.',
+        regionalUsage: 'Pan-India',
+        benefits: [
+            { title: 'Freshness Guaranteed', desc: 'Each pack in the combo is small-batch ground for maximum flavor.' },
+            { title: 'Value for Money', desc: 'Get our premium spices at a significantly lower price when bundled.' }
+        ],
+        culinaryUses: [
+            { dish: 'Variety of Dishes', tip: 'Use the different blends in the combo for everything from daily curries to special biryanis.' }
+        ],
+        storageLife: '12 months',
+        storageInstructions: 'Keep in a cool, dry place in airtight containers.',
+        sourcingStory: 'This combo is a celebration of our best farm-to-kitchen spices.',
+        faqs: [
+            { q: 'Can I choose which masalas I get?', a: 'Yes! After placing the order, you can specify your choice in the order notes or we will contact you for your preference.' },
+            { q: 'What is the savings?', a: 'You save up to 20% compared to buying individual 50gm packs.' }
+        ],
+        keywords: ['masala combo online', 'spice bundle buy india', '50gm spice pack', 'trial spice pack'],
+        metaTitle: 'Buy 50gm Masala Combo Pack Online | Savika',
+        metaDescription: 'Get a 3-pack or 4-pack combo of our premium 50gm stone-ground masalas. Experience pure Indian spices at a special bundle price.',
+        relatedProducts: [
+            { slug: 'garam-masala-artisan', name: 'Artisan Garam Masala' },
+            { slug: 'premium-turmeric-powder', name: 'Premium Turmeric Powder' }
+        ],
+        image: '/images/products/garam-masala-artisan.jpg'
     }
 };
 
@@ -381,7 +421,12 @@ type Props = { params: Promise<{ slug: string }> }
 export async function generateStaticParams() {
     const supabase = createStaticClient()
     const { data: products } = await supabase.from('products').select('slug') as { data: { slug: string }[] | null }
-    return (products || []).map((p: { slug: string }) => ({ slug: p.slug }))
+    const slugs = (products || []).map((p: { slug: string }) => ({ slug: p.slug }))
+    
+    // Add manual slugs from metadata
+    slugs.push({ slug: '50gm-masala-combo' })
+    
+    return slugs
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -389,26 +434,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const p = await getProduct(slug)
     const meta = PRODUCT_METADATA[slug] || {}
     
-    if (!p) return { title: 'Product Not Found | Savika' }
+    if (!p && !PRODUCT_METADATA[slug]) return { title: 'Product Not Found | Savika' }
+
+    const name = p?.name || meta.name
+    const description = p?.description || meta.heroIntro
+    const image = p?.image_urls?.[0] || meta.image
 
     return {
-        title: meta.metaTitle || `${p.name} | Savika`,
-        description: meta.metaDescription || p.description,
+        title: meta.metaTitle || `${name} | Savika`,
+        description: meta.metaDescription || description,
         keywords: (meta.keywords || []).join(', '),
         openGraph: {
-            title: meta.metaTitle || p.name,
-            description: meta.metaDescription || p.description,
+            title: meta.metaTitle || name,
+            description: meta.metaDescription || description,
             url: `https://savikafoods.in/product/${slug}`,
             siteName: 'Savika',
-            images: [{ url: getProductImageUrl(p.image_urls?.[0]), width: 1200, height: 630, alt: p.name }],
+            images: [{ url: image.startsWith('/') ? image : getProductImageUrl(image), width: 1200, height: 630, alt: name }],
             locale: 'en_IN',
             type: 'website',
         },
         twitter: {
             card: 'summary_large_image',
-            title: meta.metaTitle || p.name,
-            description: meta.metaDescription || p.description,
-            images: [getProductImageUrl(p.image_urls?.[0])],
+            title: meta.metaTitle || name,
+            description: meta.metaDescription || description,
+            images: [image.startsWith('/') ? image : getProductImageUrl(image)],
         },
         alternates: {
             canonical: `https://savikafoods.in/product/${slug}`,
@@ -418,24 +467,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
     const { slug } = await params
-    const p = await getProduct(slug)
-    if (!p) notFound()
-
+    let p = await getProduct(slug)
+    
     // Enrich with local metadata if available
-    const meta = PRODUCT_METADATA[slug] || {
-        heroIntro: p.description,
-        whatIsThis: p.description,
-        origin: 'India',
-        botanicalName: 'N/A',
-        culturalImportance: 'N/A',
-        regionalUsage: 'N/A',
-        benefits: [],
-        culinaryUses: [],
-        storageLife: '12 months',
-        storageInstructions: 'Store in a cool, dry place.',
-        sourcingStory: 'Sourced from the finest farms.',
-        faqs: [],
-        relatedProducts: [],
+    const meta = PRODUCT_METADATA[slug]
+    
+    if (!p && !meta) notFound()
+
+    // If product doesn't exist in DB, create a mock one from meta
+    if (!p && meta) {
+        p = {
+            id: meta.slug,
+            name: meta.name,
+            slug: meta.slug,
+            description: meta.heroIntro,
+            price: meta.price,
+            sale_price: meta.salePrice,
+            stock: meta.stock,
+            is_active: true,
+            image_urls: [meta.image],
+            category: meta.category,
+            weight_options: meta.weightOptions,
+            rating: meta.rating,
+            review_count: meta.reviewCount
+        }
     }
 
     // Merge weight options from DB if they exist, otherwise use default

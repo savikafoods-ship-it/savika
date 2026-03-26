@@ -18,7 +18,23 @@ export default async function ShopPage() {
         .from('products')
         .select('*, category:categories(*)')
         .eq('is_active', true)
-        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: false }) as { data: any[] | null }
+
+    // Inject 50gm Masala Combo if not present
+    if (products && !products.some(p => p.slug === '50gm-masala-combo')) {
+        products.unshift({
+            id: '50gm-masala-combo',
+            name: '50gm Masala Combo Pack',
+            slug: '50gm-masala-combo',
+            description: 'Experience the pure, stone-ground difference of Savika with our 50gm Masala Combo Pack.',
+            price: 117,
+            sale_price: 105,
+            stock: 100,
+            is_active: true,
+            image_urls: ['/images/products/garam-masala-artisan.jpg'],
+            category: { name: 'Blends & Masalas', slug: 'blends-masalas' }
+        })
+    }
 
     // Fetch Categories for Filter Pills
     const { data: categories } = await supabase
