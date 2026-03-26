@@ -3,6 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
+
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919898176667'
 const WHATSAPP_MESSAGE = encodeURIComponent('Hi, I need help with my Savika Foods order')
 
@@ -30,7 +33,7 @@ export default function WhatsAppFloat() {
                    hover:bg-green-600 shadow-lg hover:shadow-xl
                    transition-all duration-200 hover:scale-110 active:scale-95"
       >
-        <i className="fa-brands fa-whatsapp text-white text-3xl leading-none" />
+        <FontAwesomeIcon icon={faWhatsapp} className="text-white text-3xl leading-none" />
       </Link>
       {/* Pulse ring animation */}
       <span className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-20

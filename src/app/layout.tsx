@@ -32,10 +32,6 @@ export default function RootLayout({
     <html lang="en" className={poppins.variable}>
       <head>
         <link rel="preconnect" href="https://images.unsplash.com" />
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-        />
       </head>
       <body className="font-[--font-poppins] bg-[#F5F0E8] texture-bg">
         <ToastProvider>

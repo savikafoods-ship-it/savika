@@ -18,7 +18,7 @@ export default function HeroSection() {
                 fill
                 className="object-cover"
                 priority={true}
-                unoptimized={true}
+                sizes="100vw"
             />
             {/* Brown Overlay */}
             <div className="absolute inset-0 bg-[#2D1B0B]/75 mix-blend-multiply z-0" />

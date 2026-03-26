@@ -40,15 +40,23 @@ export async function middleware(request: NextRequest) {
     }
 
     // Check Role
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    if (!profile || profile.role !== 'admin') {
-      // If not an admin, redirect to home
-      return NextResponse.redirect(new URL('/', request.url))
+    if (profileError || !profile || profile.role !== 'admin') {
+      console.warn('Middleware: Unauthorized admin access attempt', { 
+        userId: user.id, 
+        email: user.email,
+        role: profile?.role,
+        error: profileError?.message 
+      })
+      // Redirect to home if strictly not an admin
+      if (profile?.role !== 'admin') {
+        return NextResponse.redirect(new URL('/', request.url))
+      }
     }
   }
 
