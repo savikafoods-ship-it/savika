@@ -32,6 +32,18 @@ import {
     faClock, 
     faArchive 
 } from '@fortawesome/free-solid-svg-icons'
+import { 
+    BookOpen, 
+    HeartPulse, 
+    Utensils, 
+    HelpCircle,
+    MapPin,
+    Globe,
+    Leaf,
+    School,
+    Map,
+    ChevronDown
+} from 'lucide-react'
 import ProductCommercePanel from '@/components/product/ProductCommercePanel'
 import { createClient, createStaticClient } from '@/lib/supabase/server'
 import { getProductImageUrl } from '@/lib/supabase/imageUrl'
@@ -103,17 +115,21 @@ export default async function ProductPage({ params }: Props) {
         ...p,
         localName: p.local_name || '',
         heroIntro: p.description || '',
-        whatIsThis: p.description || '', // Use description if no rich 'whatIsThis'
-        origin: p.metadata?.origin || 'India',
-        botanicalName: p.metadata?.botanicalName || '',
+        whatIsThis: p.generated_content?.what_is?.description || p.description || '',
+        origin: p.generated_content?.what_is?.origin || p.metadata?.origin || 'India',
+        botanicalName: p.generated_content?.what_is?.botanical_name || p.metadata?.botanicalName || '',
         culturalImportance: p.metadata?.culturalImportance || 'Traditional Indian Spice',
         regionalUsage: p.metadata?.regionalUsage || 'Pan-India',
-        benefits: p.metadata?.benefits || [],
-        culinaryUses: p.metadata?.culinaryUses || [],
+        benefits: (p.generated_content?.health_benefits?.length > 0) 
+            ? p.generated_content.health_benefits.map((b: any) => ({ title: b.name, desc: b.description }))
+            : (p.metadata?.benefits || []),
+        culinaryUses: p.generated_content?.culinary_uses || p.metadata?.culinaryUses || [],
         storageLife: p.metadata?.storageLife || '12 months',
         storageInstructions: p.metadata?.storageInstructions || 'Store in a cool, dry place.',
         sourcingStory: p.metadata?.sourcingStory || 'Sourced directly from verified farmers.',
-        faqs: p.metadata?.faqs || [],
+        faqs: (p.generated_content?.faqs?.length > 0)
+            ? p.generated_content.faqs.map((f: any) => ({ q: f.question, a: f.answer }))
+            : (p.metadata?.faqs || []),
         weightOptions: p.weight_options || []
     }
 
@@ -257,7 +273,12 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 2 - WHAT IS THIS SPICE?
                 ══════════════════════════════════════════════════ */}
                 <section className="bg-white rounded-3xl p-8 shadow-sm border border-[#e8ddd0]">
-                    <SectionHeading icon={faBookOpen} text={`What Is ${enrichedProduct.name.split(' ')[0]}?`} />
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-[#C17F24]/10 flex items-center justify-center">
+                            <BookOpen className="w-5 h-5 text-[#C17F24]" />
+                        </div>
+                        <h2 className="text-2xl font-extrabold text-[#2C1A0E]">What Is {enrichedProduct.name.split(' ')[0]}?</h2>
+                    </div>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
                         <div className="lg:col-span-2 space-y-4">
                             {enrichedProduct.whatIsThis?.split('\n\n').map((para: string, i: number) => (
@@ -265,11 +286,11 @@ export default async function ProductPage({ params }: Props) {
                             ))}
                         </div>
                         <div className="space-y-4">
-                            <InfoCard label="Origin" value={enrichedProduct.origin} icon={faMapMarkerAlt} />
-                            <InfoCard label="Local Name" value={enrichedProduct.localName} icon={faGlobe} />
-                            <InfoCard label="Botanical Name" value={enrichedProduct.botanicalName} icon={faLeaf} italic />
-                            <InfoCard label="Cultural Role" value={enrichedProduct.culturalImportance} icon={faUniversity} />
-                            <InfoCard label="Regional Use" value={enrichedProduct.regionalUsage} icon={faMap} />
+                            <InfoCard label="Origin" value={enrichedProduct.origin} icon={MapPin} />
+                            <InfoCard label="Local Name" value={enrichedProduct.localName} icon={Globe} />
+                            <InfoCard label="Botanical Name" value={enrichedProduct.botanicalName} icon={Leaf} italic />
+                            <InfoCard label="Cultural Role" value={enrichedProduct.culturalImportance} icon={School} />
+                            <InfoCard label="Regional Use" value={enrichedProduct.regionalUsage} icon={Map} />
                         </div>
                     </div>
                 </section>
@@ -278,7 +299,12 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 3 - HEALTH BENEFITS
                 ══════════════════════════════════════════════════ */}
                 <section>
-                    <SectionHeading icon={faHeartPulse} text={`Health Benefits of ${enrichedProduct.name.split(' ')[0]}`} />
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-[#C17F24]/10 flex items-center justify-center">
+                            <HeartPulse className="w-5 h-5 text-[#C17F24]" />
+                        </div>
+                        <h2 className="text-2xl font-extrabold text-[#2C1A0E]">Health Benefits of {enrichedProduct.name.split(' ')[0]}</h2>
+                    </div>
                     <p className="text-gray-500 mt-2 mb-6 max-w-2xl">
                         Backed by traditional Ayurvedic wisdom and modern nutritional science.
                     </p>
@@ -286,7 +312,7 @@ export default async function ProductPage({ params }: Props) {
                         {enrichedProduct.benefits?.map((b: any, i: number) => (
                             <div key={i} className="bg-white rounded-2xl p-5 border border-[#e8ddd0] hover:shadow-md transition-shadow">
                                 <div className="w-10 h-10 rounded-xl bg-[#C47F17]/10 flex items-center justify-center mb-3">
-                                    <FontAwesomeIcon icon={faLeaf} className="w-4 h-4 text-[#C17F24]" />
+                                    <Leaf className="w-4 h-4 text-[#C17F24]" />
                                 </div>
                                 <h3 className="font-bold text-[#2C1A0E] mb-2">{b.title}</h3>
                                 <p className="text-sm text-gray-500 leading-relaxed">{b.desc}</p>
@@ -302,13 +328,18 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 4 - CULINARY USES
                 ══════════════════════════════════════════════════ */}
                 <section className="bg-[#2C1A0E] rounded-3xl p-8">
-                    <SectionHeading icon={faUtensils} text="Culinary Uses & Cooking Tips" dark />
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-[#C17F24]/20 flex items-center justify-center">
+                            <Utensils className="w-5 h-5 text-[#C17F24]" />
+                        </div>
+                        <h2 className="text-2xl font-extrabold text-white">Culinary Uses & Cooking Tips</h2>
+                    </div>
                     <p className="text-gray-400 mt-2 mb-6">How to use {enrichedProduct.name} like an Indian chef</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {enrichedProduct.culinaryUses?.map((u: any, i: number) => (
                             <div key={i} className="bg-white/5 rounded-2xl p-5 border border-white/10 hover:bg-white/10 transition-colors">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <FontAwesomeIcon icon={faUtensils} className="w-4 h-4 text-[#C17F24]" />
+                                    <Utensils className="w-4 h-4 text-[#C17F24]" />
                                     <h3 className="font-bold text-white">{u.dish}</h3>
                                 </div>
                                 <p className="text-sm text-gray-400 leading-relaxed">{u.tip}</p>
@@ -389,7 +420,12 @@ export default async function ProductPage({ params }: Props) {
                     SECTION 7 - FAQ
                 ══════════════════════════════════════════════════ */}
                 <section>
-                    <SectionHeading icon={faQuestionCircle} text="Frequently Asked Questions" />
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-[#C17F24]/10 flex items-center justify-center">
+                            <HelpCircle className="w-5 h-5 text-[#C17F24]" />
+                        </div>
+                        <h2 className="text-2xl font-extrabold text-[#2C1A0E]">Frequently Asked Questions</h2>
+                    </div>
                     <div className="mt-6 space-y-3 max-w-3xl">
                         {enrichedProduct.faqs?.map((faq: any, i: number) => (
                             <details
@@ -398,7 +434,7 @@ export default async function ProductPage({ params }: Props) {
                             >
                                 <summary className="flex items-center justify-between p-5 cursor-pointer list-none font-semibold text-[#2C1A0E] hover:bg-[#FFF8F0] transition-colors">
                                     <span>{faq.q}</span>
-                                    <FontAwesomeIcon icon={faChevronDown} className="w-3 h-3 text-[#C17F24] group-open:rotate-180 transition-transform" />
+                                    <ChevronDown className="w-4 h-4 text-[#C17F24] group-open:rotate-180 transition-transform" />
                                 </summary>
                                 <div className="px-5 pb-5 text-sm text-gray-600 leading-relaxed border-t border-[#e8ddd0] pt-4">
                                     {faq.a}
@@ -451,14 +487,14 @@ function SectionHeading({ icon, text, dark }: { icon: any; text: string; dark?: 
     )
 }
 
-function InfoCard({ label, value, icon, italic }: { label: string; value: string; icon: any; italic?: boolean }) {
+function InfoCard({ label, value, icon: Icon, italic }: { label: string; value: string; icon: any; italic?: boolean }) {
     return (
         <div className="bg-[#FFF8F0] rounded-xl p-4 border border-[#e8ddd0]">
             <div className="flex items-center gap-2 mb-1">
-                <FontAwesomeIcon icon={icon} className="w-3 h-3 text-[#C17F24]" />
+                <Icon className="w-3.5 h-3.5 text-[#C17F24]" />
                 <span className="text-xs font-bold text-[#8E562E] uppercase tracking-wider">{label}</span>
             </div>
-            <p className={`text-sm text-[#2C1A0E] font-medium ${italic ? 'italic' : ''}`}>{value}</p>
+            <p className={`text-sm text-[#2C1A0E] font-medium ${italic ? 'italic' : ''}`}>{value || 'Not Specified'}</p>
         </div>
     )
 }

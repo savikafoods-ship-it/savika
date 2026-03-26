@@ -185,8 +185,14 @@ details>summary::-webkit-details-marker {
 /* 4-col product grid */
 .grid-products {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .grid-products {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (min-width: 768px) {
@@ -408,4 +414,9 @@ details>summary::-webkit-details-marker {
 .gold-divider {
   height: 2px;
   background: linear-gradient(90deg, transparent, #C17F24, transparent);
+}
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw;
+  width: 100%;
 }

@@ -1,56 +1,80 @@
 import { MetadataRoute } from 'next'
+import { createStaticClient } from '@/lib/supabase/server'
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://savikafoods.in'
-
-// Fallback slugs used if DB is unavailable (dev mode / build time)
-const FALLBACK_PRODUCTS = [
-    'kashmiri-mirch-whole', 'premium-turmeric-powder', 'garam-masala-artisan',
-    'malabar-black-pepper', 'star-anise-whole', 'coriander-powder',
-    'biryani-masala', 'kashmiri-saffron',
-]
-const FALLBACK_CATEGORIES = [
-    'whole-spices', 'ground-powdered', 'blends-masalas', 'gift-packs', 'exotics-rare',
-]
-
-async function getProductSlugs(): Promise<string[]> {
-    return FALLBACK_PRODUCTS
-}
-
-async function getCategorySlugs(): Promise<string[]> {
-    return FALLBACK_CATEGORIES
-}
+const BASE_URL = 'https://savikafoods.in'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const [productSlugs, categorySlugs] = await Promise.all([
-        getProductSlugs(),
-        getCategorySlugs(),
-    ])
+  const supabase = createStaticClient()
 
-    const now = new Date()
+  // Fetch all product slugs
+  const { data: products } = await supabase
+    .from('products')
+    .select('slug, updated_at')
+    .eq('is_active', true)
 
-    const staticPages: MetadataRoute.Sitemap = [
-        { url: BASE_URL, lastModified: now, changeFrequency: 'daily', priority: 1.0 },
-        { url: `${BASE_URL}/shop`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
-        { url: `${BASE_URL}/about`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-        { url: `${BASE_URL}/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
-        { url: `${BASE_URL}/track-order`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
-        { url: `${BASE_URL}/privacy`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
-        { url: `${BASE_URL}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
-    ]
+  // Fetch all category slugs
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('slug, updated_at')
 
-    const categoryPages: MetadataRoute.Sitemap = categorySlugs.map((slug) => ({
-        url: `${BASE_URL}/category/${slug}`,
-        lastModified: now,
-        changeFrequency: 'weekly',
-        priority: 0.8,
-    }))
+  const productEntries: MetadataRoute.Sitemap = (products || []).map((p) => ({
+    url: `${BASE_URL}/product/${p.slug}`,
+    lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  }))
 
-    const productPages: MetadataRoute.Sitemap = productSlugs.map((slug) => ({
-        url: `${BASE_URL}/product/${slug}`,
-        lastModified: now,
-        changeFrequency: 'weekly',
-        priority: 0.9,
-    }))
+  const categoryEntries: MetadataRoute.Sitemap = (categories || []).map((c) => ({
+    url: `${BASE_URL}/category/${c.slug}`,
+    lastModified: c.updated_at ? new Date(c.updated_at) : new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }))
 
-    return [...staticPages, ...categoryPages, ...productPages]
+  const staticRoutes: MetadataRoute.Sitemap = [
+    {
+      url: BASE_URL,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1,
+    },
+    {
+      url: `${BASE_URL}/shop`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/our-story`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/why-savika`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/contact`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${BASE_URL}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${BASE_URL}/terms`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+  ]
+
+  return [...staticRoutes, ...categoryEntries, ...productEntries]
 }

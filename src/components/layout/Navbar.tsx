@@ -55,8 +55,21 @@ export default function Navbar() {
     return (
         <>
             {/* Promo Bar */}
-            <div className="bg-[#C47F17] text-white text-center text-xs py-2 px-4 tracking-wide font-medium">
-                Free shipping on orders above Rs.599 &nbsp;|&nbsp; 100% Pure &amp; Natural &nbsp;|&nbsp; Pan-India Delivery
+            <div className="bg-[#C47F17] text-white py-2 px-4 overflow-hidden relative">
+                <div className="flex sm:justify-center items-center gap-6 text-[10px] sm:text-xs tracking-wide font-medium whitespace-nowrap animate-marquee sm:animate-none">
+                    <span>Free shipping on orders above Rs.599</span>
+                    <span className="hidden sm:inline">|</span>
+                    <span>100% Pure &amp; Natural</span>
+                    <span className="hidden sm:inline">|</span>
+                    <span>Pan-India Delivery</span>
+                    {/* Duplicate for seamless marquee on mobile */}
+                    <span className="sm:hidden">|</span>
+                    <span className="sm:hidden">Free shipping on orders above Rs.599</span>
+                    <span className="sm:hidden">|</span>
+                    <span className="sm:hidden">100% Pure &amp; Natural</span>
+                    <span className="sm:hidden">|</span>
+                    <span className="sm:hidden">Pan-India Delivery</span>
+                </div>
             </div>
 
             <header

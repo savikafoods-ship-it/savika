@@ -38,7 +38,7 @@ export default function HeroSection() {
                         </div>
 
                         {/* Headline */}
-                        <h1 className="text-white text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-[1.1] mb-6">
+                        <h1 className="text-white text-3xl sm:text-5xl lg:text-7xl font-extrabold leading-[1.2] sm:leading-[1.1] mb-6">
                             Your Kitchen.<br />
                             <span className="text-amber-500 italic relative">
                                 Your Spice.
@@ -68,10 +68,10 @@ export default function HeroSection() {
                         </div>
 
                         {/* Stats */}
-                        <div className="flex gap-10 border-t border-white/10 pt-8">
+                        <div className="flex flex-wrap gap-6 sm:gap-10 border-t border-white/10 pt-8">
                             {stats.map((s) => (
                                 <div key={s.label}>
-                                    <p className="text-2xl sm:text-3xl font-extrabold text-white">{s.value}</p>
+                                    <p className="text-xl sm:text-3xl font-extrabold text-white">{s.value}</p>
                                     <p className="text-[10px] sm:text-xs text-stone-400 font-bold uppercase tracking-wider mt-1">{s.label}</p>
                                 </div>
                             ))}

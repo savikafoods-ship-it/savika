@@ -10,6 +10,7 @@ export interface Profile {
   avatar_url?: string
   wishlist_ids?: string[]
   is_active: boolean
+  role: 'user' | 'admin'
   created_at: string
 }
 

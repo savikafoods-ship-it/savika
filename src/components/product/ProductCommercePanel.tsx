@@ -43,8 +43,8 @@ export default function ProductCommercePanel({ productData }: { productData: any
         <div className="space-y-6">
             {/* Price Display */}
             <div className="flex flex-col gap-1">
-                <div className="flex items-baseline gap-3">
-                    <span className="text-3xl font-extrabold text-[#2C1A0E]">
+                <div className="flex flex-wrap items-baseline gap-3">
+                    <span className="text-2xl sm:text-3xl font-extrabold text-[#2C1A0E]">
                         ₹{currentSalePrice ?? currentPrice}
                     </span>
                     {currentSalePrice && currentSalePrice < currentPrice && (

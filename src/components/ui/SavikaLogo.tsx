@@ -43,7 +43,7 @@ export function SavikaLogo({ variant, className = '' }: SavikaLogoProps) {
       </div>
       <div className="flex flex-col leading-none justify-center">
         <span
-          className={`font-sans font-bold text-2xl tracking-wide transition-opacity
+          className={`font-sans font-bold text-xl sm:text-2xl tracking-wide transition-opacity
             ${isFooter ? 'text-white' : 'text-[#CD8527]'}
             group-hover:opacity-90`}
           style={{ fontWeight: 800 }}
@@ -51,8 +51,8 @@ export function SavikaLogo({ variant, className = '' }: SavikaLogoProps) {
           SAVIKA
         </span>
         <span
-          className={`font-sans tracking-[0.2em] uppercase mt-1 transition-opacity
-            ${isFooter ? 'text-white/70 text-xs' : 'text-[#8E562E] text-[10px]'}
+          className={`font-sans tracking-[0.2em] uppercase mt-0.5 sm:mt-1 transition-opacity
+            ${isFooter ? 'text-white/70 text-[10px] sm:text-xs' : 'text-[#8E562E] text-[8px] sm:text-[10px]'}
             group-hover:opacity-90`}
           style={{ fontWeight: 500 }}
         >
