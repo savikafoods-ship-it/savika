@@ -9,7 +9,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch all product slugs
   const { data: products } = await supabase
     .from('products')
-    .select('slug, updated_at')
+    .select('slug')
     .eq('is_active', true)
 
   // Fetch all category slugs
@@ -17,14 +17,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .from('categories')
     .select('slug')
 
-  const productEntries: MetadataRoute.Sitemap = (products || []).map((p) => ({
+  const productEntries: MetadataRoute.Sitemap = (products || []).map((p: { slug: string }) => ({
     url: `${BASE_URL}/product/${p.slug}`,
-    lastModified: p.updated_at ? new Date(p.updated_at) : new Date(),
+    lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.7,
   }))
 
-  const categoryEntries: MetadataRoute.Sitemap = (categories || []).map((c) => ({
+  const categoryEntries: MetadataRoute.Sitemap = (categories || []).map((c: { slug: string }) => ({
     url: `${BASE_URL}/category/${c.slug}`,
     lastModified: new Date(),
     changeFrequency: 'monthly',
