@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { OrderItem } from '@/types'
+import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -56,9 +58,17 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                             <FontAwesomeIcon icon={faBox} className="w-5 h-5 text-[#C17F24]" /> Order Items
                         </div>
                         <div className="p-5 space-y-4">
-                            {items.map((item: any, i: number) => (
+                            {items.map((item: OrderItem, i: number) => (
                                 <div key={i} className="flex gap-4 items-center p-3 rounded-lg bg-[#27272a]/30">
-                                    <div className="w-12 h-12 bg-[#27272a] rounded-md border border-[#3f3f46] flex shrink-0" />
+                                    <div className="relative w-12 h-12 bg-[#27272a] rounded-md border border-[#3f3f46] overflow-hidden flex shrink-0">
+                                        {item.image_urls?.[0] ? (
+                                            <img src={getProductImageUrl(item.image_urls[0])} alt={item.name} className="object-cover w-full h-full" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <FontAwesomeIcon icon={faBox} className="w-4 h-4 text-[#3f3f46]" />
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-semibold text-white truncate">{item.name}</p>
                                         <p className="text-xs text-[#a1a1aa] mt-0.5">₹{item.price} × {item.quantity} {item.weight ? `(${item.weight})` : ''}</p>

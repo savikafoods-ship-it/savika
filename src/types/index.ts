@@ -78,6 +78,7 @@ export interface OrderItem {
   quantity: number
   weight?: string
   imageId?: string
+  image_urls?: string[]
 }
 
 // Shipping address shape
@@ -93,7 +94,7 @@ export interface ShippingAddress {
 
 // Coupon (collection: coupons)
 export interface Coupon {
-  $id: string
+  id: string
   code: string
   discountPercent?: number
   discountFlat?: number
@@ -104,21 +105,21 @@ export interface Coupon {
 
 // Site Content (collection: site_content)
 export interface SiteContent {
-  $id: string // key e.g. promo_card_1
-  value: string // JSON string
-  updatedAt: string
+  id: string // key e.g. promo_card_1
+  value: any // JSON
+  updated_at: string
 }
 
 // Review (collection: reviews)
 export interface Review {
-  $id: string
+  id: string
   productId: string
   userId: string
   userName: string
   rating: number // 1-5
   comment?: string
   isVerifiedBuyer: boolean
-  createdAt: string
+  created_at: string
 }
 
 // Cart (client-side, Zustand store)
