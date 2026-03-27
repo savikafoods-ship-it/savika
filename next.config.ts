@@ -1,6 +1,12 @@
 import type { NextConfig } from 'next'
 
-const nextConfig: NextConfig = {
+interface ExtendedNextConfig extends NextConfig {
+  eslint?: {
+    ignoreDuringBuilds?: boolean
+  }
+}
+
+const nextConfig: ExtendedNextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
