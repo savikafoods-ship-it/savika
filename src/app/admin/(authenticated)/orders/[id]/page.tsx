@@ -4,7 +4,8 @@ import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft, faBox, faMapPin, faTruck, faRefresh } from '@fortawesome/free-solid-svg-icons'
+import { faArrowLeft, faBox, faMapPin, faRefresh } from '@fortawesome/free-solid-svg-icons'
+import OrderStatusActions from '@/components/admin/OrderStatusActions'
 
 export const dynamic = 'force-dynamic'
 
@@ -129,15 +130,10 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                     {/* Quick Actions Actions could be client-components in a real app */}
                     <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
                         <div className="border-b border-[#27272a] p-5 flex items-center gap-2 text-white font-semibold">
-                            <FontAwesomeIcon icon={faRefresh} className="w-5 h-5 text-[#C17F24]" /> Actions
+                            <FontAwesomeIcon icon={faRefresh} className="w-5 h-5 text-[#C17F24]" /> Order Status
                         </div>
-                        <div className="p-5 space-y-3">
-                            <button className="w-full flex items-center justify-center gap-2 bg-[#27272a] hover:bg-[#3f3f46] text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
-                                <FontAwesomeIcon icon={faTruck} className="w-4 h-4" /> Mark as Shipped
-                            </button>
-                            <button className="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 py-2.5 rounded-lg text-sm font-medium transition-colors">
-                                Cancel Order
-                            </button>
+                        <div className="p-5">
+                            <OrderStatusActions orderId={order.id} currentStatus={order.status} />
                         </div>
                     </div>
 

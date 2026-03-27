@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTicket, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { faTicket, faPlus, faPenToSquare } from '@fortawesome/free-solid-svg-icons'
+import DeleteButton from '@/components/admin/DeleteButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,9 +35,12 @@ export default async function AdminCouponsPage() {
                     <h1 className="text-2xl font-bold text-white">Coupons & Discounts</h1>
                     <p className="text-[#a1a1aa] text-sm mt-1">Manage promotional codes and cart rules.</p>
                 </div>
-                <button className="inline-flex items-center gap-2 bg-[#C17F24] hover:bg-[#D4A855] text-white px-5 py-2.5 rounded-lg font-semibold transition-colors w-fit">
+                <Link 
+                    href="/admin/coupons/new" 
+                    className="inline-flex items-center gap-2 bg-[#C17F24] hover:bg-[#D4A855] text-white px-5 py-2.5 rounded-lg font-semibold transition-colors w-fit"
+                >
                     <FontAwesomeIcon icon={faPlus} className="w-4 h-4" /> Create Coupon
-                </button>
+                </Link>
             </div>
 
             <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
@@ -46,7 +51,7 @@ export default async function AdminCouponsPage() {
                             <th className="px-6 py-4 font-medium">Discount</th>
                             <th className="px-6 py-4 font-medium">Status</th>
                             <th className="px-6 py-4 font-medium">Expiry</th>
-                            <th className="px-6 py-4 font-medium text-right">Usage</th>
+                            <th className="px-6 py-4 font-medium text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-[#27272a]">
@@ -73,8 +78,13 @@ export default async function AdminCouponsPage() {
                                 <td className="px-6 py-4 text-[#a1a1aa]">
                                     {coupon.expiry_date ? new Date(coupon.expiry_date).toLocaleDateString('en-IN') : 'Never'}
                                 </td>
-                                <td className="px-6 py-4 text-right text-[#a1a1aa]">
-                                    {coupon.usage_count || 0} / {coupon.max_uses || '∞'}
+                                <td className="px-6 py-4 text-right">
+                                    <div className="flex justify-end gap-2 text-[#a1a1aa]">
+                                        <Link href={`/admin/coupons/${coupon.id}`} className="p-2 hover:bg-[#27272a] hover:text-white rounded-lg transition-colors">
+                                            <FontAwesomeIcon icon={faPenToSquare} className="w-4 h-4" />
+                                        </Link>
+                                        <DeleteButton table="coupons" id={coupon.id} />
+                                    </div>
                                 </td>
                             </tr>
                         ))}

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
 import { getProductImageUrl } from '@/lib/supabase/imageUrl'
+import DeleteButton from '@/components/admin/DeleteButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -113,9 +114,7 @@ export default async function AdminProductsPage() {
                                             <Link href={`/admin/products/${product.id}`} className="p-2 hover:bg-[#27272a] hover:text-white rounded-lg transition-colors">
                                                 <FontAwesomeIcon icon={faPenToSquare} className="w-4 h-4" />
                                             </Link>
-                                            <button className="p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors">
-                                                <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
-                                            </button>
+                                            <DeleteButton table="products" id={product.id} />
                                         </div>
                                     </td>
                                 </tr>

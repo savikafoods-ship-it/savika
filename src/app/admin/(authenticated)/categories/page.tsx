@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons'
+import DeleteButton from '@/components/admin/DeleteButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,9 +35,12 @@ export default async function AdminCategoriesPage() {
                     <h1 className="text-2xl font-bold text-white">Categories</h1>
                     <p className="text-[#a1a1aa] text-sm mt-1">Organize your products into navigation categories.</p>
                 </div>
-                <button className="inline-flex items-center gap-2 bg-[#C17F24] hover:bg-[#D4A855] text-white px-4 py-2 rounded-lg font-semibold transition-colors w-fit">
+                <Link 
+                    href="/admin/categories/new" 
+                    className="inline-flex items-center gap-2 bg-[#C17F24] hover:bg-[#D4A855] text-white px-4 py-2 rounded-lg font-semibold transition-colors w-fit"
+                >
                     <FontAwesomeIcon icon={faPlus} className="w-4 h-4" /> Add Category
-                </button>
+                </Link>
             </div>
 
             <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
@@ -63,12 +68,10 @@ export default async function AdminCategoriesPage() {
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex justify-end gap-2 text-[#a1a1aa]">
-                                        <button className="p-2 hover:bg-[#27272a] hover:text-white rounded-lg transition-colors">
+                                        <Link href={`/admin/categories/${cat.id}`} className="p-2 hover:bg-[#27272a] hover:text-white rounded-lg transition-colors">
                                             <FontAwesomeIcon icon={faPenToSquare} className="w-4 h-4" />
-                                        </button>
-                                        <button className="p-2 hover:bg-red-500/10 hover:text-red-400 rounded-lg transition-colors">
-                                            <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
-                                        </button>
+                                        </Link>
+                                        <DeleteButton table="categories" id={cat.id} />
                                     </div>
                                 </td>
                             </tr>

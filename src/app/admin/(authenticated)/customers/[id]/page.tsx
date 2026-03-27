@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft, faCircleUser, faShieldHalved, faEnvelope } from '@fortawesome/free-solid-svg-icons'
+import { faArrowLeft, faCircleUser, faEnvelope } from '@fortawesome/free-solid-svg-icons'
+import CustomerActions from '@/components/admin/CustomerActions'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,12 +53,10 @@ export default async function AdminCustomerDetailsPage({ params }: { params: Pro
 
                     <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-6 space-y-4">
                         <h3 className="font-semibold text-white border-b border-[#27272a] pb-2">Actions</h3>
-                        <button className="w-full flex items-center gap-2 justify-center bg-[#27272a] hover:bg-[#3f3f46] text-white py-2 rounded-lg text-sm transition-colors">
+                        <button className="w-full flex items-center gap-2 justify-center bg-[#27272a] hover:bg-[#3f3f46] text-white py-2 rounded-lg text-sm transition-colors mb-2">
                             <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4" /> Send Email
                         </button>
-                        <button className="w-full flex items-center gap-2 justify-center bg-red-500/10 text-red-500 hover:bg-red-500/20 py-2 rounded-lg text-sm transition-colors">
-                            <FontAwesomeIcon icon={faShieldHalved} className="w-4 h-4" /> {profile.is_active ? 'Block User' : 'Unblock User'}
-                        </button>
+                        <CustomerActions profileId={profile.id} isActive={profile.is_active} />
                     </div>
                 </div>
 

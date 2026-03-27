@@ -42,19 +42,20 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid content key' }, { status: 400 })
     }
 
+    // Upserting to site_content
     const { error } = await supabase
       .from('site_content')
       .upsert({
         id: key,
         value: value,
-        updated_at: new Date().toISOString(),
-      })
+      }, { onConflict: 'id' })
 
     if (error) throw error
 
-    return NextResponse.json({ success: true, key, updatedAt: new Date().toISOString() })
+    return NextResponse.json({ success: true, key })
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to update content'
+    console.error('API SAVE ERROR:', err)
     return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

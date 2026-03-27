@@ -10,36 +10,28 @@ import CartDrawer from '@/components/layout/CartDrawer'
 
 import SearchModal from '@/components/layout/SearchModal'
 import { SavikaLogo } from '@/components/ui/SavikaLogo'
+import { createClient } from '@/lib/supabase/client'
 
 
-const navLinks = [
-    { label: 'Shop All', href: '/shop' },
-    {
-        label: 'Categories', href: '#',
-        children: [
-            { label: 'Whole Spices', href: '/category/whole-spices' },
-            { label: 'Ground & Powdered', href: '/category/ground-powdered' },
-            { label: 'Blends & Masalas', href: '/category/blends-masalas' },
-            { label: 'Gift Packs', href: '/category/gift-packs' },
-            { label: 'Exotics & Rare', href: '/category/exotics-rare' },
-        ],
-    },
-    { label: 'Our Story', href: '/our-story' },
-    { label: 'Why Savika', href: '/why-savika' },
-    { label: 'Contact', href: '/contact' },
-]
 
 export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false)
     const [mobileOpen, setMobileOpen] = useState(false)
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
+    const [announcement, setAnnouncement] = useState('Free shipping on orders above Rs.599 | 100% Pure & Natural | Pan-India Delivery')
+    const [categories, setCategories] = useState<{label: string, href: string}[]>([
+        { label: 'Whole Spices', href: '/category/whole-spices' },
+        { label: 'Ground & Powdered', href: '/category/ground-powdered' },
+        { label: 'Blends & Masalas', href: '/category/blends-masalas' },
+        { label: 'Gift Packs', href: '/category/gift-packs' },
+        { label: 'Exotics & Rare', href: '/category/exotics-rare' },
+    ])
+
     const { itemCount, toggleCart } = useCartStore()
     const count = itemCount()
     const pathname = usePathname()
     const router = useRouter()
-
-
 
     useEffect(() => {
         setIsSearchOpen(false)
@@ -49,26 +41,62 @@ export default function Navbar() {
     useEffect(() => {
         const handler = () => setIsScrolled(window.scrollY > 20)
         window.addEventListener('scroll', handler)
+        
+        // Fetch announcement
+        fetch('/api/content')
+            .then(res => res.json())
+            .then(data => {
+                if (data.announcement_bar?.text) {
+                    setAnnouncement(data.announcement_bar.text)
+                }
+            })
+            .catch(console.error)
+
+        // Fetch categories for nav
+        const supabase = createClient()
+        supabase.from('categories').select('name, slug').order('sort_order')
+            .then(({ data }: { data: any[] | null }) => {
+                if (data && data.length > 0) {
+                    setCategories(data.map((c: any) => ({ label: c.name, href: `/category/${c.slug}` })))
+                }
+            })
+
         return () => window.removeEventListener('scroll', handler)
     }, [])
+
+    const dynamicNavLinks = [
+        { label: 'Shop All', href: '/shop' },
+        {
+            label: 'Categories', href: '#',
+            children: categories,
+        },
+        { label: 'Our Story', href: '/our-story' },
+        { label: 'Why Savika', href: '/why-savika' },
+        { label: 'Contact', href: '/contact' },
+    ]
+
+    const announcementParts = announcement.split('|').map(s => s.trim())
 
     return (
         <>
             {/* Promo Bar */}
             <div className="bg-[#C47F17] text-white py-2 px-4 overflow-hidden relative">
                 <div className="flex sm:justify-center items-center gap-6 text-[10px] sm:text-xs tracking-wide font-medium whitespace-nowrap animate-marquee sm:animate-none">
-                    <span>Free shipping on orders above Rs.599</span>
-                    <span className="hidden sm:inline">|</span>
-                    <span>100% Pure &amp; Natural</span>
-                    <span className="hidden sm:inline">|</span>
-                    <span>Pan-India Delivery</span>
+                    {announcementParts.map((part, i) => (
+                        <span key={i} className="flex items-center gap-6">
+                            {i > 0 && <span className="hidden sm:inline">|</span>}
+                            <span>{part}</span>
+                        </span>
+                    ))}
                     {/* Duplicate for seamless marquee on mobile */}
-                    <span className="sm:hidden">|</span>
-                    <span className="sm:hidden">Free shipping on orders above Rs.599</span>
-                    <span className="sm:hidden">|</span>
-                    <span className="sm:hidden">100% Pure &amp; Natural</span>
-                    <span className="sm:hidden">|</span>
-                    <span className="sm:hidden">Pan-India Delivery</span>
+                    <div className="flex sm:hidden items-center gap-6">
+                        {announcementParts.map((part, i) => (
+                            <span key={`dup-${i}`} className="flex items-center gap-6">
+                                <span>|</span>
+                                <span>{part}</span>
+                            </span>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -86,7 +114,7 @@ export default function Navbar() {
 
                         {/* Desktop Nav */}
                         <nav className="hidden lg:flex items-center gap-1">
-                            {navLinks.map((link) => (
+                            {dynamicNavLinks.map((link) => (
                                 <div
                                     key={link.label}
                                     className="relative"
@@ -159,7 +187,7 @@ export default function Navbar() {
                     {mobileOpen && (
                         <div className="lg:hidden pb-4 border-t border-[#e8ddd0] mt-1 bg-[#FFF8F0]">
                             <div className="pt-3 space-y-1">
-                                {navLinks.map((link) => (
+                                {dynamicNavLinks.map((link) => (
                                     <div key={link.label}>
                                         <Link
                                             href={link.href}

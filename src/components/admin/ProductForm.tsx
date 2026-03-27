@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -46,6 +46,29 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
         }
     })
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [categories, setCategories] = useState<any[]>([])
+    const [fetchingCategories, setFetchingCategories] = useState(false)
+
+    // Fetch categories on mount
+    useEffect(() => {
+        const fetchCats = async () => {
+            setFetchingCategories(true)
+            const { data } = await supabase.from('categories').select('id, name').order('name')
+            if (data) setCategories(data)
+            setFetchingCategories(false)
+        }
+        fetchCats()
+    }, [])
+
+    // Auto-generate slug from name if new product
+    const handleNameChange = (name: string) => {
+        if (!initialData) {
+            const slug = name.toLowerCase().trim().replace(/ /g, '-').replace(/[^\w-]+/g, '')
+            setFormData(prev => ({ ...prev, name, slug }))
+        } else {
+            setFormData(prev => ({ ...prev, name }))
+        }
+    }
 
     const [uploading, setUploading] = useState(false)
 
@@ -97,8 +120,17 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
             const validatedData = productSchema.parse(formData)
             
             const dataToSave = {
-                ...validatedData,
+                name: validatedData.name,
+                slug: validatedData.slug,
+                tagline: validatedData.tagline || '',
+                local_name: validatedData.local_name || '',
+                price: validatedData.price,
+                compare_price: validatedData.compare_price || null,
+                stock: validatedData.stock,
+                description: validatedData.description || '',
+                is_active: validatedData.is_active,
                 category_id: validatedData.category_id || null,
+                image_urls: validatedData.image_urls || [],
             }
 
             if (initialData?.id) {
@@ -153,12 +185,12 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium text-[#e4e4e7]">Product Name</label>
-                                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 focus:border-[#C17F24] focus:ring-1 focus:ring-[#C17F24] outline-none transition-all" />
+                                <input required type="text" value={formData.name} onChange={e => handleNameChange(e.target.value)} className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 focus:border-[#C17F24] focus:ring-1 focus:ring-[#C17F24] outline-none transition-all" />
                                 {errors.name && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {errors.name}</p>}
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium text-[#e4e4e7]">URL Slug</label>
-                                <input required type="text" value={formData.slug} onChange={e => setFormData({...formData, slug: e.target.value})} className="w-full bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] rounded-lg px-4 py-2.5 outline-none font-mono text-sm" />
+                                <input required type="text" value={formData.slug} onChange={e => setFormData({...formData, slug: e.target.value})} className="w-full bg-[#27272a] border border-[#3f3f46] text-[#a1a1aa] rounded-lg px-4 py-2.5 outline-none font-mono text-sm" readOnly={!!initialData} />
                                 {errors.slug && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {errors.slug}</p>}
                             </div>
                         </div>
@@ -513,8 +545,18 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                         </div>
 
                         <div className="space-y-1.5 pt-2">
-                            <label className="text-sm font-medium text-[#e4e4e7]">Category ID</label>
-                            <input type="text" value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} placeholder="Supabase UUID" className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 outline-none" />
+                            <label className="text-sm font-medium text-[#e4e4e7]">Category</label>
+                            <select 
+                                value={formData.category_id || ''} 
+                                onChange={e => setFormData({...formData, category_id: e.target.value})} 
+                                className="w-full bg-[#27272a] border border-[#3f3f46] text-white rounded-lg px-4 py-2.5 outline-none focus:border-[#C17F24] transition-all"
+                            >
+                                <option value="">Select Category</option>
+                                {categories.map(cat => (
+                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                ))}
+                            </select>
+                            {fetchingCategories && <p className="text-[#a1a1aa] text-xs animate-pulse">Loading categories...</p>}
                             {errors.category_id && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {errors.category_id}</p>}
                         </div>
                     </div>
