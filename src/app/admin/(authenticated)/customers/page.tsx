@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faSearch, faCircleUser } from '@fortawesome/free-solid-svg-icons'
+import ExportCSVButton from '@/components/admin/ExportCSVButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,6 +38,7 @@ export default async function AdminCustomersPage() {
                     <h1 className="text-2xl font-bold text-white">Customers</h1>
                     <p className="text-[#a1a1aa] text-sm mt-1">Total {totalCount} registered users.</p>
                 </div>
+                <ExportCSVButton />
             </div>
 
             <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">

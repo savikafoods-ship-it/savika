@@ -1,41 +1,19 @@
 import Link from 'next/link'
 import ProductCard from '@/components/product/ProductCard'
-import type { Product } from '@/types'
+import { createClient } from '@/lib/supabase/server'
 
-const MOCK_PRODUCTS: Product[] = [
-    {
-        id: '1', name: 'Red Chilli Powder', tagline: 'Tikha Swad', slug: 'kashmiri-mirch-whole',
-        category: { id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', sort_order: 1 },
-        category_id: 'cat2', price: 185, stock: 100, is_active: true,
-        image_urls: ['/images/products/kashmiri-mirch-whole.jpg'],
-        description: 'Pure red chilli powder with the authentic fiery heat of Indian kitchens. No fillers, no artificial color. Just the real tikha swad that elevates every dish.'
-    },
-    {
-        id: '2', name: 'Garam Masala', tagline: 'Rich Aroma', slug: 'garam-masala-artisan',
-        category: { id: 'cat3', slug: 'blends-masalas', name: 'Blends & Masalas', sort_order: 2 },
-        category_id: 'cat3', price: 295, stock: 80, is_active: true,
-        image_urls: ['/images/products/garam-masala-artisan.jpg'],
-        description: 'A perfectly balanced blend of whole spices, slow-roasted and stone-ground. The rich aroma of Savika Garam Masala transforms ordinary meals into unforgettable ones.'
-    },
-    {
-        id: '3', name: 'Turmeric Powder', tagline: 'Rang Aur Shuddhta', slug: 'premium-turmeric-powder',
-        category: { id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', sort_order: 1 },
-        category_id: 'cat2', price: 145, stock: 120, is_active: true,
-        image_urls: ['/images/products/premium-turmeric-powder.jpg'],
-        description: 'Cold-ground pure turmeric with high curcumin content. The vibrant rang and shuddhta of this turmeric is unmatched - sourced directly from Erode, Tamil Nadu.'
-    },
-    {
-        id: '4', name: 'Coriander Powder', tagline: 'Khushboo Bhara Taste', slug: 'coriander-powder',
-        category: { id: 'cat2', slug: 'ground-powdered', name: 'Ground & Powdered', sort_order: 1 },
-        category_id: 'cat2', price: 165, stock: 90, is_active: true,
-        image_urls: ['/images/products/coriander-powder.jpg'],
-        description: 'Freshly ground coriander with an unmistakable khushboo. Adds a warm, citrusy depth to curries, dals, and marinades. 100% pure, no mixing.'
-    },
-]
+export default async function FeaturedProducts() {
+    const supabase = await createClient()
+    
+    const { data: products } = await supabase
+        .from('products')
+        .select('*, category:categories(*)')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(4)
 
-export default function FeaturedProducts() {
     return (
-        <section style={{ padding: '3.5rem 1rem', background: '#F9F4EE' }}>
+        <section className="animate-fadeUp" style={{ padding: '3.5rem 1rem', background: '#F9F4EE' }}>
             <div className="section-wrap">
                 <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '2rem' }}>
                     <div>
@@ -49,10 +27,15 @@ export default function FeaturedProducts() {
                     </Link>
                 </div>
                 <div className="grid-products">
-                    {MOCK_PRODUCTS.map((product) => (
+                    {products?.map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
+                {(!products || products.length === 0) && (
+                    <div className="py-10 text-center text-gray-500 italic">
+                        New spices arriving soon...
+                    </div>
+                )}
             </div>
         </section>
     )

@@ -30,7 +30,7 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
     const discountPercent = product.compare_price ? getDiscountPercent(product.compare_price, product.price) : 0
 
     return (
-        <div className={`product-card ${className}`}>
+        <div className={`product-card hover-lift premium-shadow ${className}`}>
             <Link href={`/product/${product.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
                 {/* Image */}
                 <div className="product-card-img">
@@ -39,8 +39,8 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
                             src={product.image_urls[0].startsWith('/') ? product.image_urls[0] : getProductImageUrl(product.image_urls[0])}
                             alt={product.name}
                             fill
-                            className="object-contain"
-                            style={{ padding: '1rem', transition: 'transform 400ms' }}
+                            style={{ padding: '1rem', transition: 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }}
+                            className="object-contain group-hover:scale-110"
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                             onError={() => setImgError(true)}
                         />

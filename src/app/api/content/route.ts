@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 export async function GET() {
   try {
@@ -51,6 +52,10 @@ export async function PATCH(req: NextRequest) {
       }, { onConflict: 'id' })
 
     if (error) throw error
+
+    // Revalidate homepage and all layouts so promo cards & announcement bar refresh instantly
+    revalidatePath('/')
+    revalidatePath('/(.*)', 'layout')
 
     return NextResponse.json({ success: true, key })
   } catch (err: unknown) {

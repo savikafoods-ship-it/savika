@@ -6,37 +6,75 @@ import { faShoppingBag, faHeart, faTruck, faShieldAlt, faRotateLeft } from '@for
 import { useCartStore } from '@/store/cartStore'
 import type { Product } from '@/types'
 
+interface WeightVariant {
+    label: string
+    price: number
+}
+
+function parseWeightOptions(raw: any[], metadataPricing: any[], fallbackPrice: number): WeightVariant[] {
+    // If we have explicit weight_pricing in metadata (which we guarantee to be {label, price}), use it!
+    if (metadataPricing && metadataPricing.length > 0) {
+        return metadataPricing.map((opt: any) => ({
+            label: opt.label || '100g',
+            price: Number(opt.price) || fallbackPrice
+        }))
+    }
+    
+    // Fallback to parsing the legacy array (which might just be strings)
+    if (!raw || raw.length === 0) return []
+    return raw.map((opt: any) => {
+        if (typeof opt === 'object' && opt !== null) {
+            return { label: opt.label || opt.weight || '100g', price: Number(opt.price) || fallbackPrice }
+        }
+        if (typeof opt === 'string') {
+            try { return JSON.parse(opt) } catch { /* ignore */ }
+            return { label: opt, price: fallbackPrice }
+        }
+        return null
+    }).filter(Boolean) as WeightVariant[]
+}
+
 export default function ProductCommercePanel({ productData }: { productData: any }) {
-    const weightOptions = (productData.weightOptions || []).map((opt: any) => 
-        typeof opt === 'string' ? JSON.parse(opt) : opt
+    const weightOptions = parseWeightOptions(
+        productData.weightOptions || productData.weight_options || [],
+        productData.metadata?.weight_pricing || [],
+        productData.price
     )
 
-    const [selectedVariant, setSelectedVariant] = useState(weightOptions[0] || { label: '100g', price: productData.price, salePrice: productData.sale_price })
+    const [selectedIndex, setSelectedIndex] = useState(0)
     const [adding, setAdding] = useState(false)
     const { addItem } = useCartStore()
 
-    const currentPrice = selectedVariant?.price || productData.price
-    const currentSalePrice = selectedVariant?.salePrice || productData.sale_price
-    const savings = currentSalePrice ? currentPrice - currentSalePrice : 0
-    const savingsPct = savings > 0 ? Math.round((savings / currentPrice) * 100) : 0
+    const selectedVariant = weightOptions[selectedIndex] || { label: '100g', price: productData.price }
+    const displayPrice = selectedVariant.price
+    const comparePrice = productData.compare_price
+    const savings = comparePrice && comparePrice > displayPrice ? comparePrice - displayPrice : 0
+    const savingsPct = savings > 0 ? Math.round((savings / comparePrice) * 100) : 0
+
+    // Debug logging
+    console.log('[CommercePanel] RAW productData.weight_options:', productData.weight_options)
+    console.log('[CommercePanel] RAW productData.weightOptions:', productData.weightOptions)
+    console.log('[CommercePanel] weightOptions PARSED:', JSON.stringify(weightOptions))
+    console.log('[CommercePanel] selectedIndex:', selectedIndex, 'selectedVariant:', JSON.stringify(selectedVariant), 'displayPrice:', displayPrice)
 
     const handleAddToCart = () => {
         setAdding(true)
-        
+
+        // Set product price to the selected variant price so cart total is correct
         const cartProduct: Product = {
             id: productData.id || productData.slug,
-            name: productData.name,
+            name: `${productData.name} - ${selectedVariant.label}`,
             slug: productData.slug,
-            price: currentSalePrice ?? currentPrice,
-            compare_price: currentSalePrice ? currentPrice : undefined,
+            price: displayPrice,
+            compare_price: comparePrice && comparePrice > displayPrice ? comparePrice : undefined,
             stock: productData.stock,
             is_active: true,
             category_id: productData.category?.id || productData.category?.slug,
-            image_urls: productData.image_urls || [productData.image]
+            image_urls: productData.image_urls || []
         }
-        
-        addItem(cartProduct, 1, selectedVariant?.label || '100g') 
-        setTimeout(() => setAdding(false), 1000)
+
+        addItem(cartProduct, 1, selectedVariant.label)
+        setTimeout(() => setAdding(false), 1200)
     }
 
     return (
@@ -45,11 +83,11 @@ export default function ProductCommercePanel({ productData }: { productData: any
             <div className="flex flex-col gap-1">
                 <div className="flex flex-wrap items-baseline gap-3">
                     <span className="text-2xl sm:text-3xl font-extrabold text-[#2C1A0E]">
-                        ₹{currentSalePrice ?? currentPrice}
+                        ₹{displayPrice}
                     </span>
-                    {currentSalePrice && currentSalePrice < currentPrice && (
+                    {savings > 0 && (
                         <>
-                            <span className="text-xl text-gray-400 line-through">₹{currentPrice}</span>
+                            <span className="text-xl text-gray-400 line-through">₹{comparePrice}</span>
                             <span className="text-sm bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">
                                 Save ₹{savings} ({savingsPct}%)
                             </span>
@@ -59,24 +97,26 @@ export default function ProductCommercePanel({ productData }: { productData: any
             </div>
 
             {/* Weight / Variant selector */}
-            <div>
-                <p className="text-sm font-semibold text-[#2E2E2E] mb-2">Select Weight</p>
-                <div className="flex flex-wrap gap-2">
-                    {weightOptions.map((opt: any, i: number) => (
-                        <button
-                            key={i}
-                            onClick={() => setSelectedVariant(opt)}
-                            className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
-                                selectedVariant?.label === opt.label
-                                    ? 'border-[#C47F17] bg-[#C47F17] text-white'
-                                    : 'border-[#e8ddd0] bg-white text-[#2E2E2E] hover:border-[#C47F17]'
-                            }`}
-                        >
-                            {opt.label || opt.weight || '100g'}
-                        </button>
-                    ))}
+            {weightOptions.length > 0 && (
+                <div>
+                    <p className="text-sm font-semibold text-[#2E2E2E] mb-2">Select Weight</p>
+                    <div className="flex flex-wrap gap-2">
+                        {weightOptions.map((opt, i) => (
+                            <button
+                                key={opt.label}
+                                onClick={() => setSelectedIndex(i)}
+                                className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
+                                    selectedIndex === i
+                                        ? 'border-[#C47F17] bg-[#C47F17] text-white'
+                                        : 'border-[#e8ddd0] bg-white text-[#2E2E2E] hover:border-[#C47F17]'
+                                }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Stock */}
             <div className="flex items-center gap-2">
@@ -88,7 +128,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
-                <button 
+                <button
                     onClick={handleAddToCart}
                     disabled={productData.stock === 0}
                     className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#C17F24]/30 ${adding ? 'bg-green-500 text-white' : 'bg-[#C17F24] hover:bg-[#8B5E16] text-white'}`}
@@ -96,7 +136,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
                     <FontAwesomeIcon icon={faShoppingBag} className="w-5 h-5" />
                     {adding ? 'Added to Cart!' : 'Add to Cart'}
                 </button>
-                <button 
+                <button
                     className="flex items-center justify-center gap-2 border-2 border-[#C17F24] text-[#C17F24] hover:bg-[#C17F24] hover:text-white px-5 py-4 rounded-2xl font-bold text-base transition-all duration-300"
                     onClick={() => alert(`Added ${productData.name} to wishlist!`)}
                 >

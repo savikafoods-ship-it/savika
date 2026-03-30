@@ -19,6 +19,7 @@ export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false)
     const [openDropdown, setOpenDropdown] = useState<string | null>(null)
     const [isSearchOpen, setIsSearchOpen] = useState(false)
+    const [mounted, setMounted] = useState(false)
     const [announcement, setAnnouncement] = useState('Free shipping on orders above Rs.599 | 100% Pure & Natural | Pan-India Delivery')
     const [categories, setCategories] = useState<{label: string, href: string}[]>([
         { label: 'Whole Spices', href: '/category/whole-spices' },
@@ -32,6 +33,10 @@ export default function Navbar() {
     const count = itemCount()
     const pathname = usePathname()
     const router = useRouter()
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
         setIsSearchOpen(false)
@@ -167,8 +172,8 @@ export default function Navbar() {
                                 className="relative p-2.5 rounded-xl hover:bg-[#FFF0DC] text-[#2E2E2E] hover:text-[#C47F17] transition-all"
                             >
                                 <ShoppingBag className="w-5 h-5" />
-                                {count > 0 && (
-                                    <span className="absolute -top-0.5 -right-0.5 bg-[#C47F17] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                                {mounted && count > 0 && (
+                                    <span className="absolute -top-0.5 -right-0.5 bg-[#C47F17] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center animate-in zoom-in duration-300">
                                         {count}
                                     </span>
                                 )}

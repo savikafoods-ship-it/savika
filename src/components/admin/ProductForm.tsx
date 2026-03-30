@@ -15,7 +15,9 @@ import {
     Utensils, 
     HelpCircle,
     Info,
-    AlertTriangle
+    AlertTriangle,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react'
 import { productSchema } from '@/lib/validations/product'
 import { ZodError } from 'zod'
@@ -36,7 +38,10 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
         is_active: initialData?.is_active ?? true,
         category_id: initialData?.category_id || '',
         image_urls: initialData?.image_urls || [] as string[],
-        weight_options: initialData?.weight_options || [] as any[],
+        weight_options: initialData?.metadata?.weight_pricing || 
+                        (initialData?.weight_options?.length > 0 && typeof initialData.weight_options[0] === 'string' 
+                            ? initialData.weight_options.map((w: string) => ({ label: w, price: initialData.price }))
+                            : (initialData?.weight_options || [] as any[])),
         metadata: initialData?.metadata || { benefits: [], culinaryUses: [], faqs: [] },
         generated_content: initialData?.generated_content || {
             what_is: { description: '', origin: 'India', botanical_name: '' },
@@ -80,7 +85,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
         try {
             const fileExt = file.name.split('.').pop()
             const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
-            const filePath = `products/${fileName}`
+            const filePath = fileName // Upload to root of 'products' bucket
 
             const { error: uploadError } = await supabase.storage
                 .from('products')
@@ -94,13 +99,25 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
 
             setFormData(prev => ({
                 ...prev,
-                image_urls: [...prev.image_urls, publicUrl]
+                image_urls: [...prev.image_urls, fileName] // Store only the filename/relative path
             }))
         } catch (err: any) {
             alert(`Error uploading image: ${err.message}`)
         } finally {
             setUploading(false)
         }
+    }
+
+    const moveImage = (index: number, direction: 'left' | 'right') => {
+        const newUrls = [...formData.image_urls]
+        const nextIndex = direction === 'left' ? index - 1 : index + 1
+        if (nextIndex < 0 || nextIndex >= newUrls.length) return
+        
+        const temp = newUrls[index]
+        newUrls[index] = newUrls[nextIndex]
+        newUrls[nextIndex] = temp
+        
+        setFormData((prev: any) => ({ ...prev, image_urls: newUrls }))
     }
 
     const removeImage = (index: number) => {
@@ -118,7 +135,6 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
         try {
             // Validate with Zod
             const validatedData = productSchema.parse(formData)
-            
             const dataToSave = {
                 name: validatedData.name,
                 slug: validatedData.slug,
@@ -131,6 +147,12 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                 is_active: validatedData.is_active,
                 category_id: validatedData.category_id || null,
                 image_urls: validatedData.image_urls || [],
+                weight_options: (formData.weight_options || []).map((o: any) => o.label || o),
+                generated_content: formData.generated_content || {},
+                metadata: {
+                    ...(formData.metadata || {}),
+                    weight_pricing: formData.weight_options || []
+                }
             }
 
             if (initialData?.id) {
@@ -225,20 +247,59 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                             </button>
                         </div>
                         {formData.weight_options.map((opt: any, i: number) => (
-                            <div key={i} className="grid grid-cols-3 gap-3 p-3 bg-[#27272a] rounded-lg relative group">
-                                <input type="text" value={opt.label} onChange={e => {
-                                    const next = [...formData.weight_options]; next[i].label = e.target.value;
-                                    setFormData({...formData, weight_options: next})
-                                }} className="bg-[#18181b] border border-[#3f3f46] text-white text-xs rounded-md px-2 py-1.5" placeholder="Size" />
-                                <input type="number" value={opt.price} onChange={e => {
-                                    const next = [...formData.weight_options]; next[i].price = parseFloat(e.target.value);
-                                    setFormData({...formData, weight_options: next})
-                                }} className="bg-[#18181b] border border-[#3f3f46] text-white text-xs rounded-md px-2 py-1.5" placeholder="Price" />
-                                <input type="number" value={opt.salePrice} onChange={e => {
-                                    const next = [...formData.weight_options]; next[i].salePrice = parseFloat(e.target.value);
-                                    setFormData({...formData, weight_options: next})
-                                }} className="bg-[#18181b] border border-[#3f3f46] text-white text-xs rounded-md px-2 py-1.5" placeholder="Sale" />
-                                <button type="button" onClick={() => setFormData((p: any) => ({ ...p, weight_options: p.weight_options.filter((_opt: any, idx: number) => idx !== i) }))} className="absolute -top-2 -right-2 bg-red-600 text-white w-5 h-5 rounded-full text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+                            <div key={i} className="grid grid-cols-3 gap-3 p-3 bg-[#27272a] rounded-xl relative group border border-transparent hover:border-[#3f3f46] transition-all">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] uppercase tracking-wider text-[#71717a] font-bold ml-1">Size</label>
+                                    <input 
+                                        type="text" 
+                                        value={opt.label} 
+                                        onChange={e => {
+                                            const next = [...formData.weight_options];
+                                            next[i] = { ...next[i], label: e.target.value };
+                                            setFormData(prev => ({ ...prev, weight_options: next }));
+                                        }} 
+                                        className="w-full bg-[#18181b] border border-[#3f3f46] text-white text-xs rounded-lg px-3 py-2 outline-none focus:border-[#C17F24]" 
+                                        placeholder="e.g. 100gm" 
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] uppercase tracking-wider text-[#71717a] font-bold ml-1">MRP (₹)</label>
+                                    <input 
+                                        type="number" 
+                                        value={opt.price} 
+                                        onChange={e => {
+                                            const next = [...formData.weight_options];
+                                            next[i] = { ...next[i], price: parseFloat(e.target.value) || 0 };
+                                            setFormData(prev => ({ ...prev, weight_options: next }));
+                                        }} 
+                                        className="w-full bg-[#18181b] border border-[#3f3f46] text-white text-xs rounded-lg px-3 py-2 outline-none focus:border-[#C17F24]" 
+                                        placeholder="0" 
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] uppercase tracking-wider text-[#71717a] font-bold ml-1">Sale (₹)</label>
+                                    <input 
+                                        type="number" 
+                                        value={opt.salePrice || 0} 
+                                        onChange={e => {
+                                            const next = [...formData.weight_options];
+                                            next[i] = { ...next[i], salePrice: parseFloat(e.target.value) || 0 };
+                                            setFormData(prev => ({ ...prev, weight_options: next }));
+                                        }} 
+                                        className="w-full bg-[#18181b] border border-[#3f3f46] text-white text-xs rounded-lg px-3 py-2 outline-none focus:border-[#C17F24]" 
+                                        placeholder="0" 
+                                    />
+                                </div>
+                                <button 
+                                    type="button" 
+                                    onClick={() => {
+                                        const next = formData.weight_options.filter((_: any, idx: number) => idx !== i);
+                                        setFormData(prev => ({ ...prev, weight_options: next }));
+                                    }} 
+                                    className="absolute -top-2 -right-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white w-6 h-6 rounded-full flex items-center justify-center border border-red-500/20 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 shadow-lg"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -503,15 +564,48 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                         <h2 className="text-lg font-semibold text-white mb-4">Media</h2>
                         <div className="grid grid-cols-2 gap-3 mb-4">
                             {formData.image_urls.map((url: string, i: number) => (
-                                <div key={i} className="relative aspect-square bg-[#27272a] rounded-lg overflow-hidden group">
+                                <div key={i} className="relative aspect-square bg-[#27272a] rounded-lg overflow-hidden group border border-[#3f3f46] hover:border-[#C17F24] transition-all">
                                     <img src={url} className="w-full h-full object-cover" alt="" />
-                                    <button 
-                                        type="button" 
-                                        onClick={() => removeImage(i)}
-                                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                    >
-                                        <span className="text-white text-xs font-bold">Remove</span>
-                                    </button>
+                                    
+                                    {/* Overlay Controls */}
+                                    <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                                        <div className="flex items-center gap-2">
+                                            {i > 0 && (
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => moveImage(i, 'left')}
+                                                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#C17F24] text-white flex items-center justify-center transition-colors"
+                                                    title="Move Left"
+                                                >
+                                                    <ChevronLeft className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                            {i < formData.image_urls.length - 1 && (
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => moveImage(i, 'right')}
+                                                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#C17F24] text-white flex items-center justify-center transition-colors"
+                                                    title="Move Right"
+                                                >
+                                                    <ChevronRight className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => removeImage(i)}
+                                            className="px-3 py-1 rounded-md bg-red-500/20 hover:bg-red-500 text-red-500 hover:text-white text-[10px] font-bold transition-all border border-red-500/30"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+
+                                    {/* Primary Badge */}
+                                    {i === 0 && (
+                                        <div className="absolute top-2 left-2 bg-[#C17F24] text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-lg uppercase tracking-wider">
+                                            Primary
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                             {uploading ? (

@@ -45,11 +45,11 @@ import {
     ChevronDown
 } from 'lucide-react'
 import ProductCommercePanel from '@/components/product/ProductCommercePanel'
+import ImageZoom from '@/components/product/ImageZoom'
 import { createClient, createStaticClient } from '@/lib/supabase/server'
 import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
-// ─── ISR: revalidate every hour ─────────────────────────────────────────
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 // ─── Product Metadata (rich content not in DB yet) ─────────────────────────
 
@@ -80,25 +80,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const name = p.name
     const description = p.description || ''
+    const shortDesc = description.slice(0, 160)
     const image = p.image_urls?.[0] || '/images/logo.png'
 
     return {
-        title: p.metadata?.metaTitle || `${name} | Savika`,
-        description: p.metadata?.metaDescription || p.tagline || description,
+        title: `Buy ${name} Online in India | Savika Foods`,
+        description: shortDesc || p.tagline || description,
         keywords: (p.metadata?.keywords || []).join(', '),
+        alternates: {
+            canonical: `https://savikafoods.in/product/${slug}`,
+        },
         openGraph: {
-            title: p.metadata?.metaTitle || name,
-            description: p.metadata?.metaDescription || description,
+            title: `Buy ${name} Online in India | Savika Foods`,
+            description: shortDesc || description,
             url: `https://savikafoods.in/product/${slug}`,
-            siteName: 'Savika',
+            siteName: 'Savika Foods',
             images: [{ url: image.startsWith('/') ? image : getProductImageUrl(image), width: 1200, height: 630, alt: name }],
             locale: 'en_IN',
             type: 'website',
         },
         twitter: {
             card: 'summary_large_image',
-            title: p.metadata?.metaTitle || name,
-            description: p.metadata?.metaDescription || description,
+            title: `Buy ${name} Online in India | Savika Foods`,
+            description: shortDesc || description,
             images: [image.startsWith('/') ? image : getProductImageUrl(image)],
         },
     }
@@ -121,16 +125,17 @@ export default async function ProductPage({ params }: Props) {
         culturalImportance: p.metadata?.culturalImportance || 'Traditional Indian Spice',
         regionalUsage: p.metadata?.regionalUsage || 'Pan-India',
         benefits: (p.generated_content?.health_benefits?.length > 0) 
-            ? p.generated_content.health_benefits.map((b: any) => ({ title: b.name, desc: b.description }))
+            ? p.generated_content.health_benefits.map((b: any) => ({ title: b.name || 'Benefit', desc: b.description || '' }))
             : (p.metadata?.benefits || []),
         culinaryUses: p.generated_content?.culinary_uses || p.metadata?.culinaryUses || [],
         storageLife: p.metadata?.storageLife || '12 months',
         storageInstructions: p.metadata?.storageInstructions || 'Store in a cool, dry place.',
         sourcingStory: p.metadata?.sourcingStory || 'Sourced directly from verified farmers.',
         faqs: (p.generated_content?.faqs?.length > 0)
-            ? p.generated_content.faqs.map((f: any) => ({ q: f.question, a: f.answer }))
+            ? p.generated_content.faqs.map((f: any) => ({ q: f.question || '', a: f.answer || '' }))
             : (p.metadata?.faqs || []),
-        weightOptions: p.weight_options || []
+        weightOptions: p.weight_options || [],
+        weight_options: p.weight_options || []
     }
 
     const currentPrice = enrichedProduct.price
@@ -205,34 +210,21 @@ export default async function ProductPage({ params }: Props) {
                 ══════════════════════════════════════════════════ */}
                 <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
 
-                    {/* Product Gallery */}
-                    <div className="space-y-3">
-                        <div className="relative aspect-square rounded-3xl overflow-hidden bg-white shadow-xl">
-                            <Image
-                                src={getProductImageUrl(enrichedProduct.image_urls?.[0])}
-                                alt={`${enrichedProduct.name} - Buy Online India | Savika`}
-                                fill
-                                sizes="(max-width: 768px) 100vw, 50vw"
-                                className="object-cover"
-                                priority
-                            />
-                            {savingsPct > 0 && (
-                                <div className="absolute top-4 left-4 bg-[#C47F17] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                                    {savingsPct}% OFF
-                                </div>
-                            )}
-                            <div className="absolute top-4 right-4 bg-white/90 text-[#2E2E2E] text-xs font-semibold px-3 py-1.5 rounded-full shadow flex items-center gap-1">
-                                <FontAwesomeIcon icon={faCheckCircle} className="w-3 h-3 text-green-600" />
-                                FSSAI Certified
+                    {/* Product Gallery with Zoom / Lightbox */}
+                    <div className="relative">
+                        <ImageZoom
+                            images={enrichedProduct.image_urls || []}
+                            alt={enrichedProduct.name}
+                            priority
+                        />
+                        {savingsPct > 0 && (
+                            <div className="absolute top-4 left-4 z-10 bg-[#C47F17] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                                {savingsPct}% OFF
                             </div>
-                        </div>
-                        {/* Thumbnail row placeholder */}
-                        <div className="grid grid-cols-4 gap-2">
-                            {enrichedProduct.image_urls?.slice(0, 4).map((url: string, i: number) => (
-                                <div key={i} className="aspect-square rounded-xl bg-white shadow border-2 border-transparent hover:border-[#C47F17] transition-all cursor-pointer overflow-hidden relative">
-                                    <Image src={getProductImageUrl(url)} alt={`${enrichedProduct.name} view ${i}`} fill sizes="80px" className="object-cover" />
-                                </div>
-                            ))}
+                        )}
+                        <div className="absolute top-4 right-4 z-10 bg-white/90 text-[#2E2E2E] text-xs font-semibold px-3 py-1.5 rounded-full shadow flex items-center gap-1">
+                            <FontAwesomeIcon icon={faCheckCircle} className="w-3 h-3 text-green-600" />
+                            FSSAI Certified
                         </div>
                     </div>
 
@@ -272,12 +264,12 @@ export default async function ProductPage({ params }: Props) {
                 {/* ══════════════════════════════════════════════════
                     SECTION 2 - WHAT IS THIS SPICE?
                 ══════════════════════════════════════════════════ */}
-                <section className="bg-white rounded-3xl p-8 shadow-sm border border-[#e8ddd0]">
+                <section className="glass-card premium-shadow rounded-3xl p-8 animate-fadeUp" style={{ animationDelay: '200ms' }}>
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 rounded-xl bg-[#C17F24]/10 flex items-center justify-center">
                             <BookOpen className="w-5 h-5 text-[#C17F24]" />
                         </div>
-                        <h2 className="text-2xl font-extrabold text-[#2C1A0E]">What Is {enrichedProduct.name.split(' ')[0]}?</h2>
+                        <h2 className="text-2xl font-extrabold text-[#2C1A0E]">What Is {enrichedProduct.name}?</h2>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
                         <div className="lg:col-span-2 space-y-4">
@@ -303,7 +295,7 @@ export default async function ProductPage({ params }: Props) {
                         <div className="w-10 h-10 rounded-xl bg-[#C17F24]/10 flex items-center justify-center">
                             <HeartPulse className="w-5 h-5 text-[#C17F24]" />
                         </div>
-                        <h2 className="text-2xl font-extrabold text-[#2C1A0E]">Health Benefits of {enrichedProduct.name.split(' ')[0]}</h2>
+                        <h2 className="text-2xl font-extrabold text-[#2C1A0E]">Health Benefits of {enrichedProduct.name}</h2>
                     </div>
                     <p className="text-gray-500 mt-2 mb-6 max-w-2xl">
                         Backed by traditional Ayurvedic wisdom and modern nutritional science.
@@ -327,7 +319,7 @@ export default async function ProductPage({ params }: Props) {
                 {/* ══════════════════════════════════════════════════
                     SECTION 4 - CULINARY USES
                 ══════════════════════════════════════════════════ */}
-                <section className="bg-[#2C1A0E] rounded-3xl p-8">
+                <section className="bg-[#2C1A0E] rounded-3xl p-8 premium-shadow animate-fadeUp" style={{ animationDelay: '600ms' }}>
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 rounded-xl bg-[#C17F24]/20 flex items-center justify-center">
                             <Utensils className="w-5 h-5 text-[#C17F24]" />
@@ -351,7 +343,7 @@ export default async function ProductPage({ params }: Props) {
                 {/* ══════════════════════════════════════════════════
                     SECTION 5 - WHY CHOOSE SAVIKA
                 ══════════════════════════════════════════════════ */}
-                <section>
+                <section className="animate-fadeUp" style={{ animationDelay: '800ms' }}>
                     <SectionHeading icon={faAward} text="Why Choose Savika?" />
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
                         {[
@@ -403,7 +395,7 @@ export default async function ProductPage({ params }: Props) {
                     </div>
 
                     {/* ──────── Sourcing Story ──────── */}
-                    <section className="bg-[#FFF8F0] rounded-3xl p-7 border border-[#e8ddd0]">
+                    <section className="bg-[#FFF8F0] rounded-3xl p-7 border border-[#e8ddd0] premium-shadow animate-fadeUp" style={{ animationDelay: '1000ms' }}>
                         <h2 className="text-xl font-extrabold text-[#2C1A0E] mb-4 flex items-center gap-2">
                             <FontAwesomeIcon icon={faLeaf} className="w-5 h-5 text-[#C17F24]" />
                             Sourcing Story
@@ -419,7 +411,7 @@ export default async function ProductPage({ params }: Props) {
                 {/* ══════════════════════════════════════════════════
                     SECTION 7 - FAQ
                 ══════════════════════════════════════════════════ */}
-                <section>
+                <section className="glass-card premium-shadow rounded-3xl p-8 animate-fadeUp" style={{ animationDelay: '1200ms' }}>
                     <div className="flex items-center gap-3 mb-6">
                         <div className="w-10 h-10 rounded-xl bg-[#C17F24]/10 flex items-center justify-center">
                             <HelpCircle className="w-5 h-5 text-[#C17F24]" />
@@ -499,21 +491,4 @@ function InfoCard({ label, value, icon: Icon, italic }: { label: string; value: 
     )
 }
 
-function WeightSelector({ options }: { options: string[] }) {
-    // Client interaction - uses details/summary for no-JS fallback
-    return (
-        <div className="flex flex-wrap gap-2">
-            {options.map((opt, i) => (
-                <button
-                    key={opt}
-                    className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${i === 1
-                        ? 'border-[#C47F17] bg-[#C47F17] text-white'
-                        : 'border-[#e8ddd0] bg-white text-[#2E2E2E] hover:border-[#C47F17]'
-                        }`}
-                >
-                    {opt}
-                </button>
-            ))}
-        </div>
-    )
-}
+

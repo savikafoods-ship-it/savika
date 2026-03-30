@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave, faEye, faFire, faStar, faBullhorn, faSpinner, faCheck, faUpload, faTrash, faPalette } from '@fortawesome/free-solid-svg-icons'
-import { createClient } from '@/lib/supabase/client'
+import { faSave, faEye, faFire, faStar, faBullhorn, faSpinner, faCheck, faPalette } from '@fortawesome/free-solid-svg-icons'
 
 interface PromoCard {
   badge: string
@@ -13,7 +12,6 @@ interface PromoCard {
   buttonLabel: string
   buttonUrl: string
   icon: 'jar' | 'diamond' | 'star' | 'flame'
-  imageUrl?: string
   bgStart?: string
   bgEnd?: string
   textColor?: string
@@ -67,7 +65,10 @@ async function saveContent(key: string, value: object): Promise<void> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ key, value }),
   })
-  if (!res.ok) throw new Error('Failed to save')
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: 'Failed to save' }))
+    throw new Error(err.error || 'Failed to save')
+  }
 }
 
 function InputField({
@@ -94,101 +95,35 @@ function InputField({
   )
 }
 
-function ImageUpload({ 
-  currentUrl, 
-  onUpload, 
-  onRemove 
-}: { 
-  currentUrl?: string; 
-  onUpload: (url: string) => void;
-  onRemove: () => void 
-}) {
-  const [uploading, setUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const supabase = createClient()
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setUploading(true)
-    try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `banners/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('site-assets')
-        .upload(filePath, file)
-
-      if (uploadError) throw uploadError
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('site-assets')
-        .getPublicUrl(filePath)
-
-      onUpload(publicUrl)
-    } catch (err: any) {
-      alert(`Error uploading image: ${err.message}`)
-    } finally {
-      setUploading(false)
-    }
-  }
-
-  return (
-    <div className="space-y-2">
-      <label className="block text-sm font-[500] text-gray-300">Banner Image (Optional)</label>
-      <div className="flex items-center gap-4">
-        {currentUrl ? (
-          <div className="relative group">
-            <img src={currentUrl} alt="Preview" className="w-20 h-20 object-cover rounded-lg border border-gray-700" />
-            <button 
-              onClick={onRemove}
-              className="absolute -top-2 -right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-            >
-              <FontAwesomeIcon icon={faTrash} className="w-2.5 h-2.5" />
-            </button>
-          </div>
-        ) : (
-          <button 
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="w-20 h-20 border-2 border-dashed border-gray-700 rounded-lg flex flex-col items-center justify-center text-gray-500 hover:border-amber-600 hover:text-amber-600 transition-all"
-          >
-            {uploading ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faUpload} />}
-            <span className="text-[10px] mt-1">{uploading ? '...' : 'Upload'}</span>
-          </button>
-        )}
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-        <div className="text-xs text-gray-500">
-          <p>Recommended size: 800x400px</p>
-          <p>Transparency supported (PNG/WebP)</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function SaveButton({ onClick, saving, saved }: {
-  onClick: () => void; saving: boolean; saved: boolean
+function SaveButton({ onClick, saving, saved, error }: {
+  onClick: () => void; saving: boolean; saved: boolean; error?: string
 }) {
   return (
-    <button
-      onClick={onClick}
-      disabled={saving}
-      className="flex items-center gap-2 px-5 h-10 rounded-lg text-sm font-[600]
-                 bg-amber-700 text-white hover:bg-amber-800 active:scale-95
-                 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
-    >
-      {saving ? (
-        <><FontAwesomeIcon icon={faSpinner} className="w-4 h-4 animate-spin" /> Saving...</>
-      ) : saved ? (
-        <><FontAwesomeIcon icon={faCheck} className="w-4 h-4" /> Saved!</>
-      ) : (
-        <><FontAwesomeIcon icon={faSave} className="w-4 h-4" /> Save Changes</>
+    <div className="flex items-center gap-3">
+      {error && (
+        <span className="text-xs text-red-400 font-medium bg-red-500/10 px-3 py-1 rounded-lg">
+          {error}
+        </span>
       )}
-    </button>
+      <button
+        onClick={onClick}
+        disabled={saving}
+        className={`flex items-center gap-2 px-5 h-10 rounded-lg text-sm font-[600]
+                   transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${
+                     saved
+                       ? 'bg-green-600 text-white'
+                       : 'bg-amber-700 text-white hover:bg-amber-800'
+                   }`}
+      >
+        {saving ? (
+          <><FontAwesomeIcon icon={faSpinner} className="w-4 h-4 animate-spin" /> Saving...</>
+        ) : saved ? (
+          <><FontAwesomeIcon icon={faCheck} className="w-4 h-4" /> Saved!</>
+        ) : (
+          <><FontAwesomeIcon icon={faSave} className="w-4 h-4" /> Save Changes</>
+        )}
+      </button>
+    </div>
   )
 }
 
@@ -202,21 +137,24 @@ function PromoCardEditor({
 }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const isCard1 = cardKey === 'promo_card_1'
   
   const update = (field: keyof PromoCard, value: any) => {
     onChange(cardKey, { ...data, [field]: value })
     setSaved(false)
+    setSaveError('')
   }
 
   const handleSave = async () => {
     setSaving(true)
+    setSaveError('')
     try {
       await saveContent(cardKey, data)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
-    } catch {
-      alert('Failed to save. Please check your connection and try again.')
+    } catch (err: any) {
+      setSaveError(err.message || 'Failed to save')
     } finally {
       setSaving(false)
     }
@@ -237,7 +175,7 @@ function PromoCardEditor({
           }
           <h2 className="text-white font-[600] text-base">{title}</h2>
         </div>
-        <SaveButton onClick={handleSave} saving={saving} saved={saved} />
+        <SaveButton onClick={handleSave} saving={saving} saved={saved} error={saveError} />
       </div>
       <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         <div className="space-y-4">
@@ -260,13 +198,6 @@ function PromoCardEditor({
               <InputField label="BG End" value={data.bgEnd || '#000'} onChange={(v) => update('bgEnd', v)} type="color" />
               <InputField label="Text Color" value={data.textColor || '#fff'} onChange={(v) => update('textColor', v)} type="color" />
             </div>
-            <div className="mt-4">
-              <ImageUpload 
-                currentUrl={data.imageUrl} 
-                onUpload={(url) => update('imageUrl', url)} 
-                onRemove={() => update('imageUrl', '')} 
-              />
-            </div>
           </div>
         </div>
         
@@ -276,13 +207,9 @@ function PromoCardEditor({
             <span className="text-xs text-gray-500 font-[500] uppercase tracking-wider">Live Preview</span>
           </div>
           <div style={previewStyle} className={`relative rounded-2xl p-6 sm:p-8 overflow-hidden min-h-[220px] transition-all`}>
-            {/* Background Image / Icon */}
+            {/* Background Icon */}
             <div className="absolute right-6 top-1/2 -translate-y-1/2 w-32 h-32 opacity-20 pointer-events-none scale-125">
-              {data.imageUrl ? (
-                <img src={data.imageUrl} className="w-full h-full object-contain" alt="" />
-              ) : (
-                isCard1 ? <FontAwesomeIcon icon={faFire} className="w-full h-full" /> : <FontAwesomeIcon icon={faStar} className="w-full h-full" />
-              )}
+              {isCard1 ? <FontAwesomeIcon icon={faFire} className="w-full h-full" /> : <FontAwesomeIcon icon={faStar} className="w-full h-full" />}
             </div>
 
             <span className="inline-flex items-center gap-1.5 bg-black/20 text-white text-xs font-[600] px-3 py-1 rounded-full mb-3 backdrop-blur-sm">
@@ -307,15 +234,17 @@ function AnnouncementEditor({ data, onChange }: {
 }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   const handleSave = async () => {
     setSaving(true)
+    setSaveError('')
     try {
       await saveContent('announcement_bar', data)
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)
-    } catch {
-      alert('Failed to save. Please try again.')
+    } catch (err: any) {
+      setSaveError(err.message || 'Failed to save')
     } finally {
       setSaving(false)
     }
@@ -328,13 +257,13 @@ function AnnouncementEditor({ data, onChange }: {
           <FontAwesomeIcon icon={faBullhorn} className="w-4 h-4 text-amber-500" />
           <h2 className="text-white font-[600] text-base">Announcement Bar</h2>
         </div>
-        <SaveButton onClick={handleSave} saving={saving} saved={saved} />
+        <SaveButton onClick={handleSave} saving={saving} saved={saved} error={saveError} />
       </div>
       <div className="p-4 sm:p-6 space-y-4">
         <InputField
           label="Announcement Text"
           value={data.text}
-          onChange={(v) => { onChange({ text: v }); setSaved(false) }}
+          onChange={(v) => { onChange({ text: v }); setSaved(false); setSaveError('') }}
           placeholder="Free shipping on orders | 100% Pure & Natural"
           hint="Separate sections with  |  (pipe character)."
         />
@@ -395,7 +324,7 @@ export default function AdminUpdatesClient() {
       <div>
         <h1 className="text-white text-2xl font-[700]">Site Content</h1>
         <p className="text-gray-400 text-sm mt-1">
-          Customize homepage promo cards, colors, and the announcement bar. Changes go live instantly.
+          Customize homepage promo cards, colors, and the announcement bar. Changes go live instantly after saving.
         </p>
       </div>
       <AnnouncementEditor

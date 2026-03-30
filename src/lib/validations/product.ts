@@ -10,7 +10,7 @@ export const productSchema = z.object({
   stock: z.coerce.number().int().nonnegative('Stock cannot be negative'),
   description: z.string().optional(),
   is_active: z.boolean().default(true),
-  category_id: z.string().uuid('Invalid category ID').optional().nullable(),
+  category_id: z.preprocess((val) => val === '' ? null : val, z.string().uuid('Invalid category ID').optional().nullable()),
   image_urls: z.array(z.string()).optional(),
   weight_options: z.array(z.any()).optional(),
   generated_content: z.object({
