@@ -6,178 +6,612 @@ import Image from 'next/image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
     faSpinner, 
-    faLock 
+    faLock, 
+    faCheckCircle, 
+    faArrowLeft, 
+    faTruck, 
+    faMapMarkerAlt, 
+    faMoneyBillWave,
+    faTag,
+    faUser,
+    faEnvelope,
+    faKey,
+    faCreditCard,
+    faBuildingColumns
 } from '@fortawesome/free-solid-svg-icons'
 import { useCartStore } from '@/store/cartStore'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils'
 import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
+const INDIAN_STATES = [
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+    "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+    "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+    "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana",
+    "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+    "Andaman & Nicobar Islands", "Chandigarh", "Dadra & Nagar Haveli",
+    "Daman & Diu", "Delhi", "Jammu & Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+]
+
 export default function CheckoutPage() {
     const { items, total, clearCart } = useCartStore()
     const router = useRouter()
     const supabase = createClient()
 
+    // Flow State
+    const [step, setStep] = useState(1) // 1: Info, 2: Payment
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState('')
     const [ready, setReady] = useState(false)
+    const [error, setError] = useState('')
+    const [currentUser, setCurrentUser] = useState<any>(null)
 
-    const [address, setAddress] = useState({
-        line1: '',
+    // Auth State
+    const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup')
+    const [password, setPassword] = useState('')
+    const [authLoading, setAuthLoading] = useState(false)
+
+    // Form Data
+    const [formData, setFormData] = useState({
+        full_name: '',
+        mobile: '',
+        email: '',
+        street: '',
         city: '',
         state: '',
-        pincode: ''
+        pincode: '',
+        landmark: '',
+        notes: ''
     })
 
-    const cartTotal = total()
-    const shipping = cartTotal >= 599 ? 0 : 60
-    const finalAmount = cartTotal + shipping
+    // Coupon State
+    const [couponCode, setCouponCode] = useState('')
+    const [appliedCoupon, setAppliedCoupon] = useState<{code: string, discount: number} | null>(null)
+    const [couponLoading, setCouponLoading] = useState(false)
+
+    // Totals
+    const subtotal = total()
+    const gst = Math.round(subtotal * 5 / 105)  // 5% GST included in MRP
+    const discount = appliedCoupon?.discount || 0
+    const delivery_fee = (subtotal - discount) >= 599 ? 0 : 60
+    const finalTotal = subtotal - discount + delivery_fee
 
     useEffect(() => {
-        if (items.length === 0) {
+        if (items.length === 0 && !loading) {
             router.push('/cart')
             return
         }
-        const checkAuth = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser()
-                if (user) {
-                    setReady(true)
-                } else {
-                    router.push('/auth/login?next=/checkout')
-                }
-            } catch {
-                router.push('/auth/login?next=/checkout')
-            }
-        }
-        checkAuth()
-    }, [items, router, supabase])
 
-    const handlePlaceOrder = async (e: React.FormEvent) => {
-        e.preventDefault()
+        const loadProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                setCurrentUser(user)
+                // Pre-fill email
+                setFormData(prev => ({ ...prev, email: user.email || '' }))
+
+                // Try to get profile address
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single()
+
+                if (profile) {
+                    setFormData(prev => ({
+                        ...prev,
+                        full_name: profile.full_name || prev.full_name,
+                        mobile: profile.mobile || prev.mobile,
+                        ...(profile.address as any)
+                    }))
+                }
+            }
+            setReady(true)
+        }
+
+        loadProfile()
+    }, [items, router])
+
+    // Pincode Auto-fill
+    useEffect(() => {
+        if (formData.pincode.length === 6) {
+            const fetchPincode = async () => {
+                try {
+                    const res = await fetch(`https://api.postalpincode.in/pincode/${formData.pincode}`)
+                    const data = await res.json()
+                    if (data[0]?.Status === 'Success') {
+                        const postOffice = data[0].PostOffice[0]
+                        setFormData(prev => ({
+                            ...prev,
+                            city: postOffice.District,
+                            state: postOffice.State
+                        }))
+                    }
+                } catch (err) {
+                    console.warn('Pincode auto-fill failed:', err)
+                }
+            }
+            fetchPincode()
+        }
+    }, [formData.pincode])
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode) return
+        setCouponLoading(true)
+        setError('')
+        try {
+            const res = await fetch('/api/coupons/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: couponCode, subtotal })
+            })
+            const data = await res.json()
+            if (data.valid) {
+                setAppliedCoupon({ code: data.code, discount: data.discount })
+            } else {
+                setError(data.error || 'Invalid coupon')
+            }
+        } catch (err) {
+            setError('Failed to validate coupon')
+        } finally {
+            setCouponLoading(false)
+        }
+    }
+
+    const validateInfo = () => {
+        const required = ['full_name', 'mobile', 'email', 'street', 'city', 'state', 'pincode']
+        for (const f of required) {
+            if (!(formData as any)[f]) return false
+        }
+        if (!/^[6-9]\d{9}$/.test(formData.mobile)) return false
+        if (!/^\d{6}$/.test(formData.pincode)) return false
+        if (!currentUser && (!password || password.length < 6)) return false
+        return true
+    }
+
+    const handleAuthAndProceed = async () => {
+        if (currentUser) {
+            setStep(2)
+            return
+        }
+
+        setAuthLoading(true)
+        setError('')
+        try {
+            const endpoint = authMode === 'signup' ? '/api/auth/signup' : '/api/auth/login'
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: formData.email,
+                    password,
+                    full_name: formData.full_name
+                })
+            })
+
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || `Failed to ${authMode}`)
+
+            // Successful auth - get session
+            const { data: { user } } = await supabase.auth.getUser()
+            setCurrentUser(user)
+            setStep(2)
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setAuthLoading(false)
+        }
+    }
+
+    const handlePlaceOrder = async () => {
         setLoading(true)
         setError('')
-
         try {
             const res = await fetch('/api/orders/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     items: items.map(i => ({
-                        productId: i.productId,
+                        product_id: i.productId,
                         name: i.product.name,
+                        tagline: i.product.tagline,
+                        weight: i.weight,
                         price: i.product.price,
                         quantity: i.quantity,
-                        weight: i.weight,
-                        image: i.product.image_urls?.[0]
+                        image_url: i.product.image_urls?.[0]
                     })),
-                    shippingAddress: address,
-                    subtotal: cartTotal,
-                    shipping,
-                    total: finalAmount
-                }),
+                    shipping_address: {
+                        full_name: formData.full_name,
+                        mobile: formData.mobile,
+                        street: formData.street,
+                        city: formData.city,
+                        state: formData.state,
+                        pincode: formData.pincode,
+                        landmark: formData.landmark
+                    },
+                    coupon_code: appliedCoupon?.code,
+                    notes: formData.notes
+                })
             })
 
             const data = await res.json()
-            if (!res.ok) throw new Error(data.error || 'Failed to create order')
+            if (!res.ok) throw new Error(data.error || 'Failed to place order')
 
             clearCart()
-            router.push(`/account?success=true&order=${data.orderId}`)
-
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Something went wrong'
-            setError(message)
+            router.push(`/checkout/success?orderId=${data.orderId}&orderNumber=${data.orderNumber}`)
+        } catch (err: any) {
+            setError(err.message)
             setLoading(false)
         }
     }
 
     if (!ready) return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#C17F24]" />
+        <div className="min-h-screen flex items-center justify-center bg-[#F5F0E8]">
+            <FontAwesomeIcon icon={faSpinner} className="w-10 h-10 animate-spin text-[#C17F24]" />
         </div>
     )
 
     return (
-        <div className="min-h-screen bg-[#F5F0E8]">
-            <div className="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-8">
-
-                {/* Shipping Form */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm">
-                    <h2 className="text-2xl font-bold text-[#2E2E2E] mb-6">Shipping Details</h2>
-
-                    <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-semibold mb-1 text-gray-700">Street Address</label>
-                            <input type="text" required value={address.line1} onChange={e => setAddress({ ...address, line1: e.target.value })} className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#C17F24]" />
+        <div className="min-h-screen bg-[#F5F0E8] pb-20">
+            <div className="max-w-5xl mx-auto px-4 py-12">
+                {/* Stepper */}
+                <div className="flex items-center justify-center mb-12 select-none">
+                    <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
+                            step >= 1 ? 'bg-[#C17F24] border-[#C17F24] text-white shadow-lg' : 'bg-white border-gray-300 text-gray-400'
+                        }`}>
+                            {step > 1 ? <FontAwesomeIcon icon={faCheckCircle} /> : '1'}
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-semibold mb-1 text-gray-700">City</label>
-                                <input type="text" required value={address.city} onChange={e => setAddress({ ...address, city: e.target.value })} className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#C17F24]" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold mb-1 text-gray-700">State</label>
-                                <input type="text" required value={address.state} onChange={e => setAddress({ ...address, state: e.target.value })} className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#C17F24]" />
-                            </div>
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${step >= 1 ? 'text-[#C17F24]' : 'text-gray-400'}`}>Account & Info</span>
+                    </div>
+                    <div className={`w-12 h-[2px] mx-4 transition-all ${step > 1 ? 'bg-[#C17F24]' : 'bg-gray-300'}`} />
+                    <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all ${
+                            step >= 2 ? 'bg-[#C17F24] border-[#C17F24] text-white shadow-lg' : 'bg-white border-gray-300 text-gray-400'
+                        }`}>
+                            {step > 2 ? <FontAwesomeIcon icon={faCheckCircle} /> : '2'}
                         </div>
-                        <div>
-                            <label className="block text-sm font-semibold mb-1 text-gray-700">PIN Code</label>
-                            <input type="text" required value={address.pincode} onChange={e => setAddress({ ...address, pincode: e.target.value })} className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-[#C17F24]" />
-                        </div>
-                    </form>
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${step >= 2 ? 'text-[#C17F24]' : 'text-gray-400'}`}>Review & Pay</span>
+                    </div>
                 </div>
 
-                {/* Order Summary */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm sticky top-24 h-fit">
-                    <h2 className="text-2xl font-bold text-[#2E2E2E] mb-6">Order Summary</h2>
-                    <div className="space-y-3 mb-6 max-h-64 overflow-y-auto pr-2">
-                        {items.map(item => (
-                            <div key={`${item.productId}-${item.weight}`} className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-[#F9F4EE] rounded-lg relative overflow-hidden shrink-0">
-                                    {item.product.image_urls?.[0] && (
-                                        <Image
-                                            src={getProductImageUrl(item.product.image_urls[0])}
-                                            fill alt="" className="object-cover"
+                <div className="grid lg:grid-cols-3 gap-10 items-start">
+                    {/* Main Form Area */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {step === 1 && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                {/* Inline Auth Section */}
+                                {!currentUser && (
+                                    <div className="bg-white rounded-[2rem] p-8 shadow-xl border-2 border-amber-500/20">
+                                        <div className="flex items-center justify-between mb-8">
+                                            <h2 className="text-xl font-black text-[#2E2E2E] flex items-center gap-3 uppercase tracking-tighter">
+                                                <FontAwesomeIcon icon={faUser} className="text-amber-600 w-4" />
+                                                {authMode === 'signup' ? 'Create Account' : 'Welcome Back'}
+                                            </h2>
+                                            <div className="flex bg-gray-100 p-1 rounded-xl">
+                                                <button 
+                                                    onClick={() => setAuthMode('signup')}
+                                                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${authMode === 'signup' ? 'bg-white text-amber-700 shadow-md' : 'text-gray-400'}`}
+                                                >
+                                                    Signup
+                                                </button>
+                                                <button 
+                                                    onClick={() => setAuthMode('login')}
+                                                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${authMode === 'login' ? 'bg-white text-amber-700 shadow-md' : 'text-gray-400'}`}
+                                                >
+                                                    Login
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid sm:grid-cols-2 gap-5">
+                                            <div className="sm:col-span-2 relative">
+                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Email Address *</label>
+                                                <div className="relative">
+                                                    <FontAwesomeIcon icon={faEnvelope} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                                                    <input 
+                                                        type="email" required placeholder="you@example.com"
+                                                        value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
+                                                        className="w-full h-12 pl-11 pr-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="sm:col-span-2 relative">
+                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Create Password *</label>
+                                                <div className="relative">
+                                                    <FontAwesomeIcon icon={faKey} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                                                    <input 
+                                                        type="password" required placeholder="Min. 6 characters"
+                                                        value={password} onChange={e => setPassword(e.target.value)}
+                                                        className="w-full h-12 pl-11 pr-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p className="mt-4 text-[9px] text-gray-400 font-bold uppercase tracking-tight leading-relaxed">
+                                            This will create your Savika account to track orders and save your address for future purchases.
+                                        </p>
+                                    </div>
+                                )}
+
+                                {currentUser && (
+                                    <div className="bg-green-50 rounded-2xl p-4 border border-green-100 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-xs">
+                                                <FontAwesomeIcon icon={faCheckCircle} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black text-green-800 uppercase tracking-widest">Logged in as</p>
+                                                <p className="text-sm font-bold text-green-900">{currentUser.email}</p>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            onClick={() => supabase.auth.signOut().then(() => setCurrentUser(null))}
+                                            className="text-[9px] font-black text-green-700 underline uppercase tracking-widest"
+                                        >
+                                            Change Account
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Delivery Info Card */}
+                                <div className="bg-white rounded-[2rem] p-8 shadow-xl border border-gray-50">
+                                    <h2 className="text-2xl font-black text-[#2E2E2E] flex items-center gap-3 uppercase tracking-tighter mb-8">
+                                        <FontAwesomeIcon icon={faMapMarkerAlt} className="text-amber-600 w-5" />
+                                        Delivery Info
+                                    </h2>
+                                    
+                                    <div className="grid sm:grid-cols-2 gap-5">
+                                        <div className="sm:col-span-2">
+                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Recipient Name *</label>
+                                            <input 
+                                                type="text" required placeholder="Full Name"
+                                                value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})}
+                                                className="w-full h-12 px-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Mobile Number *</label>
+                                            <input 
+                                                type="tel" required placeholder="10-digit mobile"
+                                                value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})}
+                                                className="w-full h-12 px-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Pincode *</label>
+                                            <input 
+                                                type="text" required placeholder="6-digit PIN"
+                                                value={formData.pincode} onChange={e => setFormData({...formData, pincode: e.target.value})}
+                                                className="w-full h-12 px-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                            />
+                                        </div>
+                                        <div className="sm:col-span-2">
+                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Street Address *</label>
+                                            <input 
+                                                type="text" required placeholder="House No, Building, Street, Area"
+                                                value={formData.street} onChange={e => setFormData({...formData, street: e.target.value})}
+                                                className="w-full h-12 px-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">City *</label>
+                                            <input 
+                                                type="text" required placeholder="City"
+                                                value={formData.city} onChange={e => setFormData({...formData, city: e.target.value })}
+                                                className="w-full h-12 px-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">State *</label>
+                                            <select 
+                                                value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})}
+                                                className="w-full h-12 px-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                            >
+                                                <option value="">Select State</option>
+                                                {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {error && <div className="mt-6 p-4 bg-red-50 text-red-600 text-[11px] font-black uppercase tracking-tight rounded-xl border border-red-100">{error}</div>}
+
+                                    <button 
+                                        onClick={handleAuthAndProceed}
+                                        disabled={!validateInfo() || authLoading}
+                                        className="w-full mt-10 bg-[#C17F24] hover:bg-[#8B5E16] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+                                    >
+                                        {authLoading ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : null}
+                                        {authLoading ? 'Setting up your account...' : 'Review & Choose Payment'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                {/* Review Summary Card */}
+                                <div className="bg-white rounded-[2rem] p-8 shadow-xl border border-gray-50">
+                                    <div className="flex items-center justify-between mb-8">
+                                        <h2 className="text-2xl font-black text-[#2E2E2E] flex items-center gap-3 uppercase tracking-tighter">
+                                            <FontAwesomeIcon icon={faTruck} className="text-amber-600 w-5" />
+                                            Order Review
+                                        </h2>
+                                        <button onClick={() => setStep(1)} className="text-[10px] font-black text-amber-700 underline uppercase tracking-widest">
+                                            Edit Details
+                                        </button>
+                                    </div>
+
+                                    <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 mb-8">
+                                        <p className="font-black text-[#2E2E2E] text-[10px] uppercase tracking-widest text-gray-400 mb-3">Deliver To:</p>
+                                        <div className="text-sm text-gray-600 font-medium">
+                                            <p className="font-bold text-gray-800">{formData.full_name}</p>
+                                            <p>{formData.street}</p>
+                                            <p>{formData.city}, {formData.state} - {formData.pincode}</p>
+                                            <p className="mt-2 text-[#C17F24] font-bold text-xs"><FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" /> {formData.mobile}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <h3 className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Choose Payment Method</h3>
+                                        
+                                        {/* COD Option - Active */}
+                                        <div className="p-6 rounded-2xl border-2 border-amber-600 bg-amber-50 flex items-center gap-5 cursor-pointer shadow-md">
+                                            <div className="w-12 h-12 rounded-full bg-amber-600 text-white flex items-center justify-center shadow-lg">
+                                                <FontAwesomeIcon icon={faMoneyBillWave} className="text-xl" />
+                                            </div>
+                                            <div>
+                                                <p className="font-black text-[#2E2E2E] uppercase tracking-tighter">Cash on Delivery (COD)</p>
+                                                <p className="text-[11px] text-amber-700 font-bold uppercase tracking-widest mt-0.5">Pay when your spices arrive</p>
+                                            </div>
+                                            <div className="ml-auto w-6 h-6 rounded-full bg-[#C17F24] flex items-center justify-center">
+                                                <div className="w-2 h-2 rounded-full bg-white" />
+                                            </div>
+                                        </div>
+
+                                        {/* Disabled Options - Coming Soon */}
+                                        <div className="p-6 rounded-2xl border border-gray-100 bg-gray-50/50 flex items-center gap-5 opacity-60 grayscale cursor-not-allowed">
+                                            <div className="w-12 h-12 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center">
+                                                <FontAwesomeIcon icon={faTag} className="text-xl" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <p className="font-black text-gray-400 uppercase tracking-tighter">UPI (GPay / PhonePe / Paytm)</p>
+                                                    <span className="text-[8px] font-black bg-gray-200 text-gray-500 px-2 py-0.5 rounded uppercase tracking-widest">Coming Soon</span>
+                                                </div>
+                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Direct UPI Payment</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6 rounded-2xl border border-gray-100 bg-gray-50/50 flex items-center gap-5 opacity-60 grayscale cursor-not-allowed">
+                                            <div className="w-12 h-12 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center">
+                                                <FontAwesomeIcon icon={faCreditCard} className="text-xl" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <p className="font-black text-gray-400 uppercase tracking-tighter">Debit / Credit Cards</p>
+                                                    <span className="text-[8px] font-black bg-gray-200 text-gray-500 px-2 py-0.5 rounded uppercase tracking-widest">Coming Soon</span>
+                                                </div>
+                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Visa, Mastercard, RuPay</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-6 rounded-2xl border border-gray-100 bg-gray-50/50 flex items-center gap-5 opacity-60 grayscale cursor-not-allowed">
+                                            <div className="w-12 h-12 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center">
+                                                <FontAwesomeIcon icon={faBuildingColumns} className="text-xl" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <p className="font-black text-gray-400 uppercase tracking-tighter">Net Banking</p>
+                                                    <span className="text-[8px] font-black bg-gray-200 text-gray-500 px-2 py-0.5 rounded uppercase tracking-widest">Coming Soon</span>
+                                                </div>
+                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">All Major Indian Banks</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {error && <div className="mt-6 p-4 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-100">{error}</div>}
+
+                                    <button 
+                                        onClick={handlePlaceOrder}
+                                        disabled={loading}
+                                        className="w-full mt-10 bg-[#C17F24] hover:bg-[#8B5E16] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
+                                    >
+                                        {loading ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faLock} />}
+                                        {loading ? 'Processing Order...' : `Place Order • ${formatCurrency(finalTotal)} (COD)`}
+                                    </button>
+                                </div>
+                                <button 
+                                    onClick={() => setStep(1)} 
+                                    className="flex items-center gap-2 text-xs font-black text-[#2E2E2E] uppercase tracking-widest hover:text-amber-700 transition-colors pl-4"
+                                >
+                                    <FontAwesomeIcon icon={faArrowLeft} className="text-[10px]" /> Back to info
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Sidebar Summary */}
+                    <div className="space-y-6">
+                        <div className="bg-white rounded-[2rem] p-8 shadow-xl shadow-amber-900/5 border border-gray-100 sticky top-24">
+                            <h3 className="font-black text-[#2E2E2E] text-xl uppercase tracking-tighter mb-8 text-center sm:text-left">Cart Summary</h3>
+                            
+                            <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2 scrollbar-hide">
+                                {items.map(item => (
+                                    <div key={`${item.productId}-${item.weight}`} className="flex items-center gap-4 group">
+                                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0 shadow-inner">
+                                            <Image 
+                                                src={getProductImageUrl(item.product.image_urls?.[0] || '')} 
+                                                alt="" fill className="object-cover" 
+                                            />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xs font-black text-[#2E2E2E] truncate uppercase tracking-tighter">{item.product.name}</p>
+                                            <p className="text-[10px] text-gray-400 font-bold uppercase">{item.weight} • x{item.quantity}</p>
+                                        </div>
+                                        <p className="text-xs font-black text-[#2E2E2E]">{formatCurrency(item.product.price * item.quantity)}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="bg-gray-50 rounded-2xl p-5 mb-8 border border-gray-100">
+                                <div className="flex gap-2 mb-4">
+                                    <div className="relative flex-1">
+                                        <FontAwesomeIcon icon={faTag} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
+                                        <input 
+                                            type="text" placeholder="Promo code"
+                                            value={couponCode} onChange={e => setCouponCode(e.target.value)}
+                                            className="w-full h-10 pl-9 pr-3 rounded-xl border border-gray-200 outline-none focus:border-amber-600 text-xs font-bold"
                                         />
+                                    </div>
+                                    <button 
+                                        onClick={handleApplyCoupon}
+                                        disabled={couponLoading || appliedCoupon !== null}
+                                        className="h-10 px-4 bg-white border border-amber-600 text-[#C17F24] rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-30"
+                                    >
+                                        {couponLoading ? '...' : 'Apply'}
+                                    </button>
+                                </div>
+
+                                <div className="space-y-3 pt-4 border-t border-dashed border-gray-200">
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-gray-400 font-bold uppercase tracking-tighter">Items Total (MRP)</span>
+                                        <span className="font-bold text-gray-800">{formatCurrency(subtotal)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-gray-400 font-bold uppercase tracking-tighter">GST (5% Incl.)</span>
+                                        <span className="font-bold text-gray-500">{formatCurrency(gst)}</span>
+                                    </div>
+                                    {appliedCoupon && (
+                                        <div className="flex justify-between text-xs text-green-600">
+                                            <span className="font-bold uppercase tracking-tighter">Discount ({appliedCoupon.code})</span>
+                                            <span className="font-bold">-{formatCurrency(appliedCoupon.discount)}</span>
+                                        </div>
                                     )}
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-gray-400 font-bold uppercase tracking-tighter">Shipping Charges</span>
+                                        <span className={`font-bold ${delivery_fee === 0 ? 'text-green-600' : 'text-gray-800'}`}>
+                                            {delivery_fee === 0 ? 'FREE' : formatCurrency(delivery_fee)}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between text-base font-black text-[#2E2E2E] pt-3 border-t border-[#e8ddd0]">
+                                        <span className="uppercase tracking-tighter">Amount to Pay</span>
+                                        <span className="text-[#C17F24]">{formatCurrency(finalTotal)}</span>
+                                    </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold truncate text-[#2E2E2E]">{item.product.name}</p>
-                                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                                </div>
-                                <span className="font-bold text-sm text-[#2E2E2E]">{formatCurrency(item.product.price * item.quantity)}</span>
                             </div>
-                        ))}
-                    </div>
 
-                    <div className="border-t border-gray-100 pt-4 space-y-2 mb-6">
-                        <div className="flex justify-between text-sm text-gray-600">
-                            <span>Subtotal</span>
-                            <span>{formatCurrency(cartTotal)}</span>
-                        </div>
-                        <div className="flex justify-between text-sm text-gray-600">
-                            <span>Shipping</span>
-                            <span>{shipping === 0 ? 'FREE' : formatCurrency(shipping)}</span>
-                        </div>
-                        <div className="flex justify-between text-lg font-bold text-[#C17F24] pt-2">
-                            <span>Total</span>
-                            <span>{formatCurrency(finalAmount)}</span>
+                            <div className="flex items-center gap-3 bg-green-50 p-3 rounded-xl border border-green-100 border-dashed">
+                                <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0">
+                                    <FontAwesomeIcon icon={faTruck} className="text-xs" />
+                                </div>
+                                <div className="leading-tight">
+                                    <p className="text-[10px] font-black text-green-800 uppercase tracking-widest">Est. Delivery En-route</p>
+                                    <p className="text-[9px] font-bold text-green-600 uppercase">Within 2 Working Days</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    {error && <div className="mb-4 p-3 bg-red-50 text-red-500 text-sm rounded-lg">{error}</div>}
-
-                    <button
-                        type="submit"
-                        form="checkout-form"
-                        disabled={loading}
-                        className="w-full bg-[#C17F24] hover:bg-[#8B5E16] text-white py-4 rounded-lg font-bold transition-transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-60"
-                    >
-                        {loading ? <FontAwesomeIcon icon={faSpinner} className="w-4 h-4 animate-spin" /> : <FontAwesomeIcon icon={faLock} className="w-4 h-4" />}
-                        {loading ? 'Processing...' : `Pay ${formatCurrency(finalAmount)}`}
-                    </button>
                 </div>
-
             </div>
         </div>
     )

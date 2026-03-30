@@ -8,9 +8,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
     faColumns, faBox, faCartShopping, faUsers, faTag, faChartLine, 
     faGear, faFileLines, faRightFromBracket, faBell, faCircleUser, faSpinner,
-    faBars, faXmark
+    faBars, faXmark, faMoneyBillWave, faClock
 } from '@fortawesome/free-solid-svg-icons'
 import { createClient } from '@/lib/supabase/client'
+import { formatCurrency } from '@/lib/utils'
 
 const navItems = [
     { icon: faColumns, label: 'Dashboard', href: '/admin/dashboard' },
@@ -24,6 +25,17 @@ const navItems = [
     { icon: faGear, label: 'Settings', href: '/admin/settings' },
 ]
 
+function timeAgo(dateStr: string) {
+    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+    if (seconds < 60) return 'Just now'
+    const minutes = Math.floor(seconds / 60)
+    if (minutes < 60) return `${minutes}m ago`
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) return `${hours}h ago`
+    const days = Math.floor(hours / 24)
+    return `${days}d ago`
+}
+
 interface AdminLayoutClientProps {
     children: React.ReactNode
     user: { name: string; email: string }
@@ -32,6 +44,9 @@ interface AdminLayoutClientProps {
 export default function AdminLayoutClient({ children, user }: AdminLayoutClientProps) {
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [signingOut, setSigningOut] = useState(false)
+    const [notifOpen, setNotifOpen] = useState(false)
+    const [notifications, setNotifications] = useState<any[]>([])
+    const [seenIds, setSeenIds] = useState<Set<string>>(new Set())
     const pathname = usePathname()
     const router = useRouter()
     const supabase = createClient()
@@ -40,6 +55,41 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
     useEffect(() => {
         setSidebarOpen(false)
     }, [pathname])
+
+    // Load seen IDs from localStorage on mount
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem('savika_admin_seen_orders')
+            if (stored) setSeenIds(new Set(JSON.parse(stored)))
+        } catch {}
+    }, [])
+
+    // Fetch recent orders for notifications
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const res = await fetch('/api/orders/recent')
+                if (res.ok) {
+                    const data = await res.json()
+                    setNotifications(data)
+                }
+            } catch {}
+        }
+        fetchNotifications()
+        const interval = setInterval(fetchNotifications, 30000) // Poll every 30s
+        return () => clearInterval(interval)
+    }, [])
+
+    const unreadCount = notifications.filter(n => !seenIds.has(n.id)).length
+
+    const markAllRead = () => {
+        const allIds = notifications.map(n => n.id)
+        const newSeen = new Set([...seenIds, ...allIds])
+        setSeenIds(newSeen)
+        try {
+            localStorage.setItem('savika_admin_seen_orders', JSON.stringify([...newSeen]))
+        } catch {}
+    }
 
     const handleSignOut = async () => {
         setSigningOut(true)
@@ -59,6 +109,14 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                 <div
                     className="fixed inset-0 bg-black/50 z-30 md:hidden"
                     onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
+            {/* Notification overlay */}
+            {notifOpen && (
+                <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setNotifOpen(false)}
                 />
             )}
 
@@ -133,9 +191,96 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                     </button>
                     <div className="hidden md:block" />
                     <div className="flex items-center gap-4">
-                        <button className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors relative">
-                            <FontAwesomeIcon icon={faBell} className="w-5 h-5" />
-                        </button>
+                        {/* Notification Bell */}
+                        <div className="relative">
+                            <button 
+                                onClick={() => { setNotifOpen(!notifOpen); }}
+                                className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors relative"
+                            >
+                                <FontAwesomeIcon icon={faBell} className="w-5 h-5" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center animate-pulse shadow-lg shadow-red-500/40">
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Notification Dropdown */}
+                            {notifOpen && (
+                                <div className="absolute right-0 top-12 w-96 max-h-[480px] bg-[#18181b] border border-[#27272a] rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <div className="flex items-center justify-between px-5 py-4 border-b border-[#27272a]">
+                                        <h3 className="text-sm font-black text-white uppercase tracking-widest">New Orders</h3>
+                                        {unreadCount > 0 && (
+                                            <button 
+                                                onClick={markAllRead}
+                                                className="text-[9px] font-black text-amber-500 uppercase tracking-widest hover:text-amber-400 transition-colors"
+                                            >
+                                                Mark all read
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <div className="overflow-y-auto max-h-[380px] divide-y divide-[#27272a]">
+                                        {notifications.length === 0 ? (
+                                            <div className="p-8 text-center text-gray-500 text-sm italic">
+                                                No recent orders
+                                            </div>
+                                        ) : notifications.map(order => {
+                                            const isUnread = !seenIds.has(order.id)
+                                            return (
+                                                <Link
+                                                    key={order.id}
+                                                    href={`/admin/orders/${order.id}`}
+                                                    onClick={() => setNotifOpen(false)}
+                                                    className={`flex items-start gap-4 px-5 py-4 hover:bg-[#27272a]/50 transition-colors ${isUnread ? 'bg-amber-500/5' : ''}`}
+                                                >
+                                                    <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${isUnread ? 'bg-amber-500' : 'bg-transparent'}`} />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <span className="text-xs font-black text-[#C17F24] uppercase tracking-wider">{order.order_number || `#${order.id.slice(-8)}`}</span>
+                                                            <span className="text-[9px] font-bold text-gray-500 flex items-center gap-1 shrink-0">
+                                                                <FontAwesomeIcon icon={faClock} className="text-[8px]" />
+                                                                {timeAgo(order.created_at)}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-sm font-bold text-white mt-1 truncate">
+                                                            {order.shipping_address?.full_name || 'Customer'}
+                                                        </p>
+                                                        <div className="flex items-center gap-3 mt-1.5">
+                                                            <span className="text-xs font-bold text-amber-500 flex items-center gap-1">
+                                                                <FontAwesomeIcon icon={faMoneyBillWave} className="text-[9px]" />
+                                                                {formatCurrency(order.total)}
+                                                            </span>
+                                                            <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${
+                                                                order.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
+                                                                order.status === 'delivered' ? 'bg-green-500/10 text-green-500' :
+                                                                'bg-blue-500/10 text-blue-500'
+                                                            }`}>
+                                                                {order.status}
+                                                            </span>
+                                                            <span className="text-[9px] font-bold text-gray-500 uppercase">
+                                                                {order.payment_method === 'cod' ? 'COD' : order.payment_method}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </Link>
+                                            )
+                                        })}
+                                    </div>
+
+                                    <div className="border-t border-[#27272a] p-3">
+                                        <Link
+                                            href="/admin/orders"
+                                            onClick={() => setNotifOpen(false)}
+                                            className="block text-center text-[10px] font-black text-amber-500 uppercase tracking-widest hover:text-amber-400 transition-colors py-1"
+                                        >
+                                            View All Orders →
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="flex items-center gap-2">
                             <FontAwesomeIcon icon={faCircleUser} className="w-7 h-7 text-gray-500" />
                             <div className="text-right hidden sm:block">

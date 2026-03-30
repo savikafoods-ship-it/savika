@@ -1,142 +1,313 @@
-import { createClient } from '@/lib/supabase/server'
-import { OrderItem } from '@/types'
-import { getProductImageUrl } from '@/lib/supabase/imageUrl'
-import { redirect, notFound } from 'next/navigation'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft, faBox, faMapPin, faRefresh } from '@fortawesome/free-solid-svg-icons'
-import OrderStatusActions from '@/components/admin/OrderStatusActions'
+import { 
+    faArrowLeft, 
+    faUser, 
+    faTruck, 
+    faClock, 
+    faCheckCircle,
+    faChevronRight,
+    faBox,
+    faLocationDot,
+    faIndianRupeeSign,
+    faSpinner
+} from '@fortawesome/free-solid-svg-icons'
+import { formatCurrency } from '@/lib/utils'
+import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
-export const dynamic = 'force-dynamic'
+export default function AdminOrderDetailsPage() {
+    const { id } = useParams()
+    const router = useRouter()
+    const [order, setOrder] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+    const [updating, setUpdating] = useState(false)
+    const [error, setError] = useState('')
 
-export default async function AdminOrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params
-    let order = null
+    // Update state
+    const [newStatus, setNewStatus] = useState('')
+    const [courierName, setCourierName] = useState('')
+    const [trackingId, setTrackingId] = useState('')
 
-    try {
-        const supabase = await createClient()
-        const { data, error } = await supabase
-            .from('orders')
-            .select('*')
-            .eq('id', id)
-            .single()
+    useEffect(() => {
+        fetchOrder()
+    }, [id])
 
-        if (error || !data) throw error
-        order = data
-    } catch (error: any) {
-        console.error('Error fetching order:', error)
-        notFound()
+    const fetchOrder = async () => {
+        try {
+            const res = await fetch(`/api/orders/${id}`)
+            if (!res.ok) throw new Error('Order not found')
+            const data = await res.json()
+            setOrder(data)
+            setNewStatus(data.status)
+            setCourierName(data.courier_name || '')
+            setTrackingId(data.tracking_id || '')
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setLoading(false)
+        }
     }
 
-    const items = Array.isArray(order.items) ? order.items : []
-    const address = order.shipping_address || {}
+    const handleUpdateStatus = async () => {
+        setUpdating(true)
+        setError('')
+        try {
+            const res = await fetch(`/api/orders/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status: newStatus,
+                    courier_name: courierName,
+                    tracking_id: trackingId
+                })
+            })
+
+            if (!res.ok) {
+                const data = await res.json()
+                throw new Error(data.error || 'Failed to update order')
+            }
+
+            const updated = await res.json()
+            setOrder(updated)
+            alert('Order status updated successfully!')
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setUpdating(false)
+        }
+    }
+
+    if (loading) return (
+        <div className="flex items-center justify-center min-h-[400px]">
+            <FontAwesomeIcon icon={faSpinner} className="w-8 h-8 animate-spin text-amber-600" />
+        </div>
+    )
+
+    if (error || !order) return (
+        <div className="p-8 text-center text-red-500 bg-red-50 rounded-xl border border-red-100">
+            {error || 'Order not found'}
+        </div>
+    )
 
     return (
-        <div className="pb-10 space-y-6 max-w-5xl mx-auto">
-            <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto space-y-8 pb-12 px-4">
+            {/* Header */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                    <Link href="/admin/orders" className="p-2 hover:bg-[#27272a] text-[#a1a1aa] hover:text-white rounded-lg transition-colors">
-                        <FontAwesomeIcon icon={faArrowLeft} className="w-5 h-5" />
-                    </Link>
+                    <button 
+                        onClick={() => router.back()}
+                        className="p-2 hover:bg-[#27272a] rounded-lg text-[#a1a1aa] transition-colors"
+                    >
+                        <FontAwesomeIcon icon={faArrowLeft} />
+                    </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                            Order #{order.id.slice(-8).toUpperCase()}
-                            <span className="px-2.5 py-1 text-xs uppercase tracking-wider bg-blue-500/10 text-blue-400 rounded-full">{order.status}</span>
-                        </h1>
-                        <p className="text-[#a1a1aa] text-sm mt-1">
-                            Placed on {new Date(order.created_at).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })}
-                        </p>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-2xl font-bold text-white">{order.order_number || `#${order.id.slice(-8)}`}</h1>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                                order.status === 'delivered' ? 'bg-green-500/20 text-green-500' : 'bg-amber-500/20 text-amber-500'
+                            }`}>
+                                {order.status}
+                            </span>
+                        </div>
+                        <p className="text-[#a1a1aa] text-xs mt-1">Placed on {new Date(order.created_at).toLocaleString()}</p>
                     </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                {/* Items & Financials */}
+            <div className="grid lg:grid-cols-3 gap-8">
+                {/* Left Column: Items & Details */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
-                        <div className="border-b border-[#27272a] p-5 flex items-center gap-2 text-white font-semibold">
-                            <FontAwesomeIcon icon={faBox} className="w-5 h-5 text-[#C17F24]" /> Order Items
+                    {/* Items Card */}
+                    <div className="bg-[#18181b] border border-[#27272a] rounded-2xl overflow-hidden">
+                        <div className="px-6 py-4 border-b border-[#27272a] bg-[#1c1c1f]">
+                            <h3 className="font-bold text-white flex items-center gap-2 text-sm uppercase tracking-widest">
+                                <FontAwesomeIcon icon={faBox} className="text-amber-500 w-3.5" />
+                                Ordered Items
+                            </h3>
                         </div>
-                        <div className="p-5 space-y-4">
-                            {items.map((item: OrderItem, i: number) => (
-                                <div key={i} className="flex gap-4 items-center p-3 rounded-lg bg-[#27272a]/30">
-                                    <div className="relative w-12 h-12 bg-[#27272a] rounded-md border border-[#3f3f46] overflow-hidden flex shrink-0">
-                                        {item.image_urls?.[0] ? (
-                                            <img src={getProductImageUrl(item.image_urls[0])} alt={item.name} className="object-cover w-full h-full" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <FontAwesomeIcon icon={faBox} className="w-4 h-4 text-[#3f3f46]" />
-                                            </div>
+                        <div className="divide-y divide-[#27272a]">
+                            {order.items?.map((item: any, idx: number) => (
+                                <div key={idx} className="p-6 flex items-center gap-4 group">
+                                    <div className="w-16 h-16 bg-[#27272a] rounded-xl relative overflow-hidden shrink-0">
+                                        {item.image_url && (
+                                            <Image 
+                                                src={getProductImageUrl(item.image_url)} 
+                                                fill alt="" className="object-cover" 
+                                            />
                                         )}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-semibold text-white truncate">{item.name}</p>
-                                        <p className="text-xs text-[#a1a1aa] mt-0.5">₹{item.price} × {item.quantity} {item.weight ? `(${item.weight})` : ''}</p>
+                                        <p className="font-bold text-white text-sm truncate">{item.name}</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-[10px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded font-bold uppercase tracking-tighter">
+                                                {item.weight}
+                                            </span>
+                                            <span className="text-xs text-[#a1a1aa]">x{item.quantity}</span>
+                                        </div>
                                     </div>
-                                    <div className="text-sm font-medium text-white pl-4">
-                                        ₹{item.price * item.quantity}
+                                    <div className="text-right">
+                                        <p className="font-bold text-white">{formatCurrency(item.price * item.quantity)}</p>
+                                        <p className="text-[10px] text-[#a1a1aa] mt-0.5">{formatCurrency(item.price)} each</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                        <div className="border-t border-[#27272a] p-5 bg-[#27272a]/10 space-y-2">
+                        {/* Totals Section */}
+                        <div className="p-6 bg-[#1c1c1f] border-t border-[#27272a] space-y-3">
                             <div className="flex justify-between text-sm text-[#a1a1aa]">
-                                <span>Subtotal</span>
-                                <span>₹{order.subtotal}</span>
+                                <span>Items Total (MRP)</span>
+                                <span>{formatCurrency(order.subtotal)}</span>
                             </div>
                             <div className="flex justify-between text-sm text-[#a1a1aa]">
-                                <span>Shipping</span>
-                                <span>₹{order.total - order.subtotal + (order.discount || 0)}</span>
+                                <span>GST (5% Incl.)</span>
+                                <span>{formatCurrency(order.gst || Math.round((order.subtotal || 0) * 5 / 105))}</span>
                             </div>
                             {order.discount > 0 && (
-                                <div className="flex justify-between text-sm text-green-400">
-                                    <span>Discount {order.coupon_code ? `(${order.coupon_code})` : ''}</span>
-                                    <span>-₹{order.discount}</span>
+                                <div className="flex justify-between text-sm text-amber-500 font-medium">
+                                    <span>Discount ({order.coupon_code})</span>
+                                    <span>-{formatCurrency(order.discount)}</span>
                                 </div>
                             )}
-                            <div className="flex justify-between items-center pt-3 mt-3 border-t border-[#3f3f46]">
-                                <span className="font-semibold text-white text-base">Total</span>
-                                <span className="text-xl font-bold text-[#C17F24]">₹{order.total}</span>
+                            <div className="flex justify-between text-sm text-[#a1a1aa]">
+                                <span>Shipping Charges</span>
+                                <span>{order.delivery_fee === 0 ? 'FREE' : formatCurrency(order.delivery_fee)}</span>
+                            </div>
+                            <div className="flex justify-between text-lg font-black text-white pt-2 border-t border-[#27272a]">
+                                <span>Total Amount</span>
+                                <span className="text-[#C17F24]">{formatCurrency(order.total)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Shipping Address */}
+                    <div className="bg-[#18181b] border border-[#27272a] rounded-2xl p-6">
+                        <h3 className="font-bold text-white flex items-center gap-2 text-sm uppercase tracking-widest mb-4">
+                            <FontAwesomeIcon icon={faLocationDot} className="text-amber-500 w-3.5" />
+                            Delivery Address
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="bg-[#27272a] p-4 rounded-xl">
+                                <p className="font-bold text-white">{order.shipping_address?.full_name}</p>
+                                <p className="text-sm text-[#a1a1aa] mt-1">{order.shipping_address?.street}</p>
+                                <p className="text-sm text-[#a1a1aa]">{order.shipping_address?.city}, {order.shipping_address?.state} - {order.shipping_address?.pincode}</p>
+                                {order.shipping_address?.landmark && (
+                                    <p className="text-xs text-[#a1a1aa] mt-2 italic font-medium">Landmark: {order.shipping_address.landmark}</p>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2 text-sm bg-amber-500/10 p-3 rounded-lg border border-amber-500/20">
+                                <span className="text-amber-500 font-bold">Mobile:</span>
+                                <span className="text-white font-medium">{order.shipping_address?.mobile}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Right Column details */}
-                <div className="space-y-6">
-                    
-                    {/* Customer Details */}
-                    <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
-                        <div className="border-b border-[#27272a] p-5 flex items-center gap-2 text-white font-semibold">
-                            <FontAwesomeIcon icon={faMapPin} className="w-5 h-5 text-[#C17F24]" /> Customer & Shipping
+                {/* Right Column: Sidebar Actions */}
+                <div className="space-y-8">
+                    {/* Status Management */}
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                        <div className="p-4 bg-[#C17F24] text-white">
+                            <h3 className="font-black flex items-center gap-2 text-xs uppercase tracking-widest">
+                                <FontAwesomeIcon icon={faCheckCircle} />
+                                Update Status
+                            </h3>
                         </div>
-                        <div className="p-5 text-sm">
-                            <p className="font-bold text-white mb-1">{address?.fullName || order.customer_name}</p>
-                            <p className="text-[#a1a1aa] mb-4">{order.customer_email}</p>
+                        <div className="p-5 space-y-5">
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Order Status</label>
+                                <select 
+                                    value={newStatus}
+                                    onChange={(e) => setNewStatus(e.target.value)}
+                                    className="w-full h-11 px-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-amber-600 font-bold text-sm text-gray-800"
+                                >
+                                    <option value="pending">Pending</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="out_for_delivery">Out for Delivery</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
 
-                            {address && address.addressLine1 ? (
-                                <address className="not-italic text-[#a1a1aa] space-y-1 pt-4 border-t border-[#27272a]">
-                                    <p className="text-white font-medium mb-1">Shipping Address</p>
-                                    <p>{address.addressLine1}</p>
-                                    {address.addressLine2 && <p>{address.addressLine2}</p>}
-                                    <p>{address.city}, {address.state} {address.pincode}</p>
-                                    <p className="pt-2 text-white/80">📞 {address.phone}</p>
-                                </address>
-                            ) : null}
+                            {newStatus === 'shipped' && (
+                                <div className="space-y-4 pt-2 border-t border-gray-50">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Courier Name</label>
+                                        <input 
+                                            type="text"
+                                            placeholder="e.g. Delhivery, DTDC"
+                                            value={courierName}
+                                            onChange={(e) => setCourierName(e.target.value)}
+                                            className="w-full h-11 px-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-amber-600 font-bold text-sm"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Tracking ID</label>
+                                        <input 
+                                            type="text"
+                                            placeholder="Courier tracking number"
+                                            value={trackingId}
+                                            onChange={(e) => setTrackingId(e.target.value)}
+                                            className="w-full h-11 px-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-amber-600 font-bold text-sm"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <button
+                                onClick={handleUpdateStatus}
+                                disabled={updating}
+                                className="w-full bg-[#C17F24] hover:bg-[#8B5E16] text-white py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {updating ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : null}
+                                Update Order
+                            </button>
                         </div>
                     </div>
 
-                    {/* Quick Actions Actions could be client-components in a real app */}
-                    <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden">
-                        <div className="border-b border-[#27272a] p-5 flex items-center gap-2 text-white font-semibold">
-                            <FontAwesomeIcon icon={faRefresh} className="w-5 h-5 text-[#C17F24]" /> Order Status
-                        </div>
-                        <div className="p-5">
-                            <OrderStatusActions orderId={order.id} currentStatus={order.status} />
+                    {/* Payment Info Card */}
+                    <div className="bg-[#18181b] border border-[#27272a] rounded-2xl p-6">
+                        <h3 className="font-bold text-white flex items-center gap-2 text-sm uppercase tracking-widest mb-4">
+                            <FontAwesomeIcon icon={faIndianRupeeSign} className="text-amber-500 w-3.5" />
+                            Payment Method
+                        </h3>
+                        <div className="space-y-3">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-[#a1a1aa]">Method:</span>
+                                <span className="text-white font-bold uppercase">{order.payment_method}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-[#a1a1aa]">Status:</span>
+                                <span className={`font-black uppercase tracking-widest text-[11px] ${order.payment_status === 'paid' ? 'text-green-500' : 'text-amber-500'}`}>
+                                    {order.payment_status}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
+                    {/* Customer Info Card */}
+                    <div className="bg-[#18181b] border border-[#27272a] rounded-2xl p-6">
+                        <h3 className="font-bold text-white flex items-center gap-2 text-sm uppercase tracking-widest mb-4">
+                            <FontAwesomeIcon icon={faUser} className="text-amber-500 w-3.5" />
+                            Customer Information
+                        </h3>
+                        {order.profiles && (
+                            <div className="space-y-2">
+                                <p className="font-bold text-white">{order.profiles.full_name}</p>
+                                <p className="text-sm text-[#a1a1aa]">{order.profiles.email}</p>
+                                {order.profiles.mobile && <p className="text-sm text-[#a1a1aa]">{order.profiles.mobile}</p>}
+                            </div>
+                        )}
+                        {!order.profiles && (
+                            <p className="text-sm text-[#a1a1aa] italic">No linked profile available.</p>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

@@ -38,3 +38,20 @@ export function createStaticClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 }
+
+/**
+ * Service client for administrative operations (bypasses RLS)
+ */
+export async function createServiceClient() {
+  const { createClient } = require('@supabase/supabase-js')
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  )
+}
