@@ -43,7 +43,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                             ? initialData.weight_options.map((w: string) => ({ label: w, price: initialData.price }))
                             : (initialData?.weight_options || [] as any[])),
         metadata: initialData?.metadata || { benefits: [], culinaryUses: [], faqs: [] },
-        generated_content: initialData?.generated_content || {
+        generated_content: initialData?.metadata?.generated_content || initialData?.generated_content || {
             what_is: { description: '', origin: 'India', botanical_name: '' },
             health_benefits: [] as { name: string; description: string }[],
             culinary_uses: [] as { dish: string; tip: string }[],
@@ -148,10 +148,10 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                 category_id: validatedData.category_id || null,
                 image_urls: validatedData.image_urls || [],
                 weight_options: (formData.weight_options || []).map((o: any) => o.label || o),
-                generated_content: formData.generated_content || {},
                 metadata: {
                     ...(formData.metadata || {}),
-                    weight_pricing: formData.weight_options || []
+                    weight_pricing: formData.weight_options || [],
+                    generated_content: formData.generated_content || {}
                 }
             }
 
@@ -308,13 +308,12 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                         STRUCTURED CONTENT (Syncs with Live Page)
                     ══════════════════════════════════════════════════ */}
                     
-                    {/* Section B1: What Is This Spice? */}
-                    <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-6 space-y-6">
-                        <div className="flex items-center gap-3 border-b border-[#27272a] pb-4">
+                    <div className="bg-[#111114] border border-[#27272a] rounded-2xl p-7 space-y-6 shadow-sm">
+                        <div className="flex items-center gap-3.5 border-b border-[#27272a] pb-5">
                             <BookOpen className="w-5 h-5 text-[#C17F24]" />
-                            <h2 className="text-lg font-semibold text-white">Section B1: What Is This Spice?</h2>
+                            <h2 className="text-xl font-bold text-white tracking-tight">Section B1: What Is This Spice?</h2>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-5">
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium text-[#e4e4e7]">Main Description</label>
                                 <textarea 
@@ -368,12 +367,11 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                         </div>
                     </div>
 
-                    {/* Section B2: Health Benefits */}
-                    <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-6 space-y-4">
-                        <div className="flex items-center justify-between border-b border-[#27272a] pb-4">
-                            <div className="flex items-center gap-3">
+                    <div className="bg-[#111114] border border-[#27272a] rounded-2xl p-7 space-y-5 shadow-sm">
+                        <div className="flex items-center justify-between border-b border-[#27272a] pb-5">
+                            <div className="flex items-center gap-3.5">
                                 <HeartPulse className="w-5 h-5 text-[#C17F24]" />
-                                <h2 className="text-lg font-semibold text-white">Section B2: Health Benefits</h2>
+                                <h2 className="text-xl font-bold text-white tracking-tight">Section B2: Health Benefits</h2>
                             </div>
                             <button 
                                 type="button"
@@ -431,12 +429,11 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                         </div>
                     </div>
 
-                    {/* Section B3: Culinary Uses */}
-                    <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-6 space-y-4">
-                        <div className="flex items-center justify-between border-b border-[#27272a] pb-4">
-                            <div className="flex items-center gap-3">
+                    <div className="bg-[#111114] border border-[#27272a] rounded-2xl p-7 space-y-5 shadow-sm">
+                        <div className="flex items-center justify-between border-b border-[#27272a] pb-5">
+                            <div className="flex items-center gap-3.5">
                                 <Utensils className="w-5 h-5 text-[#C17F24]" />
-                                <h2 className="text-lg font-semibold text-white">Section B3: Culinary Uses</h2>
+                                <h2 className="text-xl font-bold text-white tracking-tight">Section B3: Culinary Uses</h2>
                             </div>
                             <button 
                                 type="button"
@@ -494,12 +491,11 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                         </div>
                     </div>
 
-                    {/* Section B6: FAQs */}
-                    <div className="bg-[#18181b] border border-[#27272a] rounded-xl p-6 space-y-4">
-                        <div className="flex items-center justify-between border-b border-[#27272a] pb-4">
-                            <div className="flex items-center gap-3">
+                    <div className="bg-[#111114] border border-[#27272a] rounded-2xl p-7 space-y-5 shadow-sm">
+                        <div className="flex items-center justify-between border-b border-[#27272a] pb-5">
+                            <div className="flex items-center gap-3.5">
                                 <HelpCircle className="w-5 h-5 text-[#C17F24]" />
-                                <h2 className="text-lg font-semibold text-white">Section B6: FAQs</h2>
+                                <h2 className="text-xl font-bold text-white tracking-tight">Section B6: FAQs</h2>
                             </div>
                             <button 
                                 type="button"

@@ -150,12 +150,26 @@ export default function Navbar() {
                             ))}
                         </nav>
 
+                        {/* Search Bar (Desktop) */}
+                        <div className="hidden md:flex flex-1 max-w-md relative group">
+                            <input 
+                                type="text"
+                                onClick={() => setIsSearchOpen(true)}
+                                readOnly
+                                placeholder="Search for spices, blends..."
+                                className="w-full bg-[#FFF0DC] border border-[#F0E8DC] rounded-xl px-4 py-2 text-sm text-[#2E2E2E] placeholder:text-gray-400 cursor-pointer focus:outline-none group-hover:bg-[#FFF4E6] transition-all"
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-[#C47F17] transition-all">
+                                <Search className="w-4 h-4" />
+                            </div>
+                        </div>
+
                         {/* Action Icons */}
                         <div className="flex items-center gap-1">
                             <button
                                 aria-label="Search"
                                 onClick={() => setIsSearchOpen(true)}
-                                className="p-2.5 rounded-xl hover:bg-[#FFF0DC] text-[#2E2E2E] hover:text-[#C47F17] transition-all"
+                                className="md:hidden p-2.5 rounded-xl hover:bg-[#FFF0DC] text-[#2E2E2E] hover:text-[#C47F17] transition-all"
                             >
                                 <Search className="w-5 h-5" />
                             </button>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark, faSearch, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { createClient } from '@/lib/supabase/client'
@@ -42,10 +43,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             try {
                 const { data, error } = await supabase
                     .from('products')
-                    .select('id, name, description, price, slug, image_urls')
-                    .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+                    .select('id, name, description, price, slug, image_urls, metadata')
+                    .or(`name.ilike.%${query}%,description.ilike.%${query}%,tagline.ilike.%${query}%`)
                     .eq('is_active', true)
-                    .limit(8)
+                    .limit(10)
 
                 if (error) throw error
                 setResults(data || [])
@@ -69,7 +70,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     ]
 
     return (
-        <div className="fixed inset-0 z-[100] flex flex-col pt-20 px-4 bg-[#F5F0E8]/90 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex flex-col pt-12 sm:pt-20 px-4 bg-[#F5F0E8]/90 backdrop-blur-md">
             <div className="max-w-2xl w-full mx-auto relative animate-in fade-in slide-in-from-top-4 duration-300">
                 <button 
                     onClick={onClose}
@@ -148,38 +149,52 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         {results.length > 0 && (
                             <div className="p-3 space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 px-3 pt-2">Search Results ({results.length})</p>
-                                {results.map((product) => (
-                                    <button
-                                        key={product.id}
-                                        onClick={() => {
-                                            onClose()
-                                            router.push(`/product/${product.slug}`)
-                                        }}
-                                        className="w-full text-left p-2.5 hover:bg-[#F9F4EE] rounded-2xl flex items-center gap-4 group transition-all"
-                                    >
-                                        <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0 border border-[#e8ddd0]">
-                                            {product.image_urls?.[0] ? (
-                                                <img 
-                                                    src={product.image_urls[0]} 
-                                                    alt={product.name}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-300 bg-[#F9F4EE]">
-                                                    <FontAwesomeIcon icon={faSearch} className="w-4 h-4" />
+                                {results.map((product) => {
+                                    const origin = product.metadata?.generated_content?.what_is?.origin || product.metadata?.origin;
+                                    return (
+                                        <button
+                                            key={product.id}
+                                            onClick={() => {
+                                                onClose()
+                                                router.push(`/product/${product.slug}`)
+                                            }}
+                                            className="w-full text-left p-2 sm:p-3 hover:bg-[#F9F4EE] rounded-2xl flex items-center gap-3 sm:gap-4 group transition-all border border-transparent hover:border-[#e8ddd0]"
+                                        >
+                                            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0 border border-[#e8ddd0] relative">
+                                                {product.image_urls?.[0] ? (
+                                                    <Image 
+                                                        src={product.image_urls[0]} 
+                                                        alt={product.name}
+                                                        fill
+                                                        sizes="(max-width: 640px) 48px, 64px"
+                                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-300 bg-[#F9F4EE]">
+                                                        <FontAwesomeIcon icon={faSearch} className="w-4 h-4" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex flex-wrap items-center gap-1 sm:gap-x-2 sm:gap-y-1 mb-0.5">
+                                                    <p className="font-bold text-[#2E2E2E] text-xs sm:text-base group-hover:text-[#C17F24] transition-colors truncate max-w-[120px] sm:max-w-none">{product.name}</p>
+                                                    {origin && (
+                                                        <span className="text-[8px] sm:text-[10px] bg-[#F9F4EE] text-[#C17F24] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-tighter whitespace-nowrap">
+                                                            {origin}
+                                                        </span>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-bold text-[#2E2E2E] text-sm group-hover:text-[#C17F24] transition-colors">{product.name}</p>
-                                            <p className="text-xs text-gray-500 line-clamp-1 pr-6">{product.description}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-[#C17F24] font-extrabold text-sm">₹{product.price}</p>
-                                            <p className="text-[10px] text-gray-400 font-medium">View Detail</p>
-                                        </div>
-                                    </button>
-                                ))}
+                                                <p className="text-[11px] sm:text-xs text-gray-500 line-clamp-1 pr-2">
+                                                    {product.metadata?.generated_content?.what_is?.description || product.description}
+                                                </p>
+                                            </div>
+                                            <div className="text-right flex-shrink-0">
+                                                <p className="text-[#C17F24] font-black text-sm sm:text-base">₹{product.price}</p>
+                                                <p className="hidden sm:block text-[10px] text-gray-400 font-bold uppercase tracking-widest group-hover:text-[#C17F24]">View Detail</p>
+                                            </div>
+                                        </button>
+                                    )
+                                })}
                             </div>
                         )}
                     </div>

@@ -54,10 +54,19 @@ export default function HomePage() {
                         contactPoint: {
                             '@type': 'ContactPoint',
                             telephone: '+91-98981-76667',
+                            email: 'savikafoods@gmail.com',
                             contactType: 'customer service',
                             areaServed: 'IN',
                             availableLanguage: ['English', 'Hindi'],
                         },
+                        address: {
+                            '@type': 'PostalAddress',
+                            streetAddress: 'B-406, Siddhivinayak Homes, Solsumba',
+                            addressLocality: 'Umargam, Valsad',
+                            addressRegion: 'Gujarat',
+                            postalCode: '396165',
+                            addressCountry: 'IN'
+                        }
                     }),
                 }}
             />

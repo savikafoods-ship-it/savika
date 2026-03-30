@@ -12,7 +12,7 @@ export default function TermsPage() {
                 </div>
                 
                 <div className="prose prose-[#C17F24] max-w-none text-[#5A5A5A]">
-                    <p>These terms and conditions outline the rules and regulations for the use of Savika Foods Pvt. Ltd.'s Website.</p>
+                    <p>These terms and conditions outline the rules and regulations for the use of Savika Foods's Website.</p>
                     
                     <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">1. Acceptance of Terms</h2>
                     <p>By accessing this website we assume you accept these terms and conditions. Do not continue to use Savika Foods if you do not agree to take all of the terms and conditions stated on this page.</p>

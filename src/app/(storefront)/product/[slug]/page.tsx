@@ -115,24 +115,26 @@ export default async function ProductPage({ params }: Props) {
     if (!p) notFound()
 
     // Map DB fields to component variables with fallbacks
+    const generatedContent = p.metadata?.generated_content || p.generated_content || {}
+    
     const enrichedProduct = {
         ...p,
         localName: p.local_name || '',
         heroIntro: p.description || '',
-        whatIsThis: p.generated_content?.what_is?.description || p.description || '',
-        origin: p.generated_content?.what_is?.origin || p.metadata?.origin || 'India',
-        botanicalName: p.generated_content?.what_is?.botanical_name || p.metadata?.botanicalName || '',
+        whatIsThis: generatedContent.what_is?.description || p.description || '',
+        origin: generatedContent.what_is?.origin || p.metadata?.origin || 'India',
+        botanicalName: generatedContent.what_is?.botanical_name || p.metadata?.botanicalName || '',
         culturalImportance: p.metadata?.culturalImportance || 'Traditional Indian Spice',
         regionalUsage: p.metadata?.regionalUsage || 'Pan-India',
-        benefits: (p.generated_content?.health_benefits?.length > 0) 
-            ? p.generated_content.health_benefits.map((b: any) => ({ title: b.name || 'Benefit', desc: b.description || '' }))
+        benefits: (generatedContent.health_benefits?.length > 0) 
+            ? generatedContent.health_benefits.map((b: any) => ({ title: b.name || 'Benefit', desc: b.description || '' }))
             : (p.metadata?.benefits || []),
-        culinaryUses: p.generated_content?.culinary_uses || p.metadata?.culinaryUses || [],
+        culinaryUses: generatedContent.culinary_uses || p.metadata?.culinaryUses || [],
         storageLife: p.metadata?.storageLife || '12 months',
         storageInstructions: p.metadata?.storageInstructions || 'Store in a cool, dry place.',
-        sourcingStory: p.metadata?.sourcingStory || 'Sourced directly from verified farmers.',
-        faqs: (p.generated_content?.faqs?.length > 0)
-            ? p.generated_content.faqs.map((f: any) => ({ q: f.question || '', a: f.answer || '' }))
+        sourcingStory: p.metadata?.sourcingStory || 'Sourced directly from verified farmers in regional spice hubs.',
+        faqs: (generatedContent.faqs?.length > 0)
+            ? generatedContent.faqs.map((f: any) => ({ q: f.question || '', a: f.answer || '' }))
             : (p.metadata?.faqs || []),
         weightOptions: p.weight_options || [],
         weight_options: p.weight_options || []

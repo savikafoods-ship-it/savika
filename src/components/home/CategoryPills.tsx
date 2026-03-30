@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Flame, CookingPot, Package, Gift, Gem, Sprout, Store, HelpCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -80,7 +81,13 @@ export default async function CategoryPills() {
                                     style={{ backgroundColor: cat.bg }}
                                 >
                                     {cat.image_url ? (
-                                        <img src={cat.image_url} alt={cat.name} className="w-10 h-10 object-contain" />
+                                        <Image 
+                                            src={cat.image_url} 
+                                            alt={cat.name} 
+                                            width={40} 
+                                            height={40} 
+                                            className="w-10 h-10 object-contain" 
+                                        />
                                     ) : (
                                         <Icon className="w-6 h-6 sm:w-7 sm:h-7" style={{ color: cat.iconColor }} />
                                     )}

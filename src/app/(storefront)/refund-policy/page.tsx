@@ -12,7 +12,7 @@ export default function RefundPolicyPage() {
                 </div>
                 
                 <div className="prose prose-[#C17F24] max-w-none text-[#5A5A5A]">
-                    <p>Thanks for purchasing our products at Savika Foods operated by Savika Foods Pvt. Ltd.</p>
+                    <p>Thanks for purchasing our products at Savika Foods.</p>
 
                     <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">1. Returns</h2>
                     <p>Given the perishable nature of spices and food products, we generally do not accept returns. However, we offer a 100% money-back guarantee in the following situations:</p>

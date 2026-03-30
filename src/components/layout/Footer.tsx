@@ -1,28 +1,50 @@
-'use client'
-
 import Link from 'next/link'
-import { MapPin, Phone, Mail, Send, Leaf, Award, Truck, RotateCcw } from 'lucide-react'
+import { 
+    MapPin, 
+    Phone, 
+    Mail, 
+    Leaf, 
+    Award, 
+    Truck, 
+    RotateCcw,
+    Flame,
+    CookingPot,
+    ChefHat,
+    Gift,
+    Star,
+    ClipboardList,
+    Undo2,
+    ShieldCheck,
+    MessageCircle,
+    Info,
+    TrendingUp,
+    Briefcase,
+    Globe,
+    CreditCard
+} from 'lucide-react'
 import { SavikaLogo } from '@/components/ui/SavikaLogo'
 
 const footerLinks = {
     shop: [
-        { label: 'Whole Spices', href: '/category/whole-spices' },
-        { label: 'Ground & Powdered', href: '/category/ground-powdered' },
-        { label: 'Blends & Masalas', href: '/category/blends-masalas' },
-        { label: 'Gift Packs', href: '/category/gift-packs' },
-        { label: 'Exotics & Rare', href: '/category/exotics-rare' },
-        { label: 'Shop All', href: '/shop' },
+        { label: 'Whole Spices', href: '/category/whole-spices', icon: Flame },
+        { label: 'Ground & Powdered', href: '/category/ground-powdered', icon: CookingPot },
+        { label: 'Blends & Masalas', href: '/category/blends-masalas', icon: ChefHat },
+        { label: 'Gift Packs', href: '/category/gift-packs', icon: Gift },
+        { label: 'Exotics & Rare', href: '/category/exotics-rare', icon: Star },
+    ],
+    help: [
+        { label: 'Track Your Order', href: '/account/orders', icon: Truck },
+        { label: 'Return & Refund', href: '/refund-policy', icon: Undo2 },
+        { label: 'Shipping Policy', href: '/shipping-policy', icon: ShieldCheck },
+        { label: 'FAQ', href: '/faq', icon: Info },
+        { label: 'Contact Us', href: '/contact', icon: MessageCircle },
     ],
     company: [
-        { label: 'Our Story', href: '/our-story' },
-        { label: 'Why Savika', href: '/why-savika' },
-        { label: 'Contact', href: '/contact' },
-    ],
-    support: [
-        { label: 'Refund Policy', href: '/refund-policy' },
-        { label: 'Terms & Conditions', href: '/terms' },
-        { label: 'Privacy Policy', href: '/privacy' },
-        { label: 'Shipping Policy', href: '/shipping-policy' },
+        { label: 'Our Story', href: '/our-story', icon: ChefHat },
+        { label: 'Why Savika?', href: '/why-savika', icon: Award },
+        { label: 'Sourcing Promise', href: '/sourcing', icon: MapPin },
+        { label: 'Blog', href: '/blog', icon: TrendingUp },
+        { label: 'Careers', href: '/careers', icon: Briefcase },
     ],
 }
 
@@ -35,141 +57,151 @@ const trustBadges = [
 
 export default function Footer() {
     return (
-        <footer className="bg-[#1A120B] text-white">
-            {/* Newsletter Strip */}
-            <div className="bg-[#2D1B0D] py-10 px-4">
-                <div className="max-w-3xl mx-auto text-center">
-                    <p className="text-2xl font-extrabold text-white mb-1">
-                        Join the Spice Family!
-                    </p>
-                    <p className="text-sm text-white/90 mb-6 font-medium">Get exclusive recipes, first access to new arrivals &amp; member-only deals.</p>
-                    <form
-                        className="flex flex-col sm:flex-row gap-0 max-w-lg mx-auto overflow-hidden rounded-xl shadow-lg"
-                        onSubmit={(e) => e.preventDefault()}
-                    >
-                        <input
-                            type="email"
-                            placeholder="Your email address..."
-                            className="flex-1 px-6 py-4 bg-white text-[#2E2E2E] text-sm font-medium outline-none placeholder:text-gray-400"
-                        />
-                        <button
-                            type="submit"
-                            className="bg-[#1A120B] text-white px-8 py-4 font-bold text-sm hover:bg-black transition-colors whitespace-nowrap inline-flex items-center justify-center gap-2 border-l border-white/10"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" className="w-4 h-4 fill-current">
-                                <path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/>
-                            </svg>
-                            Subscribe
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            {/* Main Footer */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 items-start mb-10">
-
-                    {/* Brand Column */}
-                    <div className="flex flex-col items-start text-left">
-                        <SavikaLogo variant="footer" className="mb-5" />
-                        <p className="text-sm text-white/70 leading-relaxed max-w-xs mb-8">
-                            Bringing the soul of India&apos;s spice heritage to your kitchen. Every gram, pure. Every blend, authentic.
+        <footer className="bg-[#1A1108] text-white pt-20 pb-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Upper Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 mb-16">
+                    
+                    {/* Brand Section (4 columns) */}
+                    <div className="lg:col-span-5 space-y-8">
+                        <SavikaLogo variant="footer" />
+                        <p className="text-[#D1D5DB] text-sm leading-relaxed max-w-sm">
+                            Bringing the soul of India's spice heritage to your kitchen. 
+                            Every gram, pure. Every blend, authentic.
                         </p>
-
-                        {/* Contact */}
-                        <div className="space-y-4 mb-6">
-                            <div className="flex items-start gap-3 text-xs text-white/75 group">
-                                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
-                                    <MapPin className="w-4 h-4 text-white/80" />
-                                </div>
-                                <span className="pt-2 leading-relaxed">Savika Foods Pvt. Ltd., Umbergaon, Gujarat - 396171</span>
+                        
+                        {/* Contact Details */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3 text-sm text-[#D1D5DB]">
+                                <MapPin className="w-4 h-4 text-[#C17F24]" />
+                                <span>B-406, Siddhivinayak Homes, Solsumba, Gujarat - 396165</span>
                             </div>
-                            <div className="flex items-center gap-3 text-xs text-white/75 group">
-                                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
-                                    <Phone className="w-4 h-4 text-white/80" />
-                                </div>
+                            <div className="flex items-center gap-3 text-sm text-[#D1D5DB]">
+                                <Phone className="w-4 h-4 text-[#C17F24]" />
                                 <span>+91 98981 76667</span>
                             </div>
-                            <div className="flex items-center gap-3 text-xs text-white/75 group">
-                                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:bg-white/10 transition-all duration-300">
-                                    <Mail className="w-4 h-4 text-white/80" />
-                                </div>
+                            <div className="flex items-center gap-3 text-sm text-[#D1D5DB]">
+                                <Mail className="w-4 h-4 text-[#C17F24]" />
                                 <span>savikafoods@gmail.com</span>
                             </div>
                         </div>
+
+                        {/* Social Icons */}
+                        <div className="flex items-center gap-3 pt-2">
+                            {[
+                                { 
+                                    name: 'Instagram', 
+                                    href: '#', 
+                                    svg: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                                },
+                                { 
+                                    name: 'Facebook', 
+                                    href: '#', 
+                                    svg: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                                },
+                                { 
+                                    name: 'Youtube', 
+                                    href: '#', 
+                                    svg: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg>
+                                },
+                                { 
+                                    name: 'Twitter', 
+                                    href: '#', 
+                                    svg: <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+                                }
+                            ].map((social, i) => (
+                                <Link 
+                                    key={i} 
+                                    href={social.href}
+                                    aria-label={social.name}
+                                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#C17F24] flex items-center justify-center transition-all duration-300"
+                                >
+                                    {social.svg}
+                                </Link>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Shop */}
-                    <div className="flex flex-col items-start text-left">
-                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-fit pr-4">Shop</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.shop.map((l) => (
-                                <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors duration-200">
-                                        {l.label}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                    {/* Links Sections (7 columns) */}
+                    <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-8">
+                        {/* SHOP */}
+                        <div className="space-y-6">
+                            <h4 className="text-[#C17F24] font-bold uppercase tracking-wider flex items-center gap-2">
+                                <TrendingUp className="w-4 h-4" /> SHOP
+                            </h4>
+                            <ul className="space-y-4">
+                                {footerLinks.shop.map((link) => (
+                                    <li key={link.label}>
+                                        <Link href={link.href} className="text-[#D1D5DB] hover:text-white text-sm transition-colors flex items-center gap-2 group">
+                                            <link.icon className="w-3.5 h-3.5 text-[#C17F24]/0 group-hover:text-[#C17F24] transition-all" />
+                                            {link.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
 
-                    {/* Company */}
-                    <div className="flex flex-col items-start text-left">
-                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-fit pr-4">Company</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.company.map((l) => (
-                                <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors duration-200">
-                                        {l.label}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                        {/* HELP */}
+                        <div className="space-y-6">
+                            <h4 className="text-[#C17F24] font-bold uppercase tracking-wider flex items-center gap-2">
+                                <Info className="w-4 h-4" /> HELP
+                            </h4>
+                            <ul className="space-y-4">
+                                {footerLinks.help.map((link) => (
+                                    <li key={link.label}>
+                                        <Link href={link.href} className="text-[#D1D5DB] hover:text-white text-sm transition-colors flex items-center gap-2 group">
+                                            <link.icon className="w-3.5 h-3.5 text-[#C17F24]/0 group-hover:text-[#C17F24] transition-all" />
+                                            {link.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
 
-                    {/* Support */}
-                    <div className="flex flex-col items-start text-left">
-                        <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest border-b border-white/10 pb-2 w-fit pr-4">Support</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.support.map((l) => (
-                                <li key={l.label}>
-                                    <Link href={l.href} className="text-sm text-white/75 hover:text-white transition-colors duration-200">
-                                        {l.label}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
+                        {/* COMPANY */}
+                        <div className="space-y-6">
+                            <h4 className="text-[#C17F24] font-bold uppercase tracking-wider flex items-center gap-2">
+                                <Briefcase className="w-4 h-4" /> COMPANY
+                            </h4>
+                            <ul className="space-y-4">
+                                {footerLinks.company.map((link) => (
+                                    <li key={link.label}>
+                                        <Link href={link.href} className="text-[#D1D5DB] hover:text-white text-sm transition-colors flex items-center gap-2 group">
+                                            <link.icon className="w-3.5 h-3.5 text-[#C17F24]/0 group-hover:text-[#C17F24] transition-all" />
+                                            {link.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
                 </div>
+
+                <div className="w-full h-px bg-white/5 mb-16" />
 
                 {/* Trust Badges */}
-                <div className="mt-8 pt-8 border-t border-white/20">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-                        {trustBadges.map((badge) => {
-                            const Icon = badge.icon
-                            return (
-                                <div key={badge.label} className="flex flex-col items-center gap-1.5 group">
-                                    <div className="w-12 h-12 rounded-full bg-white/5 group-hover:bg-white/15 flex items-center justify-center transition-colors duration-200">
-                                        <Icon className="w-6 h-6 text-white/80" />
-                                    </div>
-                                    <span className="text-xs font-bold text-white">{badge.label}</span>
-                                    <span className="text-[11px] text-white/50">{badge.sub}</span>
-                                </div>
-                            )
-                        })}
-                    </div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16 px-4">
+                    {trustBadges.map((badge) => (
+                        <div key={badge.label} className="flex flex-col items-center text-center space-y-3 group">
+                            <div className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center transition-colors duration-300 group-hover:bg-[#C17F24]/10">
+                                <badge.icon className="w-7 h-7 text-[#C17F24]" />
+                            </div>
+                            <div className="space-y-1">
+                                <h5 className="font-bold text-sm tracking-tight">{badge.label}</h5>
+                                <p className="text-[#9CA3AF] text-[11px] font-medium">{badge.sub}</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            </div>
 
-            {/* Bottom Bar */}
-            <div className="border-t border-white/20 py-4 px-4 flex flex-col sm:flex-row items-center justify-between max-w-7xl mx-auto text-xs text-white/60 gap-2">
-                <p>
-                    &copy; {new Date().getFullYear()} Savika Foods Pvt. Ltd. All rights reserved.
-                </p>
-                <p>
-                    <Link href="/privacy" className="hover:text-white">Privacy Policy</Link> &nbsp;|&nbsp;
-                    <Link href="/terms" className="hover:text-white">Terms of Service</Link>
-                </p>
+                {/* Bottom Bar */}
+                <div className="text-center pt-8 mt-8 border-t border-white/5">
+                    <p className="text-[#9CA3AF] text-[11px] font-medium tracking-wide">
+                        &copy; {new Date().getFullYear()} Savika Foods. All rights reserved. | 
+                        <Link href="/privacy" className="hover:text-white mx-1">Privacy Policy</Link> | 
+                        <Link href="/terms" className="hover:text-white mx-1">Terms of Service</Link>
+                    </p>
+                </div>
             </div>
         </footer>
     )

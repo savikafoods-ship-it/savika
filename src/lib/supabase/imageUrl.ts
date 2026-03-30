@@ -1,7 +1,9 @@
 export function getProductImageUrl(path: string | null | undefined) {
   if (!path) return '/placeholder-product.png'
   if (path.startsWith('http')) return path
-  if (path.startsWith('/images/')) return path // Local public images
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  if (normalizedPath.startsWith('/images/')) return normalizedPath
+  if (normalizedPath.startsWith('/product-images/')) return normalizedPath
   
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!supabaseUrl) return '/placeholder-product.png'

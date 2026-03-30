@@ -12,7 +12,7 @@ export default function PrivacyPolicyPage() {
                 </div>
                 
                 <div className="prose prose-[#C17F24] max-w-none text-[#5A5A5A]">
-                    <p>At Savika Foods Pvt. Ltd., we respect your privacy and are committed to protecting it through our compliance with this policy.</p>
+                    <p>At Savika Foods, we respect your privacy and are committed to protecting it through our compliance with this policy.</p>
                     
                     <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">1. Information We Collect</h2>
                     <p>We may collect several types of information from and about users of our Website, including information:</p>

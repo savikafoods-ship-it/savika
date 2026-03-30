@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Flame, Star, Diamond, ArrowRight } from 'lucide-react'
 
 interface PromoCard {
@@ -88,7 +89,13 @@ export default async function SaleBanners() {
               {/* Background Art (Image or Icon) */}
               <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-20 pointer-events-none scale-110 sm:scale-125">
                 {card.imageUrl ? (
-                  <img src={card.imageUrl} alt="" className="w-28 h-28 sm:w-36 sm:h-36 object-contain" />
+                  <Image 
+                    src={card.imageUrl} 
+                    alt="" 
+                    width={144} 
+                    height={144} 
+                    className="w-28 h-28 sm:w-36 sm:h-36 object-contain" 
+                  />
                 ) : (
                   <Icon className="w-28 h-28 sm:w-32 sm:h-32" />
                 )}
