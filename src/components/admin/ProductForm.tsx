@@ -43,11 +43,11 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
                             ? initialData.weight_options.map((w: string) => ({ label: w, price: initialData.price }))
                             : (initialData?.weight_options || [] as any[])),
         metadata: initialData?.metadata || { benefits: [], culinaryUses: [], faqs: [] },
-        generated_content: initialData?.metadata?.generated_content || initialData?.generated_content || {
-            what_is: { description: '', origin: 'India', botanical_name: '' },
-            health_benefits: [] as { name: string; description: string }[],
-            culinary_uses: [] as { dish: string; tip: string }[],
-            faqs: [] as { question: string; answer: string }[]
+        generated_content: {
+            what_is: initialData?.metadata?.generated_content?.what_is || initialData?.generated_content?.what_is || { description: '', origin: 'India', botanical_name: '' },
+            health_benefits: initialData?.metadata?.generated_content?.health_benefits || initialData?.generated_content?.health_benefits || [],
+            culinary_uses: initialData?.metadata?.generated_content?.culinary_uses || initialData?.generated_content?.culinary_uses || [],
+            faqs: initialData?.metadata?.generated_content?.faqs || initialData?.generated_content?.faqs || []
         }
     })
     const [errors, setErrors] = useState<Record<string, string>>({})
@@ -171,7 +171,17 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
             router.push('/admin/products')
             router.refresh()
         } catch (err: any) {
-            alert(err.message || 'Failed to save product')
+            if (err instanceof ZodError) {
+                const fieldErrors: Record<string, string> = {}
+                err.errors.forEach(e => {
+                    const path = e.path.join('.')
+                    fieldErrors[path] = e.message
+                })
+                setErrors(fieldErrors)
+                console.error('Validation errors:', fieldErrors)
+            } else {
+                alert(err.message || 'Failed to save product')
+            }
         } finally {
             setLoading(false)
         }

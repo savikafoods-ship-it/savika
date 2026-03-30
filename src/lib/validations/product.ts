@@ -6,7 +6,10 @@ export const productSchema = z.object({
   tagline: z.string().optional(),
   local_name: z.string().optional(),
   price: z.coerce.number().positive('Price must be a positive number'),
-  compare_price: z.coerce.number().optional().nullable(),
+  compare_price: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? undefined : val),
+    z.coerce.number().positive().optional().nullable()
+  ),
   stock: z.coerce.number().int().nonnegative('Stock cannot be negative'),
   description: z.string().optional(),
   is_active: z.boolean().default(true),
@@ -15,22 +18,27 @@ export const productSchema = z.object({
   weight_options: z.array(z.any()).optional(),
   generated_content: z.object({
     what_is: z.object({
-      description: z.string(),
-      origin: z.string(),
-      botanical_name: z.string()
-    }),
+      description: z.string().optional().default(''),
+      origin: z.string().optional().default(''),
+      botanical_name: z.string().optional().default('')
+    }).optional().default({ description: '', origin: '', botanical_name: '' }),
     health_benefits: z.array(z.object({
-      name: z.string(),
-      description: z.string()
-    })),
+      name: z.string().optional().default(''),
+      description: z.string().optional().default('')
+    })).optional().default([]),
     culinary_uses: z.array(z.object({
-      dish: z.string(),
-      tip: z.string()
-    })),
+      dish: z.string().optional().default(''),
+      tip: z.string().optional().default('')
+    })).optional().default([]),
     faqs: z.array(z.object({
-      question: z.string(),
-      answer: z.string()
-    }))
+      question: z.string().optional().default(''),
+      answer: z.string().optional().default('')
+    })).optional().default([])
+  }).optional().default({
+    what_is: { description: '', origin: '', botanical_name: '' },
+    health_benefits: [],
+    culinary_uses: [],
+    faqs: []
   })
 })
 
