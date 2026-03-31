@@ -70,6 +70,26 @@ export default function HomePage() {
                     }),
                 }}
             />
+            {/* Website Search Schema */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                        '@context': 'https://schema.org',
+                        '@type': 'WebSite',
+                        name: 'Savika Foods',
+                        url: 'https://www.savikafoods.in',
+                        potentialAction: {
+                            '@type': 'SearchAction',
+                            target: {
+                                '@type': 'EntryPoint',
+                                urlTemplate: 'https://www.savikafoods.in/shop?q={search_term_string}',
+                            },
+                            'query-input': 'required name=search_term_string',
+                        },
+                    }),
+                }}
+            />
             <HeroSection />
             <CategoryPills />
             <FeaturedProducts />

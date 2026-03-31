@@ -173,7 +173,7 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
         } catch (err: any) {
             if (err instanceof ZodError) {
                 const fieldErrors: Record<string, string> = {}
-                err.errors.forEach(e => {
+                ;(err as any).errors.forEach((e: any) => {
                     const path = e.path.join('.')
                     fieldErrors[path] = e.message
                 })

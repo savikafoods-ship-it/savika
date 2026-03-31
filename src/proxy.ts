@@ -2,6 +2,17 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
+  // Redirect http to https and non-www to www
+  const host = request.headers.get('host') ?? ''
+  const proto = request.headers.get('x-forwarded-proto') ?? 'https'
+
+  // Skip localhost
+  if (!host.includes('localhost') && (!host.startsWith('www.') || proto === 'http')) {
+    const cleanHost = host.replace('www.', '')
+    const wwwUrl = `https://www.${cleanHost}${request.nextUrl.pathname}${request.nextUrl.search}`
+    return NextResponse.redirect(wwwUrl, { status: 301 })
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,

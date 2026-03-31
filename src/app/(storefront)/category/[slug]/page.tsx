@@ -111,7 +111,10 @@ type Props = { params: Promise<{ slug: string }> }
 
 // ─── generateStaticParams ──────────────────────────────────────────────
 export async function generateStaticParams() {
-    return Object.keys(CATEGORIES).map((slug) => ({ slug }))
+    const { createStaticClient } = await import('@/lib/supabase/server')
+    const supabase = createStaticClient()
+    const { data: categories } = await supabase.from('categories').select('slug')
+    return (categories ?? []).map((cat: any) => ({ slug: cat.slug }))
 }
 
 // ─── generateMetadata ──────────────────────────────────────────────────

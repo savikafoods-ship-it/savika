@@ -1,80 +1,98 @@
 import { MetadataRoute } from 'next'
 import { createStaticClient } from '@/lib/supabase/server'
 
-const BASE_URL = 'https://savikafoods.in'
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = createStaticClient()
+  const baseUrl = 'https://www.savikafoods.in'
 
-  // Fetch all product slugs
+  // Fetch all active product slugs from Supabase
+  const supabase = createStaticClient()
   const { data: products } = await supabase
     .from('products')
-    .select('slug')
+    .select('slug, updated_at')
     .eq('is_active', true)
+    .order('created_at', { ascending: true })
 
   // Fetch all category slugs
   const { data: categories } = await supabase
     .from('categories')
-    .select('slug')
+    .select('slug, updated_at')
+    .order('name', { ascending: true })
 
-  const productEntries: MetadataRoute.Sitemap = (products || []).map((p: { slug: string }) => ({
-    url: `${BASE_URL}/product/${p.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }))
+  const now = new Date().toISOString()
 
-  const categoryEntries: MetadataRoute.Sitemap = (categories || []).map((c: { slug: string }) => ({
-    url: `${BASE_URL}/category/${c.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.8,
-  }))
-
-  const staticRoutes: MetadataRoute.Sitemap = [
+  // Static pages
+  const staticPages: MetadataRoute.Sitemap = [
     {
-      url: BASE_URL,
-      lastModified: new Date(),
+      url: baseUrl,
+      lastModified: now,
       changeFrequency: 'daily',
-      priority: 1,
+      priority: 1.0,
     },
     {
-      url: `${BASE_URL}/shop`,
-      lastModified: new Date(),
+      url: `${baseUrl}/shop`,
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/our-story`,
-      lastModified: new Date(),
+      url: `${baseUrl}/our-story`,
+      lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.5,
+      priority: 0.7,
     },
     {
-      url: `${BASE_URL}/why-savika`,
-      lastModified: new Date(),
+      url: `${baseUrl}/why-savika`,
+      lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.5,
+      priority: 0.7,
     },
     {
-      url: `${BASE_URL}/contact`,
-      lastModified: new Date(),
+      url: `${baseUrl}/contact`,
+      lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.5,
+      priority: 0.6,
     },
     {
-      url: `${BASE_URL}/privacy`,
-      lastModified: new Date(),
+      url: `${baseUrl}/privacy`,
+      lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.3,
     },
     {
-      url: `${BASE_URL}/terms`,
-      lastModified: new Date(),
+      url: `${baseUrl}/refund-policy`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/shipping-policy`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.3,
     },
   ]
 
-  return [...staticRoutes, ...categoryEntries, ...productEntries]
+  // Product pages (highest priority after homepage)
+  const productPages: MetadataRoute.Sitemap = (products ?? []).map((product: { slug: string, updated_at?: string }) => ({
+    url: `${baseUrl}/product/${product.slug}`,
+    lastModified: product.updated_at ?? now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.85,
+  }))
+
+  // Category pages
+  const categoryPages: MetadataRoute.Sitemap = (categories ?? []).map((category: { slug: string, updated_at?: string }) => ({
+    url: `${baseUrl}/category/${category.slug}`,
+    lastModified: category.updated_at ?? now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.75,
+  }))
+
+  return [...staticPages, ...productPages, ...categoryPages]
 }

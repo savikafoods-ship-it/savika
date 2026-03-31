@@ -68,9 +68,11 @@ type Props = { params: Promise<{ slug: string }> }
 
 export async function generateStaticParams() {
     const supabase = createStaticClient()
-    const { data: products } = await supabase.from('products').select('slug')
+    const { data: products } = await supabase.from('products').select('slug').eq('is_active', true)
     return (products || []).map((p: any) => ({ slug: p.slug }))
 }
+
+export const revalidate = 3600 // Revalidate every hour
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params
