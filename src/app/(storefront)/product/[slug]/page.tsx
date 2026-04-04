@@ -42,10 +42,13 @@ import {
     Leaf,
     School,
     Map,
-    ChevronDown
+    ChevronDown,
+    Star
 } from 'lucide-react'
 import ProductCommercePanel from '@/components/product/ProductCommercePanel'
 import ImageZoom from '@/components/product/ImageZoom'
+import ReviewsSection from '@/components/product/ReviewsSection'
+import RelatedProducts from '@/components/product/RelatedProducts'
 import { createClient, createStaticClient } from '@/lib/supabase/server'
 import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
@@ -440,31 +443,12 @@ export default async function ProductPage({ params }: Props) {
                     </div>
                 </section>
 
+                <ReviewsSection productId={enrichedProduct.id} />
+
                 {/* ══════════════════════════════════════════════════
-                    SECTION 8 - INTERNAL LINKS / RELATED PRODUCTS
+                    SECTION 8 - RELATED PRODUCTS
                 ══════════════════════════════════════════════════ */}
-                <section className="pb-4">
-                    <SectionHeading icon={faFire} text="You May Also Like" />
-                    <div className="flex flex-wrap gap-4 mt-5">
-                        {enrichedProduct.relatedProducts?.map((rp: any) => (
-                            <Link
-                                key={rp.slug}
-                                href={`/product/${rp.slug}`}
-                                className="flex items-center gap-2 bg-white border border-[#e8ddd0] hover:border-[#C47F17] hover:bg-[#FFF8F0] text-[#2C1A0E] font-semibold px-4 py-2.5 rounded-full text-sm transition-all"
-                            >
-                                <FontAwesomeIcon icon={faArrowRight} className="w-3 h-3 text-[#C17F24]" />
-                                {rp.name}
-                            </Link>
-                        ))}
-                        <Link
-                            href="/shop"
-                            className="flex items-center gap-2 bg-[#C47F17]/10 border border-[#C47F17]/30 hover:bg-[#C47F17] hover:text-white text-[#C47F17] font-semibold px-4 py-2.5 rounded-full text-sm transition-all"
-                        >
-                            <FontAwesomeIcon icon={faStore} className="w-3 h-3" />
-                            View Complete Indian Spice Collection
-                        </Link>
-                    </div>
-                </section>
+                <RelatedProducts categoryId={enrichedProduct.category_id} currentProductId={enrichedProduct.id} />
             </div>
         </div>
     )

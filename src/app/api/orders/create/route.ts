@@ -33,20 +33,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid mobile number' }, { status: 400 })
     }
 
-    // 5. Verify products and prices from database (NEVER trust client-side prices)
+    // 5. Verify products, prices, and STOCK from database
     const serviceClient = await createServiceClient()
     const productIds = items.map((item: { product_id: string }) => item.product_id)
 
     const { data: products, error: productsError } = await serviceClient
       .from('products')
-      .select('id, name, is_active, metadata')
+      .select('id, name, is_active, metadata, stock')
       .in('id', productIds)
 
     if (productsError || !products) {
       return NextResponse.json({ error: 'Failed to verify products' }, { status: 500 })
     }
 
-    // 6. Calculate verified totals (use DB prices, not client prices)
+    // 6. Calculate verified totals and check inventory
     let subtotal = 0
     const verifiedItems = []
 
@@ -55,6 +55,14 @@ export async function POST(request: NextRequest) {
       if (!product || !product.is_active) {
         return NextResponse.json(
           { error: `Product not available: ${item.name}` },
+          { status: 400 }
+        )
+      }
+
+      // Check stock
+      if (product.stock !== null && product.stock < item.quantity) {
+        return NextResponse.json(
+          { error: `Insufficient stock for ${product.name}. Available: ${product.stock}` },
           { status: 400 }
         )
       }
@@ -149,7 +157,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order. Please check database schema.' }, { status: 500 })
     }
 
-    // 10. Return order ID for redirect
+    // 10.5. Trigger Notifications (Async)
+    const { sendOrderConfirmation } = await import('@/lib/notifications')
+    const fullOrderData = {
+        ...order,
+        total,
+        shipping_address,
+        items: verifiedItems,
+    }
+    // We don't await this to avoid delaying the response, but we trigger it
+    sendOrderConfirmation(fullOrderData).catch(err => console.error('Notification error:', err))
+
+    // 11. Success - Decrement stock
+    try {
+      for (const item of items) {
+        const product = products.find((p: any) => p.id === item.product_id)
+        if (product && product.stock !== null) {
+          const newStock = Math.max(0, product.stock - item.quantity)
+          await serviceClient
+            .from('products')
+            .update({ stock: newStock })
+            .eq('id', product.id)
+        }
+      }
+    } catch (stockErr) {
+      console.error('Stock decrement error:', stockErr)
+      // We don't fail the order if stock update fails, but we should log it
+    }
+
+    // 12. Return order ID for redirect
     return NextResponse.json({
       success: true,
       orderId: order.id,

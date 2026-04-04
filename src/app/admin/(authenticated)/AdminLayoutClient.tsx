@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
     faColumns, faBox, faCartShopping, faUsers, faTag, faChartLine, 
     faGear, faFileLines, faRightFromBracket, faBell, faCircleUser, faSpinner,
-    faBars, faXmark, faMoneyBillWave, faClock
+    faBars, faXmark, faMoneyBillWave, faClock, faMessage, faUserGroup
 } from '@fortawesome/free-solid-svg-icons'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils'
@@ -18,7 +18,9 @@ const navItems = [
     { icon: faCartShopping, label: 'Orders', href: '/admin/orders' },
     { icon: faBox, label: 'Products', href: '/admin/products' },
     { icon: faTag, label: 'Categories', href: '/admin/categories' },
+    { icon: faMessage, label: 'Reviews', href: '/admin/reviews' },
     { icon: faUsers, label: 'Customers', href: '/admin/customers' },
+    { icon: faUserGroup, label: 'Staff', href: '/admin/staff' },
     { icon: faTag, label: 'Coupons', href: '/admin/coupons' },
     { icon: faChartLine, label: 'Analytics', href: '/admin/analytics' },
     { icon: faFileLines, label: 'Updates', href: '/admin/updates' },

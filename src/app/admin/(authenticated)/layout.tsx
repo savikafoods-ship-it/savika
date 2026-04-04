@@ -10,15 +10,20 @@ export default async function AdminLayout({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const isLoginPage = false // This check will be handled by middleware or simpler logic if needed, but for now we follow the existing pattern
-
-  // We can simplify the layout to just check for user
   if (!user) {
     redirect('/admin/login')
   }
 
-  if (isLoginPage) {
-    return <>{children}</>
+  // Check role in profiles
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || (profile.role !== 'admin' && profile.role !== 'staff')) {
+    // If not admin/staff, redirect to home or a forbidden page
+    redirect('/')
   }
 
   return (

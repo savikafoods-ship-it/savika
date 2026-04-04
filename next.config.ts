@@ -1,18 +1,12 @@
 import type { NextConfig } from 'next'
 
 interface ExtendedNextConfig extends NextConfig {
-  eslint?: {
-    ignoreDuringBuilds?: boolean
-  }
 }
 
 const nextConfig: ExtendedNextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },

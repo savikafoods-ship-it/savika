@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowUp, faShoppingBag, faUsers, faBox, faChartLine, faArrowDown } from '@fortawesome/free-solid-svg-icons'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, PieChart, Pie, Cell } from 'recharts'
 
 const iconMap: Record<string, any> = {
     revenue: faArrowUp,
@@ -27,9 +27,12 @@ interface DashboardClientProps {
     revenueData: any[];
     topProducts: any[];
     recentOrders: any[];
+    statusData: any[];
 }
 
-export default function DashboardClient({ stats, revenueData, topProducts, recentOrders }: DashboardClientProps) {
+const COLORS = ['#C17F24', '#3B82F6', '#8B5CF6', '#10B981', '#EF4444', '#F59E0B']
+
+export default function DashboardClient({ stats, revenueData, topProducts, recentOrders, statusData }: DashboardClientProps) {
     const today = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
     return (
@@ -65,37 +68,130 @@ export default function DashboardClient({ stats, revenueData, topProducts, recen
             {/* Charts Row */}
             <div className="grid lg:grid-cols-3 gap-4">
                 {/* Revenue Chart */}
-                <div className="lg:col-span-2 bg-[#1A1A1A] rounded-xl p-4 sm:p-5 border border-white/5">
-                    <h2 className="text-sm font-bold text-white mb-6">Monthly Revenue (Rs.)</h2>
-                    <div className="h-[220px] w-full">
+                <div className="lg:col-span-2 bg-[#1B1B1B] rounded-2xl p-6 border border-white/5 shadow-sm">
+                    <div className="flex items-center justify-between mb-8">
+                        <h2 className="text-sm font-black text-white uppercase tracking-widest">Revenue Growth</h2>
+                        <div className="flex items-center gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#C17F24]" /> Monthly</div>
+                        </div>
+                    </div>
+                    <div className="h-[260px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={revenueData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                <XAxis dataKey="month" tick={{ fill: '#9CA3AF', fontSize: 12 }} />
-                                <YAxis tick={{ fill: '#9CA3AF', fontSize: 12 }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
-                                <Tooltip 
-                                    formatter={(v: any) => [`₹${Number(v || 0).toLocaleString('en-IN')}`, 'Revenue']} 
-                                    contentStyle={{ background: '#262626', border: 'none', borderRadius: '12px', color: '#fff' }} 
+                                <defs>
+                                    <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#C17F24" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#C17F24" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                                <XAxis 
+                                    dataKey="month" 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#6B7280', fontSize: 10, fontWeight: 600 }} 
+                                    dy={10}
                                 />
-                                <Line type="monotone" dataKey="revenue" stroke="#C17F24" strokeWidth={2.5} dot={{ fill: '#C17F24', strokeWidth: 0, r: 4 }} activeDot={{ r: 6 }} />
+                                <YAxis 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#6B7280', fontSize: 10, fontWeight: 600 }} 
+                                    tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} 
+                                />
+                                <Tooltip 
+                                    cursor={{ stroke: '#ffffff10', strokeWidth: 2 }}
+                                    contentStyle={{ background: '#111', border: '1px solid #ffffff10', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }} 
+                                    itemStyle={{ color: '#C17F24' }}
+                                />
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="revenue" 
+                                    stroke="#C17F24" 
+                                    strokeWidth={3} 
+                                    dot={{ fill: '#C17F24', strokeWidth: 2, r: 4, stroke: '#1B1B1B' }} 
+                                    activeDot={{ r: 6, stroke: '#1B1B1B', strokeWidth: 2 }} 
+                                />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                {/* Top Products */}
-                <div className="bg-[#1A1A1A] rounded-xl p-4 sm:p-5 border border-white/5">
-                    <h2 className="text-sm font-bold text-white mb-6">Top Products</h2>
-                    <div className="h-[220px] w-full">
+                {/* Status Distribution (Pie) */}
+                <div className="bg-[#1B1B1B] rounded-2xl p-6 border border-white/5 shadow-sm">
+                    <h2 className="text-sm font-black text-white uppercase tracking-widest mb-8">Order Status</h2>
+                    <div className="h-[180px] w-full relative">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={topProducts} layout="vertical">
+                            <PieChart>
+                                <Pie
+                                    data={statusData}
+                                    innerRadius={60}
+                                    outerRadius={80}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {statusData.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                                    ))}
+                                </Pie>
+                                <Tooltip 
+                                    contentStyle={{ background: '#111', border: '1px solid #ffffff10', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span className="text-xl font-black text-white">{statusData.reduce((a, b) => a + b.value, 0)}</span>
+                            <span className="text-[8px] font-black text-gray-500 uppercase tracking-widest">Total</span>
+                        </div>
+                    </div>
+                    <div className="mt-6 grid grid-cols-2 gap-2">
+                        {statusData.map((entry, index) => (
+                            <div key={entry.name} className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                                <span className="text-[9px] font-bold text-gray-400 uppercase truncate">{entry.name}</span>
+                                <span className="text-[9px] font-black text-white ml-auto">{entry.value}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Row 2: Top Products & More */}
+            <div className="grid lg:grid-cols-3 gap-4">
+                <div className="lg:col-span-2 bg-[#1B1B1B] rounded-2xl p-6 border border-white/5 shadow-sm">
+                    <h2 className="text-sm font-black text-white uppercase tracking-widest mb-8">Top Selling Products</h2>
+                    <div className="h-[240px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={topProducts} layout="vertical" margin={{ left: -20 }}>
                                 <XAxis type="number" hide />
-                                <YAxis type="category" dataKey="name" tick={{ fill: '#9CA3AF', fontSize: 10 }} width={80} />
-                                <Tooltip contentStyle={{ background: '#262626', border: 'none', borderRadius: '12px', color: '#fff' }} cursor={{ fill: 'transparent' }} />
-                                <Bar dataKey="sales" fill="#C17F24" radius={[0, 4, 4, 0]} />
+                                <YAxis 
+                                    type="category" 
+                                    dataKey="name" 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 600 }} 
+                                    width={120} 
+                                />
+                                <Tooltip 
+                                    contentStyle={{ background: '#111', border: '1px solid #ffffff10', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }} 
+                                    cursor={{ fill: '#ffffff05' }} 
+                                />
+                                <Bar dataKey="sales" fill="#C17F24" radius={[0, 6, 6, 0]} barSize={20} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
+                </div>
+
+                <div className="bg-[#C17F24]/5 rounded-2xl p-6 border border-[#C17F24]/10 flex flex-col justify-center items-center text-center space-y-4">
+                    <div className="w-16 h-16 rounded-full bg-[#C17F24]/10 flex items-center justify-center mb-2">
+                        <FontAwesomeIcon icon={faChartLine} className="text-[#C17F24] text-2xl" />
+                    </div>
+                    <h3 className="text-lg font-black text-white uppercase tracking-tighter">Insights</h3>
+                    <p className="text-xs text-gray-400 leading-relaxed max-w-[200px]">
+                        Your revenue has grown by <span className="text-[#C17F24] font-bold">{stats[0].change}</span> this week compared to last. Keep it up!
+                    </p>
+                    <Link href="/admin/analytics" className="text-[10px] font-black text-[#C17F24] uppercase tracking-[0.2em] hover:opacity-80 transition-opacity">
+                        Detailed Report →
+                    </Link>
                 </div>
             </div>
 
