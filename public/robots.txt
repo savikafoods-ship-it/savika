@@ -25,4 +25,4 @@ Disallow: /wishlist
 Disallow: /api/
 Disallow: /_next/
 
-Sitemap: https://www.savikafoods.in/sitemap.xml
+Sitemap: https://savikafoods.in/sitemap.xml

@@ -14,7 +14,7 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.savikafoods.in'),
+  metadataBase: new URL('https://savikafoods.in'),
   title: {
     default: 'Savika Foods - Premium Indian Spices Online',
     template: '%s | Savika Foods',
@@ -37,13 +37,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: 'https://www.savikafoods.in',
+    url: 'https://savikafoods.in',
     siteName: 'Savika Foods',
     title: 'Savika Foods - Premium Indian Spices Online',
     description: 'Buy 100% pure, authentic Indian spices online. Stone-ground, FSSAI certified, farm-to-kitchen.',
     images: [
       {
-        url: 'https://www.savikafoods.in/og-image.jpg',
+        url: 'https://savikafoods.in/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Savika Foods - Premium Indian Spices',
@@ -54,13 +54,13 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Savika Foods - Premium Indian Spices',
     description: 'Buy 100% pure, authentic Indian spices online.',
-    images: ['https://www.savikafoods.in/og-image.jpg'],
+    images: ['https://savikafoods.in/og-image.jpg'],
   },
   verification: {
-    google: '', // ADD your Google Search Console verification code here
+    google: 'google-site-verification=uXpJDtwPvH-mlv41KW8ZyBpGk-H0zt5nSm_MpiG_6i4',
   },
   alternates: {
-    canonical: 'https://www.savikafoods.in',
+    canonical: 'https://savikafoods.in',
   },
   icons: {
     icon: '/logo.png',
@@ -77,7 +77,7 @@ export default function RootLayout({
     <html lang="en" className={poppins.variable}>
       <head>
         <link rel="preconnect" href="https://images.unsplash.com" />
-        <link rel="canonical" href="https://www.savikafoods.in" />
+        <link rel="canonical" href="https://savikafoods.in" />
       </head>
       <body className="font-[--font-poppins] bg-[#F5F0E8] texture-bg">
         <ToastProvider>

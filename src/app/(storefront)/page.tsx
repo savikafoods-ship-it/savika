@@ -10,21 +10,21 @@ import InstagramGrid from '@/components/home/InstagramGrid'
 import TrustBadges from '@/components/home/TrustBadges'
 
 export const metadata: Metadata = {
-    title: 'Savika | Premium Indian Spices Online – Pure, Authentic, Delivered',
-    description: 'Buy premium Indian spices online. 100% pure whole spices, ground masalas, and artisan blends. FSSAI certified. Fast delivery across India. Shop Savika.',
-    keywords: 'premium Indian spices online, buy spices online India, pure spices India, best garam masala India, authentic masala online',
+    title: 'Savika Foods | Premium Indian Spices Online – Pure, Authentic, Delivered',
+    description: 'Buy premium Indian spices online from Savika Foods. 100% pure whole spices, ground masalas, and artisan blends. FSSAI certified. Fast delivery across India.',
+    keywords: 'Savika Foods, premium Indian spices online, buy spices online India, pure spices India, best garam masala India, authentic masala online',
     openGraph: {
-        title: 'Savika – Premium Indian Spices',
-        description: 'Pure, hand-picked spices from the heart of India. Delivered to your door.',
+        title: 'Savika Foods – Premium Indian Spices',
+        description: 'Pure, hand-picked spices from the heart of India. Delivered to your door by Savika Foods.',
         url: 'https://savikafoods.in',
-        siteName: 'Savika',
+        siteName: 'Savika Foods',
         images: [{ url: 'https://savikafoods.in/og-image.jpg', width: 1200, height: 630 }],
         locale: 'en_IN',
         type: 'website',
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Savika – Premium Indian Spices',
+        title: 'Savika Foods – Premium Indian Spices',
         description: 'Pure, hand-picked spices from the heart of India.',
         images: ['https://savikafoods.in/og-image.jpg'],
     },
@@ -44,7 +44,7 @@ export default function HomePage() {
                     __html: JSON.stringify({
                         '@context': 'https://schema.org',
                         '@type': 'Organization',
-                        name: 'Savika',
+                        name: 'Savika Foods',
                         url: 'https://savikafoods.in',
                         logo: 'https://savikafoods.in/logo.png',
                         sameAs: [
@@ -78,12 +78,12 @@ export default function HomePage() {
                         '@context': 'https://schema.org',
                         '@type': 'WebSite',
                         name: 'Savika Foods',
-                        url: 'https://www.savikafoods.in',
+                        url: 'https://savikafoods.in',
                         potentialAction: {
                             '@type': 'SearchAction',
                             target: {
                                 '@type': 'EntryPoint',
-                                urlTemplate: 'https://www.savikafoods.in/shop?q={search_term_string}',
+                                urlTemplate: 'https://savikafoods.in/shop?q={search_term_string}',
                             },
                             'query-input': 'required name=search_term_string',
                         },

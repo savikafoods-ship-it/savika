@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { createStaticClient } from '@/lib/supabase/server'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://www.savikafoods.in'
+  const baseUrl = 'https://savikafoods.in'
 
   // Fetch all active product slugs from Supabase
   const supabase = createStaticClient()
