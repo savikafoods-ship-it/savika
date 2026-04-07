@@ -21,9 +21,11 @@ export default async function AdminLayout({
     .eq('id', user.id)
     .single()
 
-  if (!profile || (profile.role !== 'admin' && profile.role !== 'staff')) {
-    // If not admin/staff, redirect to home or a forbidden page
-    redirect('/')
+  const isSuperAdmin = user.email === 'savikafoods@gmail.com'
+
+  if (!isSuperAdmin && (!profile || (profile.role !== 'admin' && profile.role !== 'staff'))) {
+    // If not admin/staff, redirect to login with error
+    redirect('/admin/login?error=unauthorized')
   }
 
   return (
