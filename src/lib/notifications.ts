@@ -48,7 +48,7 @@ export async function sendOrderConfirmation(order: any) {
     const { order_number, total, shipping_address, items } = order
     
     // We assume the email is captured in the shipping address or profile
-    const to = shipping_address.email || 'customer@example.com' 
+    const to = order.customer_email || shipping_address.email || 'customer@example.com' 
 
     const itemLines = items.map((item: any) => 
         `<li>${item.name} (${item.weight}) x ${item.quantity} - ₹${item.price * item.quantity}</li>`

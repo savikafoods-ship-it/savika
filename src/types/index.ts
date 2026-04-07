@@ -63,6 +63,7 @@ export interface Order {
   coupon_code?: string
   status: OrderStatus
   payment_status: 'pending' | 'paid' | 'failed'
+  payment_method: 'cod' | 'online'
   payment_id?: string
   shipping_address: any // JSON delivery address
   customer_name?: string

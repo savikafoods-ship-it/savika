@@ -241,15 +241,17 @@ export default function OrderTrackingPage() {
                         </div>
 
                         {/* COD Note */}
-                        <div className="bg-amber-50 rounded-3xl p-6 border border-amber-100">
-                             <div className="flex items-start gap-4">
-                                <FontAwesomeIcon icon={faCircleInfo} className="text-amber-600 mt-1" />
-                                <div>
-                                    <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1">COD Info</p>
-                                    <p className="text-xs text-amber-800 leading-normal font-medium">Please keep <strong>{formatCurrency(order.total)}</strong> ready on the day of delivery. Our courier partner will call you beforehand.</p>
-                                </div>
-                             </div>
-                        </div>
+                        {order.payment_method === 'cod' && (
+                            <div className="bg-amber-50 rounded-3xl p-6 border border-amber-100">
+                                 <div className="flex items-start gap-4">
+                                    <FontAwesomeIcon icon={faCircleInfo} className="text-amber-600 mt-1" />
+                                    <div>
+                                        <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest mb-1">COD Info</p>
+                                        <p className="text-xs text-amber-800 leading-normal font-medium">Please keep <strong>{formatCurrency(order.total)}</strong> ready on the day of delivery. Our courier partner will call you beforehand.</p>
+                                    </div>
+                                 </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

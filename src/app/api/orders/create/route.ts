@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse request body
     const body = await request.json()
-    const { items, shipping_address, coupon_code, notes } = body
+    const { items, shipping_address, coupon_code, notes, email } = body
 
     // 3. Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -147,6 +147,8 @@ export async function POST(request: NextRequest) {
         payment_method: 'cod',
         payment_status: 'pending',
         shipping_address,
+        customer_email: email || user.email,
+        customer_name: shipping_address.full_name,
         notes: notes ?? null,
       })
       .select('id, order_number')
@@ -164,6 +166,8 @@ export async function POST(request: NextRequest) {
         total,
         shipping_address,
         items: verifiedItems,
+        customer_email: email || user.email,
+        customer_name: shipping_address.full_name,
     }
     // We don't await this to avoid delaying the response, but we trigger it
     sendOrderConfirmation(fullOrderData).catch(err => console.error('Notification error:', err))

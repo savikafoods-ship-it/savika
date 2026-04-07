@@ -229,7 +229,8 @@ export default function CheckoutPage() {
                         landmark: formData.landmark
                     },
                     coupon_code: appliedCoupon?.code,
-                    notes: formData.notes
+                    notes: formData.notes,
+                    email: formData.email
                 })
             })
 
