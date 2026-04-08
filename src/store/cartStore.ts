@@ -14,6 +14,7 @@ interface CartStore {
   closeCart: () => void
   total: () => number
   itemCount: () => number
+  setItems: (items: CartItem[]) => void
 }
 
 export const useCartStore = create<CartStore>()(
@@ -84,6 +85,8 @@ export const useCartStore = create<CartStore>()(
       itemCount: () => {
         return get().items.reduce((sum, item) => sum + item.quantity, 0)
       },
+
+      setItems: (items) => set({ items }),
     }),
     {
       name: 'savika-cart',

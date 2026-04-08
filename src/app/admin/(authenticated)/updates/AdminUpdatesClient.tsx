@@ -322,7 +322,7 @@ export default function AdminUpdatesClient() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <div>
-        <h1 className="text-white text-2xl font-[700]">Site Content</h1>
+        <h1 className="text-white text-2xl font-[800] tracking-tight">Site Content</h1>
         <p className="text-gray-400 text-sm mt-1">
           Customize homepage promo cards, colors, and the announcement bar. Changes go live instantly after saving.
         </p>
