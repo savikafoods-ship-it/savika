@@ -11,31 +11,43 @@ export default function PrivacyPolicyPage() {
                     <p className="text-[#8E562E] text-sm">Last updated: {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</p>
                 </div>
                 
-                <div className="prose prose-[#C17F24] max-w-none text-[#5A5A5A]">
-                    <p>At Savika Foods, we respect your privacy and are committed to protecting it through our compliance with this policy.</p>
+                <div className="prose prose-[#C17F24] max-w-none text-[#5A5A5A] text-sm leading-relaxed space-y-6">
+                    <p>At Savika Foods, accessible from savikafoods.in, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by Savika Foods and how we use it.</p>
                     
-                    <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">1. Information We Collect</h2>
-                    <p>We may collect several types of information from and about users of our Website, including information:</p>
-                    <ul className="list-disc pl-5 mt-2 space-y-2">
-                        <li>By which you may be personally identified, such as name, postal address, e-mail address, and telephone number.</li>
-                        <li>That is about you but individually does not identify you.</li>
-                        <li>About your internet connection, the equipment you use to access our Website, and usage details.</li>
-                    </ul>
+                    <section>
+                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">1. Consent</h2>
+                        <p>By using our website, you hereby consent to our Privacy Policy and agree to its terms.</p>
+                    </section>
 
-                    <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">2. How We Use Your Information</h2>
-                    <p>We use information that we collect about you or that you provide to us, including any personal information:</p>
-                    <ul className="list-disc pl-5 mt-2 space-y-2">
-                        <li>To present our Website and its contents to you.</li>
-                        <li>To provide you with information, products, or services that you request from us.</li>
-                        <li>To fulfill any other purpose for which you provide it.</li>
-                        <li>To carry out our obligations and enforce our rights arising from any contracts entered into between you and us, including for billing and collection.</li>
-                    </ul>
+                    <section>
+                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">2. Information We Collect</h2>
+                        <p>The personal information that you are asked to provide, and the reasons why you are asked to provide it, will be made clear to you at the point we ask you to provide your personal information.</p>
+                        <p className="mt-2">If you contact us directly, we may receive additional information about you such as your name, email address, phone number, the contents of the message and/or attachments you may send us, and any other information you may choose to provide.</p>
+                    </section>
 
-                    <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">3. Payment Information</h2>
-                    <p>All payments are processed securely through PhonePe. We do not store your credit card or UPI details on our servers. Your payment information is subject to PhonePe's respective privacy policies.</p>
+                    <section>
+                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">3. How We Use Your Information</h2>
+                        <p>We use the information we collect in various ways, including to:</p>
+                        <ul className="list-disc pl-5 space-y-1">
+                            <li>Provide, operate, and maintain our website</li>
+                            <li>Improve, personalize, and expand our website</li>
+                            <li>Understand and analyze how you use our website</li>
+                            <li>Develop new products, services, features, and functionality</li>
+                            <li>Communicate with you, either directly or through one of our partners</li>
+                            <li>Send you emails relating to your orders</li>
+                            <li>Find and prevent fraud</li>
+                        </ul>
+                    </section>
 
-                    <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">4. Contact Information</h2>
-                    <p>To ask questions or comment about this privacy policy and our privacy practices, contact us at: <strong>savikafoods@gmail.com</strong> or via our Contact Us page.</p>
+                    <section>
+                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">4. Logistics and Payments</h2>
+                        <p>We share necessary information with our delivery partners (e.g., Shiprocket) to ensure successful delivery. Payment processing is handled securely via PhonePe; we do not store sensitive payment credentials.</p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">5. Contact Us</h2>
+                        <p>If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us at <strong>savikafoods@gmail.com</strong>.</p>
+                    </section>
                 </div>
             </div>
         </main>

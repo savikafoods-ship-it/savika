@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, ShoppingCart, Check, Star } from 'lucide-react'
+import { ShoppingCart, Check, Star } from 'lucide-react'
 import type { Product } from '@/types'
 import { formatCurrency, getDiscountPercent } from '@/lib/utils'
 import { useCartStore } from '@/store/cartStore'
@@ -15,7 +15,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, className = '' }: ProductCardProps) {
-    const [isWishlisted, setIsWishlisted] = useState(false)
+
     const [adding, setAdding] = useState(false)
     const [imgError, setImgError] = useState(false)
     const { addItem } = useCartStore()
@@ -64,47 +64,33 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
                             padding: '2px 7px', borderRadius: '9999px'
                         }}>New</span>
                     )}
-                    {/* Wishlist */}
-                    <button
-                        onClick={(e) => { e.preventDefault(); setIsWishlisted(!isWishlisted) }}
-                        aria-label="Toggle Wishlist"
-                        style={{
-                            position: 'absolute', top: '0.625rem', right: '0.625rem', zIndex: 10,
-                            width: '30px', height: '30px', borderRadius: '50%',
-                            background: '#fff', border: 'none', cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            boxShadow: '0 2px 8px rgba(0,0,0,.1)'
-                        }}
-                    >
-                        <Heart className="w-4 h-4" fill={isWishlisted ? '#C17F24' : 'none'} stroke={isWishlisted ? '#C17F24' : '#999'} />
-                    </button>
+
                 </div>
 
                 {/* Body */}
-                <div className="product-card-body">
-                    <p style={{ fontSize: '10px', color: '#8E562E', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                <div className="product-card-body p-3 sm:p-4">
+                    <p style={{ fontSize: '9px', color: '#8E562E', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '2px' }}>
                         {product.category?.name ?? 'Spice'}
                     </p>
-                    <div>
-                        <p className="font-semibold text-gray-950 text-base leading-tight">{product.name}</p>
+                    <div className="min-h-[3rem] sm:min-h-[3.5rem]">
+                        <p className="font-semibold text-gray-950 text-sm sm:text-base leading-tight line-clamp-2">{product.name}</p>
                         {product.tagline && (
-                            <p className="text-amber-700 text-xs italic mt-0.5">{product.tagline}</p>
+                            <p className="text-amber-700 text-[10px] sm:text-xs italic mt-0.5 line-clamp-1">{product.tagline}</p>
                         )}
                     </div>
                     {/* Stars */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1px', marginBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1px', marginBottom: '0.25rem' }}>
                         {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="w-3 h-3" fill="#C17F24" stroke="#C17F24" />
+                            <Star key={i} className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="#C17F24" stroke="#C17F24" />
                         ))}
-                        <span style={{ fontSize: '10px', color: '#999', marginLeft: '4px' }}>(4.8)</span>
                     </div>
                     {/* Price */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#C17F24' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <span className="text-sm sm:text-base font-bold text-[#C17F24]">
                             {formatCurrency(product.price)}
                         </span>
                         {product.compare_price && (
-                            <span style={{ fontSize: '0.8125rem', textDecoration: 'line-through', color: '#aaa' }}>
+                            <span className="text-[10px] sm:text-xs text-gray-400 line-through">
                                 {formatCurrency(product.compare_price)}
                             </span>
                         )}

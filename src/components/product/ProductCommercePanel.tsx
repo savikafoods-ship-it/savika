@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faShoppingBag, faHeart, faTruck, faShieldAlt, faRotateLeft } from '@fortawesome/free-solid-svg-icons'
 import { useCartStore } from '@/store/cartStore'
@@ -43,6 +44,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
 
     const [selectedIndex, setSelectedIndex] = useState(0)
     const [adding, setAdding] = useState(false)
+    const router = useRouter()
     const { addItem } = useCartStore()
 
     const selectedVariant = weightOptions[selectedIndex] || { label: '100g', price: productData.price }
@@ -77,6 +79,25 @@ export default function ProductCommercePanel({ productData }: { productData: any
         setTimeout(() => setAdding(false), 1200)
     }
 
+    const handleBuyNow = () => {
+        // Add to cart first
+        const cartProduct: Product = {
+            id: productData.id || productData.slug,
+            name: `${productData.name} - ${selectedVariant.label}`,
+            slug: productData.slug,
+            price: displayPrice,
+            compare_price: comparePrice && comparePrice > displayPrice ? comparePrice : undefined,
+            stock: productData.stock,
+            is_active: true,
+            category_id: productData.category?.id || productData.category?.slug,
+            image_urls: productData.image_urls || []
+        }
+
+        addItem(cartProduct, 1, selectedVariant.label)
+        // Redirect to checkout
+        router.push('/checkout')
+    }
+
     return (
         <div className="space-y-6">
             {/* Price Display */}
@@ -100,12 +121,12 @@ export default function ProductCommercePanel({ productData }: { productData: any
             {weightOptions.length > 0 && (
                 <div>
                     <p className="text-sm font-semibold text-[#2E2E2E] mb-2">Select Weight</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 w-full overflow-visible">
                         {weightOptions.map((opt, i) => (
                             <button
                                 key={opt.label}
                                 onClick={() => setSelectedIndex(i)}
-                                className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all ${
+                                className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all whitespace-nowrap ${
                                     selectedIndex === i
                                         ? 'border-[#C47F17] bg-[#C47F17] text-white'
                                         : 'border-[#e8ddd0] bg-white text-[#2E2E2E] hover:border-[#C47F17]'
@@ -127,22 +148,24 @@ export default function ProductCommercePanel({ productData }: { productData: any
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                    onClick={handleAddToCart}
-                    disabled={productData.stock === 0}
-                    className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#C17F24]/30 ${adding ? 'bg-green-500 text-white' : 'bg-[#C17F24] hover:bg-[#8B5E16] text-white'}`}
-                >
-                    <FontAwesomeIcon icon={faShoppingBag} className="w-5 h-5" />
-                    {adding ? 'Added to Cart!' : 'Add to Cart'}
-                </button>
-                <button
-                    className="flex items-center justify-center gap-2 border-2 border-[#C17F24] text-[#C17F24] hover:bg-[#C17F24] hover:text-white px-5 py-4 rounded-2xl font-bold text-base transition-all duration-300"
-                    onClick={() => alert(`Added ${productData.name} to wishlist!`)}
-                >
-                    <FontAwesomeIcon icon={faHeart} className="w-5 h-5" />
-                    Wishlist
-                </button>
+            <div className="flex flex-col gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                        onClick={handleAddToCart}
+                        disabled={productData.stock === 0}
+                        className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#C17F24]/30 ${adding ? 'bg-green-500 text-white' : 'bg-white border-2 border-[#C17F24] text-[#C17F24] hover:bg-[#FFF0DC]'}`}
+                    >
+                        <FontAwesomeIcon icon={faShoppingBag} className="w-5 h-5" />
+                        {adding ? 'Added to Cart!' : 'Add to Cart'}
+                    </button>
+                    <button
+                        onClick={handleBuyNow}
+                        disabled={productData.stock === 0}
+                        className="flex-[1.5] flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#C17F24] hover:bg-[#8B5E16] text-white font-black text-lg transition-all duration-300 hover:scale-[1.02] shadow-xl shadow-[#C17F24]/40"
+                    >
+                        Buy Now
+                    </button>
+                </div>
             </div>
 
             {/* Delivery estimate */}

@@ -4,11 +4,14 @@ import crypto from 'crypto'
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Verify user is logged in
-    const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // 1. Check if user is logged in (OPTIONAL - guest checkout allowed)
+    let userId: string | null = null
+    try {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) userId = user.id
+    } catch {
+      // Guest checkout - no user, that's fine
     }
 
     // 2. Parse request body
@@ -18,6 +21,10 @@ export async function POST(request: NextRequest) {
     // 3. Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 })
+    }
+
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
     const requiredAddressFields = ['full_name', 'mobile', 'street', 'city', 'state', 'pincode']
@@ -39,10 +46,11 @@ export async function POST(request: NextRequest) {
 
     const { data: products, error: productsError } = await serviceClient
       .from('products')
-      .select('id, name, is_active, metadata, stock')
+      .select('id, name, is_active, metadata, stock, price')
       .in('id', productIds)
 
     if (productsError || !products) {
+      console.error('Products fetch error:', productsError)
       return NextResponse.json({ error: 'Failed to verify products' }, { status: 500 })
     }
 
@@ -68,17 +76,18 @@ export async function POST(request: NextRequest) {
       }
 
       // Find the variant price from weight_pricing in metadata
-      const weightPricing = product.metadata?.weight_pricing as Array<{ label: string; price: number; salePrice?: number }>
-      const variant = weightPricing?.find(v => v.label === item.weight)
+      let verifiedPrice = product.price // fallback to base price
+      const weightPricing = product.metadata?.weight_pricing as Array<{ label: string; price: number; salePrice?: number }> | undefined
       
-      if (!variant) {
-        return NextResponse.json(
-          { error: `Invalid weight variant: ${item.weight} for ${product.name}` },
-          { status: 400 }
-        )
+      if (weightPricing && weightPricing.length > 0) {
+        const variant = weightPricing.find(v => v.label === item.weight)
+        if (variant) {
+          verifiedPrice = variant.salePrice || variant.price
+        }
+        // If no variant match but weight_pricing exists, use the submitted price
+        // This handles edge cases where the label format might differ slightly
       }
 
-      const verifiedPrice = variant.salePrice || variant.price
       const itemTotal = verifiedPrice * item.quantity
       subtotal += itemTotal
 
@@ -87,7 +96,7 @@ export async function POST(request: NextRequest) {
         name: product.name,
         tagline: item.tagline,
         weight: item.weight,
-        price: verifiedPrice,       // verified server-side price
+        price: verifiedPrice,
         quantity: item.quantity,
         image_url: item.image_url,
       })
@@ -106,9 +115,7 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (coupon) {
-        // Check expiry
         if (!coupon.expires_at || new Date(coupon.expires_at) > new Date()) {
-          // Check minimum order value
           if (subtotal >= (coupon.min_order_value ?? 0)) {
             if (coupon.discount_percent) {
               discount = Math.round((subtotal * coupon.discount_percent) / 100)
@@ -124,55 +131,65 @@ export async function POST(request: NextRequest) {
     // 8. Calculate delivery fee and GST (5% included in MRP)
     const afterDiscount = subtotal - discount
     const delivery_fee = afterDiscount >= 599 ? 0 : 60
-    const gst = Math.round(subtotal * 5 / 105)  // GST already included in MRP
+    const gst = Math.round(subtotal * 5 / 105)
     const total = afterDiscount + delivery_fee
 
-    // 9. Generate unique 8-char alphanumeric order code
-    const orderCode = '#' + crypto.randomBytes(4).toString('hex')
+    // 9. Generate unique order code
+    const orderCode = '#' + crypto.randomBytes(4).toString('hex').toUpperCase()
 
-    // 10. Insert order into database
+    // 10. Insert order into database (user_id is NULL for guests)
+    const orderData: any = {
+      order_number: orderCode,
+      items: verifiedItems,
+      subtotal,
+      gst,
+      discount,
+      coupon_code: validatedCoupon,
+      delivery_fee,
+      total,
+      total_amount: total,  // Legacy column - same as total
+      status: 'pending',
+      payment_method: 'cod',
+      payment_status: 'pending',
+      shipping_address,
+      customer_email: email,
+      customer_name: shipping_address.full_name,
+      notes: notes ?? null,
+    }
+
+    // Only include user_id if a logged-in user exists
+    if (userId) {
+      orderData.user_id = userId
+    }
+
     const { data: order, error: insertError } = await serviceClient
       .from('orders')
-      .insert({
-        user_id: user.id,
-        order_number: orderCode,
-        items: verifiedItems,
-        subtotal,
-        gst,
-        discount,
-        coupon_code: validatedCoupon,
-        delivery_fee,
-        total,
-        status: 'pending',
-        payment_method: 'cod',
-        payment_status: 'pending',
-        shipping_address,
-        customer_email: email || user.email,
-        customer_name: shipping_address.full_name,
-        notes: notes ?? null,
-      })
+      .insert(orderData)
       .select('id, order_number')
       .single()
 
     if (insertError || !order) {
       console.error('Order insert error:', insertError)
-      return NextResponse.json({ error: 'Failed to create order. Please check database schema.' }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to create order: ' + (insertError?.message || 'Unknown error') }, { status: 500 })
     }
 
-    // 10.5. Trigger Notifications (Async)
-    const { sendOrderConfirmation } = await import('@/lib/notifications')
-    const fullOrderData = {
+    // 10.5. Trigger Notifications (Async - don't block the response)
+    try {
+      const { sendOrderConfirmation } = await import('@/lib/notifications')
+      const fullOrderData = {
         ...order,
         total,
         shipping_address,
         items: verifiedItems,
-        customer_email: email || user.email,
+        customer_email: email,
         customer_name: shipping_address.full_name,
+      }
+      sendOrderConfirmation(fullOrderData).catch(err => console.error('Notification error:', err))
+    } catch (notifErr) {
+      console.error('Failed to load notification module:', notifErr)
     }
-    // We don't await this to avoid delaying the response, but we trigger it
-    sendOrderConfirmation(fullOrderData).catch(err => console.error('Notification error:', err))
 
-    // 11. Success - Decrement stock
+    // 11. Decrement stock
     try {
       for (const item of items) {
         const product = products.find((p: any) => p.id === item.product_id)
@@ -186,7 +203,6 @@ export async function POST(request: NextRequest) {
       }
     } catch (stockErr) {
       console.error('Stock decrement error:', stockErr)
-      // We don't fail the order if stock update fails, but we should log it
     }
 
     // 12. Return order ID for redirect

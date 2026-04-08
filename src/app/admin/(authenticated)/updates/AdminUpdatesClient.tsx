@@ -331,20 +331,6 @@ export default function AdminUpdatesClient() {
         data={content.announcement_bar}
         onChange={(val) => setContent((prev) => ({ ...prev, announcement_bar: val }))}
       />
-      <div className="grid grid-cols-1 gap-6">
-        <PromoCardEditor
-          title="Promo Card 1"
-          cardKey="promo_card_1"
-          data={content.promo_card_1}
-          onChange={(key, val) => setContent((prev) => ({ ...prev, [key]: val }))}
-        />
-        <PromoCardEditor
-          title="Promo Card 2"
-          cardKey="promo_card_2"
-          data={content.promo_card_2}
-          onChange={(key, val) => setContent((prev) => ({ ...prev, [key]: val }))}
-        />
-      </div>
     </div>
   )
 }

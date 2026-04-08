@@ -17,11 +17,12 @@ export async function GET() {
 
     const { data: orders, error } = await serviceClient
       .from('orders')
-      .select('id, order_number, total, status, created_at, shipping_address, payment_method')
+      .select('*')
       .order('created_at', { ascending: false })
       .limit(15)
 
     if (error) {
+      console.error('DATABASE ERROR (recent orders):', error)
       return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 })
     }
 

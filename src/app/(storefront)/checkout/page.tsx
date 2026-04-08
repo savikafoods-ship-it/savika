@@ -13,14 +13,12 @@ import {
     faMapMarkerAlt, 
     faMoneyBillWave,
     faTag,
-    faUser,
     faEnvelope,
-    faKey,
     faCreditCard,
-    faBuildingColumns
+    faBuildingColumns,
+    faPhone
 } from '@fortawesome/free-solid-svg-icons'
 import { useCartStore } from '@/store/cartStore'
-import { createClient } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils'
 import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 
@@ -37,19 +35,12 @@ const INDIAN_STATES = [
 export default function CheckoutPage() {
     const { items, total, clearCart } = useCartStore()
     const router = useRouter()
-    const supabase = createClient()
 
     // Flow State
     const [step, setStep] = useState(1) // 1: Info, 2: Payment
     const [loading, setLoading] = useState(false)
     const [ready, setReady] = useState(false)
     const [error, setError] = useState('')
-    const [currentUser, setCurrentUser] = useState<any>(null)
-
-    // Auth State
-    const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup')
-    const [password, setPassword] = useState('')
-    const [authLoading, setAuthLoading] = useState(false)
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -81,35 +72,8 @@ export default function CheckoutPage() {
             router.push('/cart')
             return
         }
-
-        const loadProfile = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (user) {
-                setCurrentUser(user)
-                // Pre-fill email
-                setFormData(prev => ({ ...prev, email: user.email || '' }))
-
-                // Try to get profile address
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single()
-
-                if (profile) {
-                    setFormData(prev => ({
-                        ...prev,
-                        full_name: profile.full_name || prev.full_name,
-                        mobile: profile.mobile || prev.mobile,
-                        ...(profile.address as any)
-                    }))
-                }
-            }
-            setReady(true)
-        }
-
-        loadProfile()
-    }, [items, router])
+        setReady(true)
+    }, [items, router, loading])
 
     // Pincode Auto-fill
     useEffect(() => {
@@ -164,42 +128,13 @@ export default function CheckoutPage() {
         }
         if (!/^[6-9]\d{9}$/.test(formData.mobile)) return false
         if (!/^\d{6}$/.test(formData.pincode)) return false
-        if (!currentUser && (!password || password.length < 6)) return false
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) return false
         return true
     }
 
-    const handleAuthAndProceed = async () => {
-        if (currentUser) {
-            setStep(2)
-            return
-        }
-
-        setAuthLoading(true)
+    const handleProceedToPayment = () => {
         setError('')
-        try {
-            const endpoint = authMode === 'signup' ? '/api/auth/signup' : '/api/auth/login'
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: formData.email,
-                    password,
-                    full_name: formData.full_name
-                })
-            })
-
-            const data = await res.json()
-            if (!res.ok) throw new Error(data.error || `Failed to ${authMode}`)
-
-            // Successful auth - get session
-            const { data: { user } } = await supabase.auth.getUser()
-            setCurrentUser(user)
-            setStep(2)
-        } catch (err: any) {
-            setError(err.message)
-        } finally {
-            setAuthLoading(false)
-        }
+        setStep(2)
     }
 
     const handlePlaceOrder = async () => {
@@ -262,7 +197,7 @@ export default function CheckoutPage() {
                         }`}>
                             {step > 1 ? <FontAwesomeIcon icon={faCheckCircle} /> : '1'}
                         </div>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${step >= 1 ? 'text-[#C17F24]' : 'text-gray-400'}`}>Account & Info</span>
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${step >= 1 ? 'text-[#C17F24]' : 'text-gray-400'}`}>Delivery Info</span>
                     </div>
                     <div className={`w-12 h-[2px] mx-4 transition-all ${step > 1 ? 'bg-[#C17F24]' : 'bg-gray-300'}`} />
                     <div className="flex items-center gap-4">
@@ -280,80 +215,6 @@ export default function CheckoutPage() {
                     <div className="lg:col-span-2 space-y-6">
                         {step === 1 && (
                             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                {/* Inline Auth Section */}
-                                {!currentUser && (
-                                    <div className="bg-white rounded-[2rem] p-8 shadow-xl border-2 border-amber-500/20">
-                                        <div className="flex items-center justify-between mb-8">
-                                            <h2 className="text-xl font-black text-[#2E2E2E] flex items-center gap-3 uppercase tracking-tighter">
-                                                <FontAwesomeIcon icon={faUser} className="text-amber-600 w-4" />
-                                                {authMode === 'signup' ? 'Create Account' : 'Welcome Back'}
-                                            </h2>
-                                            <div className="flex bg-gray-100 p-1 rounded-xl">
-                                                <button 
-                                                    onClick={() => setAuthMode('signup')}
-                                                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${authMode === 'signup' ? 'bg-white text-amber-700 shadow-md' : 'text-gray-400'}`}
-                                                >
-                                                    Signup
-                                                </button>
-                                                <button 
-                                                    onClick={() => setAuthMode('login')}
-                                                    className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${authMode === 'login' ? 'bg-white text-amber-700 shadow-md' : 'text-gray-400'}`}
-                                                >
-                                                    Login
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid sm:grid-cols-2 gap-5">
-                                            <div className="sm:col-span-2 relative">
-                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Email Address *</label>
-                                                <div className="relative">
-                                                    <FontAwesomeIcon icon={faEnvelope} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
-                                                    <input 
-                                                        type="email" required placeholder="you@example.com"
-                                                        value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
-                                                        className="w-full h-12 pl-11 pr-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="sm:col-span-2 relative">
-                                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Create Password *</label>
-                                                <div className="relative">
-                                                    <FontAwesomeIcon icon={faKey} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
-                                                    <input 
-                                                        type="password" required placeholder="Min. 6 characters"
-                                                        value={password} onChange={e => setPassword(e.target.value)}
-                                                        className="w-full h-12 pl-11 pr-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <p className="mt-4 text-[9px] text-gray-400 font-bold uppercase tracking-tight leading-relaxed">
-                                            This will create your Savika account to track orders and save your address for future purchases.
-                                        </p>
-                                    </div>
-                                )}
-
-                                {currentUser && (
-                                    <div className="bg-green-50 rounded-2xl p-4 border border-green-100 flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center text-xs">
-                                                <FontAwesomeIcon icon={faCheckCircle} />
-                                            </div>
-                                            <div>
-                                                <p className="text-[10px] font-black text-green-800 uppercase tracking-widest">Logged in as</p>
-                                                <p className="text-sm font-bold text-green-900">{currentUser.email}</p>
-                                            </div>
-                                        </div>
-                                        <button 
-                                            onClick={() => supabase.auth.signOut().then(() => setCurrentUser(null))}
-                                            className="text-[9px] font-black text-green-700 underline uppercase tracking-widest"
-                                        >
-                                            Change Account
-                                        </button>
-                                    </div>
-                                )}
-
                                 {/* Delivery Info Card */}
                                 <div className="bg-white rounded-[2rem] p-8 shadow-xl border border-gray-50">
                                     <h2 className="text-2xl font-black text-[#2E2E2E] flex items-center gap-3 uppercase tracking-tighter mb-8">
@@ -372,17 +233,39 @@ export default function CheckoutPage() {
                                         </div>
                                         <div>
                                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Mobile Number *</label>
-                                            <input 
-                                                type="tel" required placeholder="10-digit mobile"
-                                                value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})}
-                                                className="w-full h-12 px-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
-                                            />
+                                            <div className="relative">
+                                                <FontAwesomeIcon icon={faPhone} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                                                <input 
+                                                    type="tel" required placeholder="10-digit mobile"
+                                                    value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})}
+                                                    className="w-full h-12 pl-11 pr-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Email Address *</label>
+                                            <div className="relative">
+                                                <FontAwesomeIcon icon={faEnvelope} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
+                                                <input 
+                                                    type="email" required placeholder="you@example.com"
+                                                    value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
+                                                    className="w-full h-12 pl-11 pr-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                                />
+                                            </div>
                                         </div>
                                         <div>
                                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Pincode *</label>
                                             <input 
                                                 type="text" required placeholder="6-digit PIN"
                                                 value={formData.pincode} onChange={e => setFormData({...formData, pincode: e.target.value})}
+                                                className="w-full h-12 px-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Landmark</label>
+                                            <input 
+                                                type="text" placeholder="Near temple, etc."
+                                                value={formData.landmark} onChange={e => setFormData({...formData, landmark: e.target.value})}
                                                 className="w-full h-12 px-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
                                             />
                                         </div>
@@ -412,17 +295,24 @@ export default function CheckoutPage() {
                                                 {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
                                         </div>
+                                        <div className="sm:col-span-2">
+                                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Order Notes (optional)</label>
+                                            <textarea 
+                                                placeholder="Any special instructions for your order..."
+                                                value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})}
+                                                className="w-full h-20 px-5 py-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold resize-none"
+                                            />
+                                        </div>
                                     </div>
 
                                     {error && <div className="mt-6 p-4 bg-red-50 text-red-600 text-[11px] font-black uppercase tracking-tight rounded-xl border border-red-100">{error}</div>}
 
                                     <button 
-                                        onClick={handleAuthAndProceed}
-                                        disabled={!validateInfo() || authLoading}
+                                        onClick={handleProceedToPayment}
+                                        disabled={!validateInfo()}
                                         className="w-full mt-10 bg-[#C17F24] hover:bg-[#8B5E16] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
                                     >
-                                        {authLoading ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : null}
-                                        {authLoading ? 'Setting up your account...' : 'Review & Choose Payment'}
+                                        Review & Choose Payment
                                     </button>
                                 </div>
                             </div>
@@ -447,8 +337,10 @@ export default function CheckoutPage() {
                                         <div className="text-sm text-gray-600 font-medium">
                                             <p className="font-bold text-gray-800">{formData.full_name}</p>
                                             <p>{formData.street}</p>
+                                            {formData.landmark && <p className="text-gray-500">{formData.landmark}</p>}
                                             <p>{formData.city}, {formData.state} - {formData.pincode}</p>
-                                            <p className="mt-2 text-[#C17F24] font-bold text-xs"><FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" /> {formData.mobile}</p>
+                                            <p className="mt-2 text-[#C17F24] font-bold text-xs"><FontAwesomeIcon icon={faPhone} className="mr-1" /> {formData.mobile}</p>
+                                            <p className="text-gray-400 text-xs"><FontAwesomeIcon icon={faEnvelope} className="mr-1" /> {formData.email}</p>
                                         </div>
                                     </div>
 
@@ -539,7 +431,7 @@ export default function CheckoutPage() {
                             <div className="space-y-4 mb-6 max-h-60 overflow-y-auto pr-2 scrollbar-hide">
                                 {items.map(item => (
                                     <div key={`${item.productId}-${item.weight}`} className="flex items-center gap-4 group">
-                                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0 shadow-inner">
+                                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0 shadow-inner relative">
                                             <Image 
                                                 src={getProductImageUrl(item.product.image_urls?.[0] || '')} 
                                                 alt="" fill className="object-cover" 

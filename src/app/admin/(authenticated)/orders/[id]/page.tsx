@@ -297,16 +297,11 @@ export default function AdminOrderDetailsPage() {
                             <FontAwesomeIcon icon={faUser} className="text-amber-500 w-3.5" />
                             Customer Information
                         </h3>
-                        {order.profiles && (
-                            <div className="space-y-2">
-                                <p className="font-bold text-white">{order.profiles.full_name}</p>
-                                <p className="text-sm text-[#a1a1aa]">{order.profiles.email}</p>
-                                {order.profiles.mobile && <p className="text-sm text-[#a1a1aa]">{order.profiles.mobile}</p>}
-                            </div>
-                        )}
-                        {!order.profiles && (
-                            <p className="text-sm text-[#a1a1aa] italic">No linked profile available.</p>
-                        )}
+                        <div className="space-y-2">
+                            <p className="font-bold text-white">{order.customer_name || order.shipping_address?.full_name || 'Guest Customer'}</p>
+                            <p className="text-sm text-[#a1a1aa]">{order.customer_email || 'No email'}</p>
+                            {order.shipping_address?.mobile && <p className="text-sm text-amber-500 font-medium">{order.shipping_address.mobile}</p>}
+                        </div>
                     </div>
                 </div>
             </div>

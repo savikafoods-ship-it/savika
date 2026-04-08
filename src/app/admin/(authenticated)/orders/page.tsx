@@ -14,14 +14,14 @@ export default async function AdminOrdersPage() {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
         
-        // Basic admin check
-        if (!user || user.user_metadata?.role !== 'admin') {
+        // Email-based admin check
+        if (!user || (user.email !== 'savikafoods@gmail.com' && user.user_metadata?.role !== 'admin')) {
             redirect('/admin/login')
         }
         
         const { data, error } = await supabase
             .from('orders')
-            .select('*, profiles:user_id(full_name, email)')
+            .select('*')
             .order('created_at', { ascending: false })
             .limit(100)
             
@@ -83,7 +83,8 @@ export default async function AdminOrdersPage() {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left text-sm whitespace-nowrap">
                         <thead className="bg-[#27272a]/50 text-[#a1a1aa] uppercase text-[10px] tracking-widest font-bold">
                             <tr>
@@ -103,8 +104,8 @@ export default async function AdminOrdersPage() {
                                     </td>
                                 </tr>
                             ) : orders.map(order => {
-                                const customerName = order.shipping_address?.full_name || order.profiles?.full_name || 'Guest User'
-                                const customerEmail = order.profiles?.email || 'N/A'
+                                const customerName = order.customer_name || order.shipping_address?.full_name || 'Guest'
+                                const customerEmail = order.customer_email || 'N/A'
                                 
                                 return (
                                     <tr key={order.id} className="hover:bg-[#27272a]/30 transition-colors group">
@@ -150,6 +151,39 @@ export default async function AdminOrdersPage() {
                             })}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="md:hidden divide-y divide-[#27272a]">
+                    {orders.length === 0 ? (
+                        <p className="px-4 py-12 text-center text-[#a1a1aa] text-sm italic">No orders found.</p>
+                    ) : orders.map(order => {
+                        const customerName = order.customer_name || order.shipping_address?.full_name || 'Guest'
+                        return (
+                            <Link key={order.id} href={`/admin/orders/${order.id}`} className="block p-4 hover:bg-[#27272a]/30 transition-colors">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="font-bold text-[#C17F24] text-sm">{order.order_number || `#${order.id.slice(-8)}`}</span>
+                                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${getStatusStyle(order.status)}`}>
+                                        {order.status}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-white">{customerName}</p>
+                                        <p className="text-[10px] text-[#a1a1aa] mt-0.5">
+                                            {new Date(order.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-white font-bold">{formatCurrency(order.total)}</p>
+                                        <p className={`text-[10px] font-bold ${order.payment_status === 'paid' ? 'text-green-500' : 'text-amber-500'}`}>
+                                            {order.payment_method === 'cod' ? 'COD' : order.payment_method} • {order.payment_status?.toUpperCase()}
+                                        </p>
+                                    </div>
+                                </div>
+                            </Link>
+                        )
+                    })}
                 </div>
                 
                 <div className="px-6 py-4 border-t border-[#27272a] flex items-center justify-between text-[#a1a1aa] text-xs font-medium bg-[#1c1c1f]">

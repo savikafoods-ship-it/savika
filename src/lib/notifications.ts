@@ -22,21 +22,29 @@ export async function sendEmail({ to, subject, html }: SendEmailParams) {
     }
 
     try {
+        // Use verified from address. Resend requires the domain to be verified.
+        // Format: "Display Name <email@domain>"
+        const fromEmail = process.env.NEXT_PUBLIC_FROM_EMAIL || 'noreply@savikafoods.in'
+        const fromFormatted = `Savika Foods <${fromEmail}>`
+
+        console.log(`[Email] Sending to: ${to}, Subject: ${subject}, From: ${fromFormatted}`)
+
         const { data, error } = await resend.emails.send({
-            from: process.env.NEXT_PUBLIC_FROM_EMAIL || 'Savika Foods <noreply@savikafoods.in>',
+            from: fromFormatted,
             to,
             subject,
             html,
         })
 
         if (error) {
-            console.error('Resend API Error:', error)
+            console.error('[Email] Resend API Error:', JSON.stringify(error, null, 2))
             return { success: false, error }
         }
 
+        console.log('[Email] Sent successfully. ID:', data?.id)
         return { success: true, data }
-    } catch (error) {
-        console.error('Email caught an error:', error)
+    } catch (error: any) {
+        console.error('[Email] Exception:', error?.message || error)
         return { success: false, error }
     }
 }
@@ -47,37 +55,51 @@ export async function sendEmail({ to, subject, html }: SendEmailParams) {
 export async function sendOrderConfirmation(order: any) {
     const { order_number, total, shipping_address, items } = order
     
-    // We assume the email is captured in the shipping address or profile
-    const to = order.customer_email || shipping_address.email || 'customer@example.com' 
+    const to = order.customer_email || shipping_address?.email
+    
+    if (!to) {
+        console.error('[Email] No customer email found for order:', order_number)
+        return
+    }
+
+    const trackUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://savikafoods.in'}/track-order`
 
     const itemLines = items.map((item: any) => 
-        `<li>${item.name} (${item.weight}) x ${item.quantity} - ₹${item.price * item.quantity}</li>`
+        `<tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f5f5f5;">${item.name} (${item.weight})</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f5f5f5; text-align: center;">x${item.quantity}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #f5f5f5; text-align: right; font-weight: 600;">₹${item.price * item.quantity}</td>
+        </tr>`
     ).join('')
 
     const emailHtml = `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: auto; padding: 40px; border: 1px solid #f0f0f0; border-radius: 16px; color: #333;">
             <div style="text-align: center; margin-bottom: 30px;">
-                <h1 style="color: #C17F24; text-transform: uppercase; letter-spacing: 2px; margin: 0;">Order Confirmed</h1>
-                <p style="color: #999; font-size: 12px; text-transform: uppercase;">Thank you for choosing Savika</p>
+                <h1 style="color: #C17F24; text-transform: uppercase; letter-spacing: 2px; margin: 0; font-size: 22px;">Order Confirmed ✓</h1>
+                <p style="color: #999; font-size: 12px; text-transform: uppercase; margin-top: 5px;">Thank you for choosing Savika Foods</p>
             </div>
             
             <p style="font-size: 16px; line-height: 1.6;">Hi ${shipping_address.full_name},</p>
-            <p style="font-size: 16px; line-height: 1.6;">Great news! Your order <strong>${order_number}</strong> has been received and is currently being prepared with love.</p>
+            <p style="font-size: 16px; line-height: 1.6;">Great news! Your order <strong style="color: #C17F24;">${order_number}</strong> has been received and is currently being prepared with love.</p>
             
             <div style="background: #fafafa; padding: 20px; border-radius: 12px; margin: 30px 0;">
-                <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #C17F24;">Order Summary</h3>
-                <ul style="list-style: none; padding: 0; margin: 0;">
+                <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #C17F24; letter-spacing: 1px;">Order Summary</h3>
+                <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
                     ${itemLines}
-                </ul>
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: space-between;">
+                </table>
+                <div style="margin-top: 15px; padding-top: 12px; border-top: 2px solid #eee; display: flex; justify-content: space-between; font-size: 16px;">
                     <span style="font-weight: bold;">Total Amount:</span>
                     <span style="font-weight: bold; color: #C17F24;">₹${total}</span>
                 </div>
             </div>
 
             <p style="font-size: 14px; color: #666;"><strong>Payment Method:</strong> Cash on Delivery (COD)</p>
-            <p style="font-size: 14px; color: #666;"><strong>Delivery Address:</strong> ${shipping_address.street}, ${shipping_address.city}</p>
+            <p style="font-size: 14px; color: #666;"><strong>Delivery Address:</strong> ${shipping_address.street}, ${shipping_address.city}, ${shipping_address.state} - ${shipping_address.pincode}</p>
             
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${trackUrl}" style="display: inline-block; padding: 14px 32px; background: #C17F24; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Track Your Order</a>
+            </div>
+
             <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
                 <p style="font-size: 14px; color: #C17F24; font-weight: bold;">Stay Pure. Stay Traditional.</p>
                 <p style="font-size: 12px; color: #999;">Team Savika Foods</p>
@@ -86,32 +108,37 @@ export async function sendOrderConfirmation(order: any) {
     `
 
     // 1. Send email to Customer
-    await sendEmail({ 
+    const customerResult = await sendEmail({ 
         to, 
         subject: `Order Confirmed: ${order_number}`, 
         html: emailHtml 
     })
+    console.log('[Email] Customer notification result:', customerResult.success ? 'SUCCESS' : 'FAILED')
 
     // 2. Send notification to Admin (savikafoods@gmail.com)
     const adminEmail = process.env.ADMIN_EMAIL
     if (adminEmail) {
         const adminHtml = `
-            <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                <h2 style="color: #C17F24;">New Order Received!</h2>
-                <p><strong>Order Number:</strong> ${order_number}</p>
-                <p><strong>Customer:</strong> ${shipping_address.full_name} (${shipping_address.mobile})</p>
-                <p><strong>Total:</strong> ₹${total}</p>
-                <p><strong>Items:</strong></p>
-                <ul>${itemLines}</ul>
-                <p><strong>Delivery Address:</strong> ${shipping_address.street}, ${shipping_address.city}, ${shipping_address.pincode}</p>
-                <hr />
-                <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/orders" style="display: inline-block; padding: 10px 20px; background: #C17F24; color: #white; text-decoration: none; border-radius: 5px;">View in Admin Dashboard</a>
+            <div style="font-family: sans-serif; padding: 25px; border: 1px solid #eee; border-radius: 12px;">
+                <h2 style="color: #C17F24; margin-top: 0;">🚨 New Order Received!</h2>
+                <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                    <tr><td style="padding: 6px 0; font-weight: bold; width: 140px;">Order Number:</td><td>${order_number}</td></tr>
+                    <tr><td style="padding: 6px 0; font-weight: bold;">Customer:</td><td>${shipping_address.full_name}</td></tr>
+                    <tr><td style="padding: 6px 0; font-weight: bold;">Phone:</td><td>${shipping_address.mobile}</td></tr>
+                    <tr><td style="padding: 6px 0; font-weight: bold;">Email:</td><td>${to}</td></tr>
+                    <tr><td style="padding: 6px 0; font-weight: bold;">Total:</td><td style="color: #C17F24; font-weight: bold;">₹${total}</td></tr>
+                    <tr><td style="padding: 6px 0; font-weight: bold;">Address:</td><td>${shipping_address.street}, ${shipping_address.city}, ${shipping_address.pincode}</td></tr>
+                </table>
+                <div style="margin-top: 20px;">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://savikafoods.in'}/admin/orders" style="display: inline-block; padding: 10px 24px; background: #C17F24; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold;">View in Admin Dashboard</a>
+                </div>
             </div>
         `
-        await sendEmail({
+        const adminResult = await sendEmail({
             to: adminEmail,
-            subject: `🚨 New Order: ${order_number} - ₹${total}`,
+            subject: `🚨 New Order: ${order_number} — ₹${total}`,
             html: adminHtml
         })
+        console.log('[Email] Admin notification result:', adminResult.success ? 'SUCCESS' : 'FAILED')
     }
 }

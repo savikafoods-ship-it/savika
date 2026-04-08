@@ -11,22 +11,33 @@ export default function RefundPolicyPage() {
                     <p className="text-[#8E562E] text-sm">Last updated: {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</p>
                 </div>
                 
-                <div className="prose prose-[#C17F24] max-w-none text-[#5A5A5A]">
-                    <p>Thanks for purchasing our products at Savika Foods.</p>
+                <div className="prose prose-[#C17F24] max-w-none text-[#5A5A5A] text-sm leading-relaxed space-y-6">
+                    <p>At Savika Foods, we take great care in delivering our products to you and we hope you enjoy every purchase. If for any reason you are not completely satisfied, we have a clear refund and return policy.</p>
 
-                    <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">1. Returns</h2>
-                    <p>Given the perishable nature of spices and food products, we generally do not accept returns. However, we offer a 100% money-back guarantee in the following situations:</p>
-                    <ul className="list-disc pl-5 mt-2 space-y-2">
-                        <li>The product received was damaged or tampered with.</li>
-                        <li>An incorrect item was shipped to you.</li>
-                        <li>The product was expired at the time of delivery.</li>
-                    </ul>
+                    <section>
+                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">1. Eligibility for Returns</h2>
+                        <p>Given the perishable nature of spices and food products, we accept returns only in the following cases:</p>
+                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                            <li>The product received is damaged or tampered with.</li>
+                            <li>The product received is incorrect (wrong item shipped).</li>
+                            <li>The product has passed its expiry date at the time of delivery.</li>
+                        </ul>
+                    </section>
 
-                    <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">2. Claiming a Refund</h2>
-                    <p>If you are eligible for a refund, you must notify us within 7 days of receiving the product. Please send an email to savikafoods@gmail.com with your order number and photographic evidence of the issue.</p>
+                    <section>
+                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">2. Return Process</h2>
+                        <p>To initiate a return, please contact us at <strong>savikafoods@gmail.com</strong> within <strong>7 days</strong> of delivery. Please provide your order number and clear photographs of the product issue. Once reviewed, we will arrange for a reverse pickup or provide further instructions.</p>
+                    </section>
 
-                    <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">3. Refund Processing</h2>
-                    <p>Once your claim is approved, we will initiate a refund to your original method of payment (via PhonePe, Credit Card, etc.). You will receive the credit within 5-7 business days, depending on your card issuer's policies.</p>
+                    <section>
+                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">3. Refunds</h2>
+                        <p>Once your return is received and inspected, we will notify you of the approval or rejection of your refund. If approved, your refund will be processed, and a credit will automatically be applied to your original method of payment (PhonePe, UPI, or Credit Card) within <strong>5-7 business days</strong>.</p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">4. Cancellations</h2>
+                        <p>Orders can only be cancelled before they are dispatched. Once an order is handed over to our logistics partner, it cannot be cancelled.</p>
+                    </section>
                 </div>
             </div>
         </main>

@@ -16,15 +16,12 @@ import { formatCurrency } from '@/lib/utils'
 const navItems = [
     { icon: faColumns, label: 'Dashboard', href: '/admin/dashboard' },
     { icon: faCartShopping, label: 'Orders', href: '/admin/orders' },
-    { icon: faBagShopping, label: 'Abandoned Carts', href: '/admin/abandoned-carts' },
     { icon: faBox, label: 'Products', href: '/admin/products' },
     { icon: faTag, label: 'Categories', href: '/admin/categories' },
     { icon: faMessage, label: 'Reviews', href: '/admin/reviews' },
     { icon: faUsers, label: 'Customers', href: '/admin/customers' },
-    { icon: faUserGroup, label: 'Staff', href: '/admin/staff' },
     { icon: faTag, label: 'Coupons', href: '/admin/coupons' },
     { icon: faChartLine, label: 'Analytics', href: '/admin/analytics' },
-    { icon: faPalette, label: 'Site Content', href: '/admin/updates' },
     { icon: faGear, label: 'Settings', href: '/admin/settings' },
 ]
 
@@ -79,7 +76,7 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
             } catch {}
         }
         fetchNotifications()
-        const interval = setInterval(fetchNotifications, 30000) // Poll every 30s
+        const interval = setInterval(fetchNotifications, 10000) // Poll every 10s
         return () => clearInterval(interval)
     }, [])
 
