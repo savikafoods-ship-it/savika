@@ -15,8 +15,7 @@ import {
     Undo2,
     ShieldCheck,
     MessageCircle,
-    Info,
-    Package
+    Info
 } from 'lucide-react'
 import { SavikaLogo } from '@/components/ui/SavikaLogo'
 
@@ -29,7 +28,6 @@ const footerLinks = {
         { label: 'Exotics & Rare', href: '/category/exotics-rare', icon: Star },
     ],
     help: [
-        { label: 'Track Your Order', href: '/track-order', icon: Package },
         { label: 'Return & Refund', href: '/refund-policy', icon: Undo2 },
         { label: 'Shipping Policy', href: '/shipping-policy', icon: ShieldCheck },
         { label: 'Contact Us', href: '/contact', icon: MessageCircle },

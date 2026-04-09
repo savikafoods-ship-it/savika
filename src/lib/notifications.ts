@@ -62,7 +62,6 @@ export async function sendOrderConfirmation(order: any) {
         return
     }
 
-    const trackUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://savikafoods.in'}/track-order`
 
     const itemLines = items.map((item: any) => 
         `<tr>
@@ -96,9 +95,6 @@ export async function sendOrderConfirmation(order: any) {
             <p style="font-size: 14px; color: #666;"><strong>Payment Method:</strong> Cash on Delivery (COD)</p>
             <p style="font-size: 14px; color: #666;"><strong>Delivery Address:</strong> ${shipping_address.street}, ${shipping_address.city}, ${shipping_address.state} - ${shipping_address.pincode}</p>
             
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="${trackUrl}" style="display: inline-block; padding: 14px 32px; background: #C17F24; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Track Your Order</a>
-            </div>
 
             <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0;">
                 <p style="font-size: 14px; color: #C17F24; font-weight: bold;">Stay Pure. Stay Traditional.</p>

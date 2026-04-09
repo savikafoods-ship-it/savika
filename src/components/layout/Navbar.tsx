@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, Package, ShoppingBag, ChevronDown, ChevronRight, X, Menu, Leaf } from 'lucide-react'
+import { Search, ShoppingBag, ChevronDown, ChevronRight, X, Menu, Leaf } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import CartDrawer from '@/components/layout/CartDrawer'
 
@@ -173,9 +173,6 @@ export default function Navbar() {
                             >
                                 <Search className="w-5 h-5" />
                             </button>
-                            <Link href="/track-order" aria-label="Track Order" className="hidden sm:flex p-2.5 rounded-xl hover:bg-[#FFF0DC] text-[#2E2E2E] hover:text-[#C47F17] transition-all">
-                                <Package className="w-5 h-5" />
-                            </Link>
 
                             <button
                                 onClick={toggleCart}
@@ -228,11 +225,7 @@ export default function Navbar() {
                                         )}
                                     </div>
                                 ))}
-                                <div className="pt-3 border-t border-[#e8ddd0] flex gap-4 px-3">
-                                    <Link href="/track-order" onClick={() => setMobileOpen(false)} className="flex items-center gap-1.5 text-sm text-[#2E2E2E] hover:text-[#C47F17]">
-                                        <Package className="w-4 h-4" /> Track Order
-                                    </Link>
-                                </div>
+
                             </div>
                         </div>
                     )}
