@@ -129,6 +129,21 @@ details>summary::-webkit-details-marker {
   animation: float 3s ease-in-out infinite;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 200ms ease-out forwards;
+}
+
 /* ════════════════════════════════════════════════
    LAYOUT UTILITIES (media-query backed)
    These guarantee responsive layouts work

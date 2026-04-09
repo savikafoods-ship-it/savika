@@ -10,7 +10,6 @@ import {
     faSignOutAlt, 
     faBox, 
     faUser, 
-    faHeart, 
     faCog 
 } from '@fortawesome/free-solid-svg-icons'
 
@@ -52,14 +51,7 @@ export default async function AccountPage() {
                         <p className="text-sm text-gray-500">Track shipments, view invoices, or reorder past purchases.</p>
                     </Link>
 
-                    {/* Wishlist Card */}
-                    <Link href="/wishlist" className="group bg-white p-6 rounded-2xl border border-[#e8ddd0] hover:border-[#C17F24] hover:shadow-md transition-all">
-                        <div className="w-12 h-12 bg-[#F9F4EE] rounded-xl flex items-center justify-center mb-4 group-hover:bg-[#C17F24]/10 transition-colors">
-                            <FontAwesomeIcon icon={faHeart} className="w-6 h-6 text-[#C17F24]" />
-                        </div>
-                        <h2 className="text-lg font-bold text-[#2E2E2E] mb-1">Wishlist</h2>
-                        <p className="text-sm text-gray-500">View and manage your saved favourite spices.</p>
-                    </Link>
+
 
                     {/* Settings Card */}
                     <Link href="/account/settings" className="group bg-white p-6 rounded-2xl border border-[#e8ddd0] hover:border-[#C17F24] hover:shadow-md transition-all">

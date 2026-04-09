@@ -79,7 +79,7 @@ export default function HeroSection() {
                     </div>
 
                     {/* RIGHT: Visual - Transparent Card for Premium Feel */}
-                    <div className="hidden lg:flex order-2 justify-center items-center relative py-8">
+                    <div className="hidden lg:flex order-2 justify-center items-center relative py-8 animate-fadeUp">
                         <div className="w-[360px] h-[360px] rounded-full bg-white/5 backdrop-blur-sm border border-white/10 flex items-center justify-center relative shadow-2xl">
                             <div className="text-center">
                                 <div className="w-32 h-32 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4 border border-amber-500/30">

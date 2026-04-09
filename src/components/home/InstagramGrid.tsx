@@ -1,13 +1,37 @@
-import { Flame, CookingPot, Package, Sprout, Gift, Star, Camera } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import Image from 'next/image'
+import { Camera } from 'lucide-react'
 
-const INSTAGRAM_POSTS: { id: number; icon: LucideIcon; caption: string; bg: string; iconColor: string }[] = [
-    { id: 1, icon: Camera, caption: 'Behind the scenes at our spice farm in Kerala #SavikaSpices', bg: 'bg-[#F9F4EE]', iconColor: 'text-[#C47F17]' },
-    { id: 2, icon: CookingPot, caption: '#PureTurmeric', bg: '#FFFBEA', iconColor: '#E6B800' },
-    { id: 3, icon: Package, caption: '#GaramMasala', bg: '#FFF3E0', iconColor: '#D4562E' },
-    { id: 4, icon: Sprout, caption: '#WholeSpices', bg: '#F5F5DC', iconColor: '#28A745' },
-    { id: 5, icon: Gift, caption: '#SpiceGifts', bg: '#FFF0F3', iconColor: '#E91E8C' },
-    { id: 6, icon: Star, caption: '#ExoticSpices', bg: '#F5F0FF', iconColor: '#9B59B6' },
+const INSTAGRAM_POSTS = [
+    { 
+        id: 1, 
+        src: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=600',
+        caption: 'Sun-dried Kashmiri Mirch 🌶️ #SavikaSpices',
+    },
+    { 
+        id: 2, 
+        src: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?auto=format&fit=crop&q=80&w=600',
+        caption: 'Golden Turmeric — Pure & Lab-Tested ✨',
+    },
+    { 
+        id: 3, 
+        src: 'https://images.unsplash.com/photo-1599909631715-66c84faae013?auto=format&fit=crop&q=80&w=600',
+        caption: 'Artisan Garam Masala Blend 🔥',
+    },
+    { 
+        id: 4, 
+        src: 'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&q=80&w=600',
+        caption: 'Fresh from the farm 🌿 #FarmToKitchen',
+    },
+    { 
+        id: 5, 
+        src: 'https://images.unsplash.com/photo-1532336414038-cf19250c5757?auto=format&fit=crop&q=80&w=600',
+        caption: 'Exotic whole spices collection #SpiceLove',
+    },
+    { 
+        id: 6, 
+        src: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&q=80&w=600',
+        caption: 'Premium Gift Packs — Handcrafted 🎁',
+    },
 ]
 
 export default function InstagramGrid() {
@@ -26,29 +50,29 @@ export default function InstagramGrid() {
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-3 md:grid-cols-6 gap-2 lg:gap-3">
-                    {INSTAGRAM_POSTS.map((post) => {
-                        const Icon = post.icon
-                        return (
-                            <a
-                                key={post.id}
-                                href="https://www.instagram.com/savika.foods/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group relative aspect-square rounded-2xl overflow-hidden flex items-center justify-center hover:scale-[1.04] transition-transform duration-300 shadow-sm hover:shadow-lg"
-                                style={{ backgroundColor: post.bg }}
-                            >
-                                <Icon className="w-12 h-12 group-hover:scale-110 transition-transform duration-300" style={{ color: post.iconColor }} />
-                                {/* Overlay */}
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex flex-col items-end justify-start p-2">
-                                    <Camera className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
-                                </div>
-                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent py-2 px-2 translate-y-full group-hover:translate-y-0 transition-transform duration-200">
-                                    <p className="text-white text-[10px] font-bold">{post.caption}</p>
-                                </div>
-                            </a>
-                        )
-                    })}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 lg:gap-3">
+                    {INSTAGRAM_POSTS.map((post) => (
+                        <a
+                            key={post.id}
+                            href="https://www.instagram.com/savika.foods/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group relative aspect-square rounded-2xl overflow-hidden hover:scale-[1.03] transition-transform duration-300 shadow-sm hover:shadow-xl"
+                        >
+                            <Image
+                                src={post.src}
+                                alt={post.caption}
+                                fill
+                                sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw"
+                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                            {/* Hover Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end p-3">
+                                <Camera className="w-5 h-5 text-white mb-1.5 drop-shadow-lg" />
+                                <p className="text-white text-[10px] font-bold text-center leading-tight drop-shadow-md">{post.caption}</p>
+                            </div>
+                        </a>
+                    ))}
                 </div>
 
                 {/* Follow CTA */}
