@@ -80,7 +80,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
     }
 
     const handleBuyNow = () => {
-        // Add to cart first
+        // Add to cart first - showCart: false to prevent drawer from opening
         const cartProduct: Product = {
             id: productData.id || productData.slug,
             name: `${productData.name} - ${selectedVariant.label}`,
@@ -93,7 +93,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
             image_urls: productData.image_urls || []
         }
 
-        addItem(cartProduct, 1, selectedVariant.label)
+        addItem(cartProduct, 1, selectedVariant.label, false)
         // Redirect to checkout
         router.push('/checkout')
     }
