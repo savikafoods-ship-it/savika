@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '919898176667'
-const WHATSAPP_MESSAGE = encodeURIComponent('Hi, I need help with my Savika Foods order')
+const WHATSAPP_MESSAGE = encodeURIComponent('Hi Savika Support, I have a question regarding the status of my order.')
 
 export default function WhatsAppFloat() {
   const pathname = usePathname()

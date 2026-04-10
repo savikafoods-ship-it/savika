@@ -33,9 +33,37 @@ export default function AdminOrderDetailsPage() {
     const [courierName, setCourierName] = useState('')
     const [trackingId, setTrackingId] = useState('')
 
+    const [isShipping, setIsShipping] = useState(false)
+    const [shipmentError, setShipmentError] = useState('')
+
     useEffect(() => {
         fetchOrder()
     }, [id])
+
+    const handleShipNimbus = async () => {
+        if (!confirm('Are you sure you want to create a shipment for this order via NimbusPost?')) return
+        
+        setIsShipping(true)
+        setShipmentError('')
+        try {
+            const res = await fetch('/api/shipping/create-shipment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: id })
+            })
+
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || 'Failed to create shipment')
+
+            alert('Shipment created successfully!')
+            fetchOrder() // Refresh order data to show tracking info
+        } catch (err: any) {
+            setShipmentError(err.message)
+            alert('Error: ' + err.message)
+        } finally {
+            setIsShipping(false)
+        }
+    }
 
     const fetchOrder = async () => {
         try {
@@ -268,6 +296,38 @@ export default function AdminOrderDetailsPage() {
                                 {updating ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : null}
                                 Update Order
                             </button>
+
+                            {/* NimbusPost Integration */}
+                            <div className="pt-4 mt-4 border-t border-gray-100">
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Logistics Integration</p>
+                                {!order.shipping_tracking_id ? (
+                                    <button
+                                        onClick={handleShipNimbus}
+                                        disabled={isShipping || order.status === 'cancelled'}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-500/20"
+                                    >
+                                        {isShipping ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faTruck} />}
+                                        Ship via NimbusPost
+                                    </button>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <div className="bg-blue-50 border border-blue-100 p-3 rounded-xl">
+                                            <p className="text-[9px] font-black text-blue-600 uppercase tracking-tight mb-1">NimbusPost Tracking ID</p>
+                                            <p className="text-sm font-black text-blue-900">{order.shipping_tracking_id}</p>
+                                        </div>
+                                        {order.shipping_label_url && (
+                                            <Link 
+                                                href={order.shipping_label_url}
+                                                target="_blank"
+                                                className="block w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all"
+                                            >
+                                                View Shipping Label
+                                            </Link>
+                                        )}
+                                        <p className="text-[10px] text-center text-gray-400 font-medium">Shipment is already created</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
