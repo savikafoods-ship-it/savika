@@ -43,15 +43,7 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL('/admin/login', request.url))
     }
 
-    // Protect User Account/Checkout
-    const isProtectedStorefront = ['/account', '/checkout', '/orders'].some((p) =>
-        pathname.startsWith(p)
-    )
-    if (isProtectedStorefront && !user) {
-        return NextResponse.redirect(
-            new URL(`/auth/login?next=${pathname}`, request.url)
-        )
-    }
+
 
     return response
 }
