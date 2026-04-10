@@ -205,7 +205,23 @@ export async function POST(request: NextRequest) {
       console.error('Stock decrement error:', stockErr)
     }
 
-    // 12. Return order ID for redirect
+    // 12. Trigger automated shipping pipeline (Async - don't block response)
+    if (order.id) {
+        try {
+            // Trigger internal shipment creation
+            // We use a relative fetch to our own API to keep logic centralized
+            const baseUrl = request.nextUrl.origin
+            fetch(`${baseUrl}/api/shipping/create-shipment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId: order.id })
+            }).catch(e => console.error('Automated shipping trigger failed:', e))
+        } catch (shipErr) {
+            console.error('Failed to trigger shipping pipeline:', shipErr)
+        }
+    }
+
+    // 13. Return order ID for redirect
     return NextResponse.json({
       success: true,
       orderId: order.id,

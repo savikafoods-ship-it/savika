@@ -91,8 +91,8 @@ export default async function AdminOrdersPage() {
                                 <th className="px-6 py-4">Order Details</th>
                                 <th className="px-6 py-4">Customer</th>
                                 <th className="px-6 py-4 text-center">Status</th>
+                                <th className="px-6 py-4 text-center">Shipping</th>
                                 <th className="px-6 py-4">Payment</th>
-                                <th className="px-6 py-4">Total</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -126,6 +126,19 @@ export default async function AdminOrdersPage() {
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest leading-none ${getStatusStyle(order.status)}`}>
                                                 {order.status}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-5 text-center">
+                                            {order.shipping_tracking_id ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <span className="text-[9px] font-black text-blue-500 uppercase tracking-tighter">Tracking ID</span>
+                                                    <span className="text-[10px] font-bold text-white">{order.shipping_tracking_id}</span>
+                                                    {order.shipping_label_url && (
+                                                        <Link href={order.shipping_label_url} target="_blank" className="text-[8px] text-gray-400 hover:text-white underline uppercase">Label</Link>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="text-[10px] text-gray-500 italic">Not Shipped</span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="text-xs font-semibold text-gray-300 uppercase tracking-tighter">
