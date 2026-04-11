@@ -138,7 +138,7 @@ export default function AdminLoginClient() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
-                                        placeholder="admin@savikafoods.in"
+                                        placeholder="Enter your email"
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm outline-none focus:border-[#C17F24] focus:ring-4 focus:ring-[#C17F24]/10 transition-all duration-300 placeholder:text-white/20"
                                     />
                                 </div>

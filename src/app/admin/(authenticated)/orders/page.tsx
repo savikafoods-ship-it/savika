@@ -14,8 +14,10 @@ export default async function AdminOrdersPage() {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
         
+        const primaryAdminEmail = process.env.ADMIN_EMAIL || 'savikafoods@gmail.com'
+        
         // Email-based admin check
-        if (!user || (user.email !== 'savikafoods@gmail.com' && user.user_metadata?.role !== 'admin')) {
+        if (!user || (user.email !== primaryAdminEmail && user.user_metadata?.role !== 'admin')) {
             redirect('/admin/login')
         }
         

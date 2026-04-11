@@ -6,7 +6,8 @@ export async function GET() {
     // Auth check — admin only
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    const isAdmin = user?.email === 'savikafoods@gmail.com' || user?.user_metadata?.role === 'admin'
+    const primaryAdminEmail = process.env.ADMIN_EMAIL || 'savikafoods@gmail.com'
+    const isAdmin = user?.email === primaryAdminEmail || user?.user_metadata?.role === 'admin'
     
     if (!user || !isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

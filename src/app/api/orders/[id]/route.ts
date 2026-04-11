@@ -29,7 +29,8 @@ export async function GET(
     }
 
     // Security: admin (by email) or order owner can see order
-    const isAdmin = user.email === 'savikafoods@gmail.com' || user.user_metadata?.role === 'admin'
+    const primaryAdminEmail = process.env.ADMIN_EMAIL || 'savikafoods@gmail.com'
+    const isAdmin = user.email === primaryAdminEmail || user.user_metadata?.role === 'admin'
     if (order.user_id && order.user_id !== user.id && !isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
@@ -50,7 +51,8 @@ export async function PATCH(
     const { data: { user } } = await supabase.auth.getUser()
 
     // Admin check — by email or role
-    const isAdmin = user?.email === 'savikafoods@gmail.com' || user?.user_metadata?.role === 'admin'
+    const primaryAdminEmail = process.env.ADMIN_EMAIL || 'savikafoods@gmail.com'
+    const isAdmin = user?.email === primaryAdminEmail || user?.user_metadata?.role === 'admin'
     if (!user || !isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
