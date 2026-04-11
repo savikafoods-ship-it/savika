@@ -53,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     },
     {
-      url: `${baseUrl}/privacy`,
+      url: `${baseUrl}/privacy-policy`,
       lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.3,
@@ -65,13 +65,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.4,
     },
     {
+      url: `${baseUrl}/return-policy`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.4,
+    },
+    {
       url: `${baseUrl}/shipping-policy`,
       lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.4,
     },
     {
-      url: `${baseUrl}/terms`,
+      url: `${baseUrl}/terms-and-conditions`,
       lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.3,

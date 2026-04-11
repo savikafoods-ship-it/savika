@@ -5,46 +5,50 @@ export const metadata = {
 export default function ShippingPolicyPage() {
     return (
         <main className="pb-20 pt-10 px-4">
-            <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-xl border border-[#F0E8DC] p-8 md:p-14 space-y-8">
+            <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl border border-[#F0E8DC] p-8 md:p-14 space-y-8">
                 <div className="border-b border-[#F0E8DC] pb-6 mb-8 text-center">
-                    <h1 className="text-3xl font-extrabold text-[#2E2E2E] mb-2">Shipping Policy</h1>
-                    <p className="text-[#8E562E] text-sm">Last updated: {new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</p>
+                    <h1 className="text-3xl font-extrabold text-[#2E2E2E] mb-2 font-display">Shipping Policy</h1>
+                    <p className="text-[#8E562E] text-sm">Effective as of {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                 </div>
                 
-                <div className="prose prose-[#C17F24] max-w-none text-[#5A5A5A] text-sm leading-relaxed space-y-6">
-                    <p>At Savika Foods, we strive to deliver our premium spices to you in the shortest possible time while ensuring they reach you in perfect condition.</p>
-
-                    <section>
-                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">1. Processing and Dispatch</h2>
-                        <p>All orders are processed and dispatched within <strong>1-2 business days</strong>. Orders placed on weekends or public holidays will be processed on the next business day.</p>
+                <div className="prose prose-[#C17F24] max-w-none text-[#5A5A5A] text-sm leading-relaxed space-y-8">
+                    <section className="bg-[#C17F24]/5 p-8 rounded-3xl border border-[#F0E8DC]">
+                        <p className="text-lg font-medium text-[#2E2E2E] mb-4">General Shipping Information</p>
+                        <p>The orders for the user are shipped through registered domestic courier companies and/or speed post only. Orders are shipped within <strong>2 days</strong> from the date of the order and/or payment or as per the delivery date agreed at the time of order confirmation and delivering of the shipment, subject to courier company / post office norms.</p>
                     </section>
 
-                    <section>
-                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">2. Delivery Timelines</h2>
-                        <p>We deliver across India. Estimated delivery times are as follows:</p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li><strong>Metros:</strong> 3-5 business days</li>
-                            <li><strong>Rest of India:</strong> 5-7 business days</li>
-                        </ul>
-                        <p className="mt-2">Please note that delivery times are estimates and may vary due to external factors like logistics delays or weather conditions.</p>
-                    </section>
+                    <section className="space-y-6">
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 bg-[#C17F24] text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">1</div>
+                            <div>
+                                <h3 className="text-lg font-bold text-[#2E2E2E]">Liability</h3>
+                                <p>Platform Owner shall not be liable for any delay in delivery by the courier company / postal authority.</p>
+                            </div>
+                        </div>
 
-                    <section>
-                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">3. Shipping Charges</h2>
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li><strong>Standard Shipping:</strong> A flat fee of ₹50 applies to orders below ₹599.</li>
-                            <li><strong>Free Shipping:</strong> We offer free standard shipping on all orders over <strong>₹599</strong>.</li>
-                        </ul>
-                    </section>
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 bg-[#C17F24] text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">2</div>
+                            <div>
+                                <h3 className="text-lg font-bold text-[#2E2E2E]">Delivery Address</h3>
+                                <p>Delivery of all orders will be made to the address provided by the buyer at the time of purchase.</p>
+                            </div>
+                        </div>
 
-                    <section>
-                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">4. Tracking Your Order</h2>
-                        <p>Once your order is shipped, you will receive an email and SMS notification with a tracking number and a link to our logistics partner's website (e.g., Shiprocket) to track your package in real-time.</p>
-                    </section>
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 bg-[#C17F24] text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">3</div>
+                            <div>
+                                <h3 className="text-lg font-bold text-[#2E2E2E]">Confirmation</h3>
+                                <p>Delivery of our services will be confirmed on your email ID as specified at the time of registration.</p>
+                            </div>
+                        </div>
 
-                    <section>
-                        <h2 className="text-xl font-bold text-[#2E2E2E] mt-8 mb-4">5. Delivery Issues</h2>
-                        <p>If your package is marked as delivered but you haven't received it, or if the package is missing entirely, please contact us within 24 hours at <strong>savikafoods@gmail.com</strong> so we can investigate with our courier partner.</p>
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 bg-[#C17F24] text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">4</div>
+                            <div>
+                                <h3 className="text-lg font-bold text-[#2E2E2E]">Refunds on Shipping</h3>
+                                <p>If there are any shipping cost(s) levied by the seller or the Platform Owner (as the case be), the same is not refundable.</p>
+                            </div>
+                        </div>
                     </section>
                 </div>
             </div>

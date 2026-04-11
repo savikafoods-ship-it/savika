@@ -28,7 +28,8 @@ const footerLinks = {
         { label: 'Exotics & Rare', href: '/category/exotics-rare', icon: Star },
     ],
     help: [
-        { label: 'Return & Refund', href: '/refund-policy', icon: Undo2 },
+        { label: 'Refund Policy', href: '/refund-policy', icon: Undo2 },
+        { label: 'Return Policy', href: '/return-policy', icon: RotateCcw },
         { label: 'Shipping Policy', href: '/shipping-policy', icon: ShieldCheck },
         { label: 'Contact Us', href: '/contact', icon: MessageCircle },
     ],
@@ -190,10 +191,18 @@ export default function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="text-center pt-8 mt-8 border-t border-white/5">
-                    <p className="text-[#9CA3AF] text-[11px] font-medium tracking-wide">
-                        &copy; {new Date().getFullYear()} Savika Foods. All rights reserved. | 
-                        <Link href="/privacy" className="hover:text-white mx-1">Privacy Policy</Link> | 
-                        <Link href="/terms" className="hover:text-white mx-1">Terms of Service</Link>
+                    <p className="text-[#9CA3AF] text-[11px] font-medium tracking-wide flex flex-wrap justify-center gap-x-2 gap-y-1">
+                        <span>&copy; {new Date().getFullYear()} Savika Foods. All rights reserved.</span>
+                        <span className="hidden md:inline">|</span>
+                        <Link href="/privacy-policy" className="hover:text-white">Privacy Policy</Link>
+                        <span>|</span>
+                        <Link href="/terms-and-conditions" className="hover:text-white">Terms and Conditions</Link>
+                        <span>|</span>
+                        <Link href="/refund-policy" className="hover:text-white">Refund Policy</Link>
+                        <span>|</span>
+                        <Link href="/return-policy" className="hover:text-white">Return Policy</Link>
+                        <span>|</span>
+                        <Link href="/shipping-policy" className="hover:text-white">Shipping Policy</Link>
                     </p>
                 </div>
             </div>
