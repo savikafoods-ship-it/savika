@@ -30,7 +30,7 @@ const DEFAULT_SETTINGS: StoreSettings = {
     notification_config: { new_order_alerts: true }
 }
 
-function NimbusPostStatus() {
+function ShiprocketStatus() {
     const [verifying, setVerifying] = useState(false)
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
     const [message, setMessage] = useState('')
@@ -61,7 +61,7 @@ function NimbusPostStatus() {
             <div className="border-b border-[#27272a] p-5 flex items-center justify-between bg-[#27272a]/30">
                 <div className="flex items-center gap-3">
                     <FontAwesomeIcon icon={faTruck} className="w-5 h-5 text-[#C17F24]" />
-                    <h2 className="font-semibold text-white">Logistics Integration (NimbusPost)</h2>
+                    <h2 className="font-semibold text-white">Logistics Integration (Shiprocket)</h2>
                 </div>
                 <button 
                     onClick={verifyConnection}
@@ -75,7 +75,7 @@ function NimbusPostStatus() {
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="font-medium text-[#e4e4e7]">Account Connectivity</p>
-                        <p className="text-xs text-[#a1a1aa] mt-0.5">Status of the link between your storefront and NimbusPost.</p>
+                        <p className="text-xs text-[#a1a1aa] mt-0.5">Status of the link between your storefront and Shiprocket.</p>
                     </div>
                     <div>
                         {status === 'idle' && (
@@ -333,8 +333,8 @@ export default function AdminSettingsPage() {
                     </div>
                 </div>
 
-                {/* Logistics Integration (NimbusPost) */}
-                <NimbusPostStatus />
+                {/* Logistics Integration (Shiprocket) */}
+                <ShiprocketStatus />
             </div>
 
             {saved && (

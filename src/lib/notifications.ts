@@ -12,41 +12,38 @@ interface SendEmailParams {
  * Sends a transactional email using Resend.
  * Falls back to simulation mode if the API key is missing or is a placeholder.
  */
-export async function sendEmail({ to, subject, html }: SendEmailParams) {
+export async function sendEmail({ to, subject, html, idempotencyKey }: SendEmailParams & { idempotencyKey?: string }) {
     if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.includes('_placeholder')) {
         console.log('--- EMAIL SIMULATION (RESEND) ---')
         console.log(`To: ${to}`)
         console.log(`Subject: ${subject}`)
+        if (idempotencyKey) console.log(`Idempotency Key: ${idempotencyKey}`)
         console.log('--- END SIMULATION ---')
         return { success: true, simulated: true }
     }
 
-    try {
-        // Use verified from address. Resend requires the domain to be verified.
-        // Format: "Display Name <email@domain>"
-        const fromEmail = process.env.NEXT_PUBLIC_FROM_EMAIL || 'noreply@savikafoods.in'
-        const fromFormatted = `Savika Foods <${fromEmail}>`
+    // Use verified from address. Resend requires the domain to be verified.
+    const fromEmail = process.env.NEXT_PUBLIC_FROM_EMAIL || 'noreply@savikafoods.in'
+    const fromFormatted = `Savika Foods <${fromEmail}>`
 
-        console.log(`[Email] Sending to: ${to}, Subject: ${subject}, From: ${fromFormatted}`)
+    console.log(`[Email] Sending to: ${to}, Subject: ${subject}, From: ${fromFormatted}`)
 
-        const { data, error } = await resend.emails.send({
-            from: fromFormatted,
-            to,
-            subject,
-            html,
-        })
+    // Use the { data, error } pattern from the SDK
+    const { data, error } = await resend.emails.send({
+        from: fromFormatted,
+        to,
+        subject,
+        html,
+        ...(idempotencyKey && { idempotencyKey })
+    })
 
-        if (error) {
-            console.error('[Email] Resend API Error:', JSON.stringify(error, null, 2))
-            return { success: false, error }
-        }
-
-        console.log('[Email] Sent successfully. ID:', data?.id)
-        return { success: true, data }
-    } catch (error: any) {
-        console.error('[Email] Exception:', error?.message || error)
+    if (error) {
+        console.error('[Email] Resend API Error:', JSON.stringify(error, null, 2))
         return { success: false, error }
     }
+
+    console.log('[Email] Sent successfully. ID:', data?.id)
+    return { success: true, data }
 }
 
 /**
@@ -107,13 +104,16 @@ export async function sendOrderConfirmation(order: any) {
     const customerResult = await sendEmail({ 
         to, 
         subject: `Order Confirmed: ${order_number}`, 
-        html: emailHtml 
+        html: emailHtml,
+        idempotencyKey: `order-customer/${order_number}`
     })
     console.log('[Email] Customer notification result:', customerResult.success ? 'SUCCESS' : 'FAILED')
 
-    // 2. Send notification to Admin (savikafoods@gmail.com)
+    // 2. Send notification to Admin
     const adminEmail = process.env.ADMIN_EMAIL
     if (adminEmail) {
+        console.log(`[Email] Preparing admin notification for ${adminEmail}`)
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://savikafoods.in'
         const adminHtml = `
             <div style="font-family: sans-serif; padding: 25px; border: 1px solid #eee; border-radius: 12px;">
                 <h2 style="color: #C17F24; margin-top: 0;">🚨 New Order Received!</h2>
@@ -126,15 +126,21 @@ export async function sendOrderConfirmation(order: any) {
                     <tr><td style="padding: 6px 0; font-weight: bold;">Address:</td><td>${shipping_address.street}, ${shipping_address.city}, ${shipping_address.pincode}</td></tr>
                 </table>
                 <div style="margin-top: 20px;">
-                    <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://savikafoods.in'}/admin/orders" style="display: inline-block; padding: 10px 24px; background: #C17F24; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold;">View in Admin Dashboard</a>
+                    <a href="${appUrl}/admin/orders" style="display: inline-block; padding: 10px 24px; background: #C17F24; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold;">View in Admin Dashboard</a>
                 </div>
             </div>
         `
         const adminResult = await sendEmail({
             to: adminEmail,
             subject: `🚨 New Order: ${order_number} — ₹${total}`,
-            html: adminHtml
+            html: adminHtml,
+            idempotencyKey: `order-admin/${order_number}`
         })
         console.log('[Email] Admin notification result:', adminResult.success ? 'SUCCESS' : 'FAILED')
+        if (!adminResult.success) {
+            console.error('[Email] Admin notification failed details:', JSON.stringify(adminResult.error, null, 2))
+        }
+    } else {
+        console.warn('[Email] Skipping admin notification: ADMIN_EMAIL is not set in environment variables.')
     }
 }

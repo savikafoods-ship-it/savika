@@ -4,32 +4,32 @@ import { Camera } from 'lucide-react'
 const INSTAGRAM_POSTS = [
     { 
         id: 1, 
-        src: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=600',
+        src: '/images/gallery/kashmiri_mirch.png',
         caption: 'Sun-dried Kashmiri Mirch 🌶️ #SavikaSpices',
     },
     { 
         id: 2, 
-        src: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?auto=format&fit=crop&q=80&w=600',
+        src: '/images/gallery/golden_turmeric.png',
         caption: 'Golden Turmeric — Pure & Lab-Tested ✨',
     },
     { 
         id: 3, 
-        src: 'https://images.unsplash.com/photo-1599909631715-66c84faae013?auto=format&fit=crop&q=80&w=600',
+        src: '/images/gallery/masala_blend.png',
         caption: 'Artisan Garam Masala Blend 🔥',
     },
     { 
         id: 4, 
-        src: 'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&q=80&w=600',
+        src: '/images/gallery/farm_spices.png',
         caption: 'Fresh from the farm 🌿 #FarmToKitchen',
     },
     { 
         id: 5, 
-        src: 'https://images.unsplash.com/photo-1532336414038-cf19250c5757?auto=format&fit=crop&q=80&w=600',
+        src: '/images/gallery/whole_spices.png',
         caption: 'Exotic whole spices collection #SpiceLove',
     },
     { 
         id: 6, 
-        src: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&q=80&w=600',
+        src: '/images/gallery/gift_packs.png',
         caption: 'Premium Gift Packs — Handcrafted 🎁',
     },
 ]

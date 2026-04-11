@@ -43,8 +43,11 @@ export default function AdminLoginClient() {
             
             router.push('/admin/dashboard')
             router.refresh()
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : 'Invalid credentials'
+        } catch (err: any) {
+            let message = err?.message || 'Invalid credentials'
+            if (message === 'Failed to fetch' || message.includes('fetch')) {
+                message = 'Network error: Failed to connect to Supabase. Please ensure your project is not "Paused" in the Supabase Dashboard.'
+            }
             setError(message)
         } finally {
             setLoading(false)

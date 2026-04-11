@@ -62,16 +62,6 @@ export default function Footer() {
                             Every gram, pure. Every blend, authentic.
                         </p>
                         
-                        {/* Track Order CTA */}
-                        <div className="pt-2">
-                            <Link 
-                                href="/track" 
-                                className="inline-flex items-center gap-2 bg-[#885E16] text-white px-6 py-3 rounded-xl font-[800] text-sm transition-transform hover:scale-[1.02] shadow-lg shadow-[#885E16]/20"
-                            >
-                                <Truck className="w-4 h-4" />
-                                Track Your Order
-                            </Link>
-                        </div>
                         
                         {/* Contact Details */}
                         <div className="space-y-4">

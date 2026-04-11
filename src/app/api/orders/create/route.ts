@@ -134,8 +134,8 @@ export async function POST(request: NextRequest) {
     const gst = Math.round(subtotal * 5 / 105)
     const total = afterDiscount + delivery_fee
 
-    // 9. Generate unique order code
-    const orderCode = '#' + crypto.randomBytes(4).toString('hex').toUpperCase()
+    // 9. Generate unique order code (SAV-XXXXX)
+    const orderCode = 'SAV-' + Math.floor(10000 + Math.random() * 90000).toString()
 
     // 10. Insert order into database (user_id is NULL for guests)
     const orderData: any = {

@@ -147,7 +147,7 @@ function SuccessContent() {
             <div className="bg-green-50 rounded-[2rem] p-8 border border-green-100 mb-6 text-center">
                 <p className="text-[10px] font-black text-green-600 uppercase tracking-[0.3em] mb-2">🎉 Order Received!</p>
                 <p className="text-sm text-green-800 font-medium leading-relaxed max-w-sm mx-auto">
-                    Your spices are being prepared with love. You will receive a **NimbusPost** tracking link via **SMS/WhatsApp** within 24 hours.
+                    Your spices are being prepared with love. You will receive a **Shiprocket** tracking link via **SMS/WhatsApp** within 24 hours.
                 </p>
             </div>
 

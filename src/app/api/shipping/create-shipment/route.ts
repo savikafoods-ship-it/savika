@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { getNimbusAuthToken, createNimbusShipment } from '@/lib/shipping/nimbus'
+import { getShiprocketAuthToken, createShiprocketOrder } from '@/lib/shipping/shiprocket'
 
 export async function POST(request: NextRequest) {
     try {
@@ -23,50 +23,49 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 })
         }
 
-        // 2. Auth with NimbusPost
+        // 2. Auth with Shiprocket
         let token
         try {
-            token = await getNimbusAuthToken()
+            token = await getShiprocketAuthToken()
         } catch (authErr: any) {
-            console.error('Nimbus Auth Error:', authErr)
+            console.error('Shiprocket Auth Error:', authErr)
             return NextResponse.json({ error: 'Failed to connect to shipping provider' }, { status: 500 })
         }
 
-        // 3. Create shipment via NimbusPost
+        // 3. Create order via Shiprocket
         try {
-            const shipmentResponse = await createNimbusShipment(order, token)
+            const shiprocketResponse = await createShiprocketOrder(order, token)
             
-            // Expected response structure: { data: { awb: '...', label: '...', status: '...' } }
-            // Adjust based on NimbusPost actual payload behavior
-            const trackingId = shipmentResponse.data?.awb || shipmentResponse.data?.tracking_id
-            const labelUrl = shipmentResponse.data?.label || shipmentResponse.data?.label_url
-            const status = shipmentResponse.data?.status || 'shipped'
+            // Shiprocket response structure for adhoc order:
+            // { order_id: 123, shipment_id: 456, ... }
+            const shiprocketOrderId = shiprocketResponse.order_id
+            const shipmentId = shiprocketResponse.shipment_id
+            const status = 'processing'
 
             // 4. Update order in Supabase
             const { error: updateError } = await supabase
                 .from('orders')
                 .update({
-                    shipping_tracking_id: trackingId,
-                    shipping_label_url: labelUrl,
+                    shipping_tracking_id: shipmentId?.toString() || '', // Shiprocket tracking ID usually matches shipment_id initially
                     shipping_status: status,
-                    status: 'shipped' // Update order status to shipped
+                    shipment_id: shipmentId?.toString() || '',
+                    status: 'processing' 
                 })
                 .eq('id', orderId)
 
             if (updateError) {
                 console.error('Database Update Error after shipment creation:', updateError)
-                // We still return success since the shipment was created on Nimbus
             }
 
             return NextResponse.json({
                 success: true,
-                trackingId,
-                labelUrl,
-                message: 'Shipment created successfully via NimbusPost'
+                shipmentId,
+                shiprocketOrderId,
+                message: 'Shipment created successfully via Shiprocket'
             })
 
         } catch (shipErr: any) {
-            console.error('Nimbus Shipment Error:', shipErr)
+            console.error('Shiprocket Order Error:', shipErr)
             return NextResponse.json({ error: shipErr.message || 'Failed to create shipment' }, { status: 500 })
         }
 

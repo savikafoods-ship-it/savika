@@ -14,9 +14,8 @@ export default function TrackOrderPage() {
         if (!orderNumber.trim()) return
 
         setLoading(true)
-        // NimbusPost tracking usually works with AWB or Order ID
-        // Redirect to the NimbusPost tracking portal with the ID
-        const baseUrl = process.env.NEXT_PUBLIC_NIMBUSPOST_TRACKING_URL || 'https://ship.nimbuspost.com/shipping/tracking/'
+        // Shiprocket tracking works with Shipment ID or AWB
+        const baseUrl = process.env.NEXT_PUBLIC_SHIPROCKET_TRACKING_URL || 'https://shiprocket.co/tracking/'
         window.location.href = `${baseUrl}${orderNumber.trim()}`
     }
 

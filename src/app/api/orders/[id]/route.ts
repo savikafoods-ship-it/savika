@@ -102,7 +102,7 @@ export async function PATCH(
         const statusMessages: Record<string, string> = {
           confirmed: 'Your order has been confirmed! We are preparing your spices.',
           processing: 'Your order is being processed and packed with care.',
-          shipped: `Your order has been shipped! ${courier_name ? `Courier: ${courier_name}` : ''} ${tracking_id ? `Tracking: ${tracking_id}` : ''}`,
+          shipped: `Your order has been shipped! ${courier_name ? `Courier: ${courier_name}` : ''}`,
           out_for_delivery: 'Your order is out for delivery! Get ready to receive your spices.',
           delivered: 'Your order has been delivered! Enjoy your authentic spices.',
           cancelled: 'Your order has been cancelled. If you have any questions, please contact us.',
