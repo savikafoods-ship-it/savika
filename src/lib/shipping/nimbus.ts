@@ -7,8 +7,12 @@ const NIMBUS_AUTH_URL = 'https://ship.nimbuspost.com/api/auth/login'
 const NIMBUS_CREATE_SHIPMENT_URL = 'https://ship.nimbuspost.com/api/shipping/create-shipment'
 
 export async function getNimbusAuthToken() {
+    const apiKey = process.env.NIMBUSPOST_API_KEY
     const email = process.env.NIMBUSPOST_API_EMAIL
     const password = process.env.NIMBUSPOST_API_PASSWORD
+
+    // If API Key is provided, use it directly as the token
+    if (apiKey) return apiKey
 
     if (!email || !password) {
         throw new Error('NimbusPost credentials not configured in environment variables')
@@ -21,11 +25,11 @@ export async function getNimbusAuthToken() {
     })
 
     if (!res.ok) {
-        throw new Error('Failed to authenticate with NimbusPost')
+        throw new Error('Failed to authenticate with NimbusPost. Please check your Email and Password.')
     }
 
     const data = await res.json()
-    return data.token // Adjust based on actual API response structure
+    return data.data || data.token // Adjust based on actual API response structure (v1/v2)
 }
 
 export function parseWeight(weightStr: string): number {

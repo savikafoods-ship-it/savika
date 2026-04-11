@@ -3,11 +3,7 @@ import { Poppins } from 'next/font/google'
 import NextTopLoader from 'nextjs-toploader'
 import './globals.css'
 import { ToastProvider } from '@/components/ui/Toast'
-import dynamic from 'next/dynamic'
-
-const WhatsAppFloat = dynamic(() => import('@/components/layout/WhatsAppFloat'), {
-  ssr: false,
-})
+import WhatsAppFloat from '@/components/layout/WhatsAppFloat'
 
 const poppins = Poppins({
   subsets: ['latin', 'latin-ext'],

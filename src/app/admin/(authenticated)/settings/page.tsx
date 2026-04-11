@@ -30,6 +30,77 @@ const DEFAULT_SETTINGS: StoreSettings = {
     notification_config: { new_order_alerts: true }
 }
 
+function NimbusPostStatus() {
+    const [verifying, setVerifying] = useState(false)
+    const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
+    const [message, setMessage] = useState('')
+
+    const verifyConnection = async () => {
+        setVerifying(true)
+        setStatus('idle')
+        try {
+            const res = await fetch('/api/admin/shipping/verify-connection')
+            const data = await res.json()
+            if (data.success) {
+                setStatus('success')
+                setMessage(data.message)
+            } else {
+                setStatus('error')
+                setMessage(data.message || 'Authentication failed')
+            }
+        } catch (err) {
+            setStatus('error')
+            setMessage('Network error: Could not reach the verification API')
+        } finally {
+            setVerifying(false)
+        }
+    }
+
+    return (
+        <div className="bg-[#18181b] border border-[#27272a] rounded-xl overflow-hidden shadow-xl">
+            <div className="border-b border-[#27272a] p-5 flex items-center justify-between bg-[#27272a]/30">
+                <div className="flex items-center gap-3">
+                    <FontAwesomeIcon icon={faTruck} className="w-5 h-5 text-[#C17F24]" />
+                    <h2 className="font-semibold text-white">Logistics Integration (NimbusPost)</h2>
+                </div>
+                <button 
+                    onClick={verifyConnection}
+                    disabled={verifying}
+                    className="bg-[#C17F24] hover:bg-[#D4A855] text-white px-4 py-1.5 rounded-lg text-sm font-bold transition-all disabled:opacity-50"
+                >
+                    {verifying ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : 'Test Connection'}
+                </button>
+            </div>
+            <div className="p-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <p className="font-medium text-[#e4e4e7]">Account Connectivity</p>
+                        <p className="text-xs text-[#a1a1aa] mt-0.5">Status of the link between your storefront and NimbusPost.</p>
+                    </div>
+                    <div>
+                        {status === 'idle' && (
+                            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest bg-gray-500/10 px-3 py-1.4 rounded-full">Unknown</span>
+                        )}
+                        {status === 'success' && (
+                            <span className="text-xs font-bold text-green-500 uppercase tracking-widest bg-green-500/10 px-3 py-1.4 rounded-full border border-green-500/20"> Connected</span>
+                        )}
+                        {status === 'error' && (
+                            <span className="text-xs font-bold text-red-500 uppercase tracking-widest bg-red-500/10 px-3 py-1.4 rounded-full border border-red-500/20">Disconnected</span>
+                        )}
+                    </div>
+                </div>
+                {message && (
+                    <div className={`mt-4 p-3 rounded-lg text-xs font-medium border ${
+                        status === 'success' ? 'bg-green-500/5 text-green-400 border-green-500/10' : 'bg-red-500/5 text-red-400 border-red-500/10'
+                    }`}>
+                        {message}
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
+
 export default function AdminSettingsPage() {
     const [settings, setSettings] = useState<StoreSettings>(DEFAULT_SETTINGS)
     const [loading, setLoading] = useState(true)
@@ -261,6 +332,9 @@ export default function AdminSettingsPage() {
                         </label>
                     </div>
                 </div>
+
+                {/* Logistics Integration (NimbusPost) */}
+                <NimbusPostStatus />
             </div>
 
             {saved && (
