@@ -41,6 +41,7 @@ export default function CheckoutPage() {
     const [loading, setLoading] = useState(false)
     const [ready, setReady] = useState(false)
     const [error, setError] = useState('')
+    const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online'>('online')
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -74,6 +75,17 @@ export default function CheckoutPage() {
         }
         setReady(true)
     }, [items, router, loading])
+
+    // Load Razorpay SDK
+    useEffect(() => {
+        const script = document.createElement('script')
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+        script.async = true
+        document.body.appendChild(script)
+        return () => {
+            document.body.removeChild(script)
+        }
+    }, [])
 
     // Pincode Auto-fill
     useEffect(() => {
@@ -145,6 +157,7 @@ export default function CheckoutPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    payment_method: paymentMethod,
                     items: items.map(i => ({
                         product_id: i.productId,
                         name: i.product.name,
@@ -172,12 +185,73 @@ export default function CheckoutPage() {
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'Failed to place order')
 
-            clearCart()
-            router.push(`/checkout/success?orderId=${data.orderId}&orderNumber=${data.orderNumber}`)
+            if (paymentMethod === 'online' && data.razorpayOrder) {
+                initiateRazorpay(data.razorpayOrder, data.orderId, data.orderNumber)
+            } else {
+                // COD Flow
+                clearCart()
+                router.push(`/checkout/success?orderId=${data.orderId}&orderNumber=${data.orderNumber}`)
+            }
         } catch (err: any) {
             setError(err.message)
             setLoading(false)
         }
+    }
+
+    const initiateRazorpay = (rzpOrder: any, orderId: string, orderNumber: string) => {
+        const options = {
+            key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
+            amount: rzpOrder.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+            currency: rzpOrder.currency,
+            name: "Savika Foods",
+            description: `Order ${orderNumber}`,
+            image: "/logo.png",
+            order_id: rzpOrder.id,
+            handler: async function (response: any) {
+                try {
+                    setLoading(true)
+                    const res = await fetch('/api/razorpay/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            orderId,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature
+                        })
+                    })
+                    const verifyData = await res.json()
+                    if (verifyData.success) {
+                        clearCart()
+                        router.push(`/checkout/success?orderId=${orderId}&orderNumber=${orderNumber}`)
+                    } else {
+                        throw new Error(verifyData.error || 'Payment verification failed')
+                    }
+                } catch (err: any) {
+                    setError(err.message)
+                    setLoading(false)
+                }
+            },
+            prefill: {
+                name: formData.full_name,
+                email: formData.email,
+                contact: formData.mobile
+            },
+            notes: {
+                address: formData.street
+            },
+            theme: {
+                color: "#C17F24"
+            },
+            modal: {
+                ondismiss: function() {
+                    setLoading(false)
+                }
+            }
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
     }
 
     if (!ready) return (
@@ -347,57 +421,49 @@ export default function CheckoutPage() {
                                     <div className="space-y-4">
                                         <h3 className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Choose Payment Method</h3>
                                         
-                                        {/* COD Option - Active */}
-                                        <div className="p-6 rounded-2xl border-2 border-amber-600 bg-amber-50 flex items-center gap-5 cursor-pointer shadow-md">
-                                            <div className="w-12 h-12 rounded-full bg-amber-600 text-white flex items-center justify-center shadow-lg">
+                                        {/* Online Option */}
+                                        <div 
+                                            onClick={() => setPaymentMethod('online')}
+                                            className={`p-6 rounded-2xl border-2 transition-all flex items-center gap-5 cursor-pointer hover:shadow-md ${
+                                                paymentMethod === 'online' ? 'border-amber-600 bg-amber-50 shadow-md' : 'border-gray-100 bg-white'
+                                            }`}
+                                        >
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-colors ${
+                                                paymentMethod === 'online' ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-400'
+                                            }`}>
+                                                <FontAwesomeIcon icon={faCreditCard} className="text-xl" />
+                                            </div>
+                                            <div>
+                                                <p className="font-black text-[#2E2E2E] uppercase tracking-tighter">Pay Online</p>
+                                                <p className="text-[11px] text-amber-700 font-bold uppercase tracking-widest mt-0.5">UPI, Cards, Netbanking</p>
+                                            </div>
+                                            <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                paymentMethod === 'online' ? 'bg-[#C17F24] border-[#C17F24]' : 'bg-white border-gray-200'
+                                            }`}>
+                                                {paymentMethod === 'online' && <div className="w-2 h-2 rounded-full bg-white" />}
+                                            </div>
+                                        </div>
+
+                                        {/* COD Option */}
+                                        <div 
+                                            onClick={() => setPaymentMethod('cod')}
+                                            className={`p-6 rounded-2xl border-2 transition-all flex items-center gap-5 cursor-pointer hover:shadow-md ${
+                                                paymentMethod === 'cod' ? 'border-amber-600 bg-amber-50 shadow-md' : 'border-gray-100 bg-white'
+                                            }`}
+                                        >
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-colors ${
+                                                paymentMethod === 'cod' ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-400'
+                                            }`}>
                                                 <FontAwesomeIcon icon={faMoneyBillWave} className="text-xl" />
                                             </div>
                                             <div>
                                                 <p className="font-black text-[#2E2E2E] uppercase tracking-tighter">Cash on Delivery (COD)</p>
                                                 <p className="text-[11px] text-amber-700 font-bold uppercase tracking-widest mt-0.5">Pay when your spices arrive</p>
                                             </div>
-                                            <div className="ml-auto w-6 h-6 rounded-full bg-[#C17F24] flex items-center justify-center">
-                                                <div className="w-2 h-2 rounded-full bg-white" />
-                                            </div>
-                                        </div>
-
-                                        {/* Disabled Options - Coming Soon */}
-                                        <div className="p-6 rounded-2xl border border-gray-100 bg-gray-50/50 flex items-center gap-5 opacity-60 grayscale cursor-not-allowed">
-                                            <div className="w-12 h-12 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center">
-                                                <FontAwesomeIcon icon={faTag} className="text-xl" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center justify-between">
-                                                    <p className="font-black text-gray-400 uppercase tracking-tighter">UPI (GPay / PhonePe / Paytm)</p>
-                                                    <span className="text-[8px] font-black bg-gray-200 text-gray-500 px-2 py-0.5 rounded uppercase tracking-widest">Coming Soon</span>
-                                                </div>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Direct UPI Payment</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-6 rounded-2xl border border-gray-100 bg-gray-50/50 flex items-center gap-5 opacity-60 grayscale cursor-not-allowed">
-                                            <div className="w-12 h-12 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center">
-                                                <FontAwesomeIcon icon={faCreditCard} className="text-xl" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center justify-between">
-                                                    <p className="font-black text-gray-400 uppercase tracking-tighter">Debit / Credit Cards</p>
-                                                    <span className="text-[8px] font-black bg-gray-200 text-gray-500 px-2 py-0.5 rounded uppercase tracking-widest">Coming Soon</span>
-                                                </div>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Visa, Mastercard, RuPay</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="p-6 rounded-2xl border border-gray-100 bg-gray-50/50 flex items-center gap-5 opacity-60 grayscale cursor-not-allowed">
-                                            <div className="w-12 h-12 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center">
-                                                <FontAwesomeIcon icon={faBuildingColumns} className="text-xl" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center justify-between">
-                                                    <p className="font-black text-gray-400 uppercase tracking-tighter">Net Banking</p>
-                                                    <span className="text-[8px] font-black bg-gray-200 text-gray-500 px-2 py-0.5 rounded uppercase tracking-widest">Coming Soon</span>
-                                                </div>
-                                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">All Major Indian Banks</p>
+                                            <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                                                paymentMethod === 'cod' ? 'bg-[#C17F24] border-[#C17F24]' : 'bg-white border-gray-200'
+                                            }`}>
+                                                {paymentMethod === 'cod' && <div className="w-2 h-2 rounded-full bg-white" />}
                                             </div>
                                         </div>
                                     </div>
@@ -410,7 +476,11 @@ export default function CheckoutPage() {
                                         className="w-full mt-10 bg-[#C17F24] hover:bg-[#8B5E16] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
                                     >
                                         {loading ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faLock} />}
-                                        {loading ? 'Processing Order...' : `Place Order • ${formatCurrency(finalTotal)} (COD)`}
+                                        {loading ? 'Processing...' : (
+                                            paymentMethod === 'online' 
+                                            ? `Pay & Place Order • ${formatCurrency(finalTotal)}` 
+                                            : `Place Order • ${formatCurrency(finalTotal)} (COD)`
+                                        )}
                                     </button>
                                 </div>
                                 <button 

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse request body
     const body = await request.json()
-    const { items, shipping_address, coupon_code, notes, email } = body
+    const { items, shipping_address, coupon_code, notes, email, payment_method = 'cod' } = body
 
     // 3. Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
       total,
       total_amount: total,  // Legacy column - same as total
       status: 'pending',
-      payment_method: 'cod',
+      payment_method: payment_method,
       payment_status: 'pending',
       shipping_address,
       customer_email: email,
@@ -173,59 +173,87 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order: ' + (insertError?.message || 'Unknown error') }, { status: 500 })
     }
 
-    // 10.5. Trigger Notifications (Async - don't block the response)
-    try {
-      const { sendOrderConfirmation } = await import('@/lib/notifications')
-      const fullOrderData = {
-        ...order,
-        total,
-        shipping_address,
-        items: verifiedItems,
-        customer_email: email,
-        customer_name: shipping_address.full_name,
+    // 10.5 Handle Razorpay Order Creation for Online Payments
+    let razorpayOrder = null
+    if (payment_method === 'online') {
+      try {
+        const { razorpay } = await import('@/lib/razorpay')
+        razorpayOrder = await razorpay.orders.create({
+          amount: Math.round(total * 100), // Razorpay expects paise
+          currency: 'INR',
+          receipt: order.order_number,
+          notes: {
+            order_id: order.id
+          }
+        })
+
+        // Update order with Razorpay Order ID
+        await serviceClient
+          .from('orders')
+          .update({ rzp_order_id: razorpayOrder.id })
+          .eq('id', order.id)
+      } catch (rzpErr: any) {
+        console.error('Razorpay order creation error:', rzpErr)
+        return NextResponse.json({ error: 'Failed to initiate online payment' }, { status: 500 })
       }
-      sendOrderConfirmation(fullOrderData).catch(err => console.error('Notification error:', err))
-    } catch (notifErr) {
-      console.error('Failed to load notification module:', notifErr)
     }
 
-    // 11. Decrement stock
-    try {
-      for (const item of items) {
-        const product = products.find((p: any) => p.id === item.product_id)
-        if (product && product.stock !== null) {
-          const newStock = Math.max(0, product.stock - item.quantity)
-          await serviceClient
-            .from('products')
-            .update({ stock: newStock })
-            .eq('id', product.id)
-        }
-      }
-    } catch (stockErr) {
-      console.error('Stock decrement error:', stockErr)
-    }
-
-    // 12. Trigger automated shipping pipeline (Async - don't block response)
-    if (order.id) {
+    // 11. Post-process (Notifications & Stock) - ONLY for COD
+    // For online payments, these happen after payment verification
+    if (payment_method === 'cod') {
+        // 11.1. Trigger Notifications (Async - don't block the response)
         try {
-            // Trigger internal shipment creation
-            // We use a relative fetch to our own API to keep logic centralized
-            const baseUrl = request.nextUrl.origin
-            fetch(`${baseUrl}/api/shipping/create-shipment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ orderId: order.id })
-            }).catch(e => console.error('Automated shipping trigger failed:', e))
-        } catch (shipErr) {
-            console.error('Failed to trigger shipping pipeline:', shipErr)
+          const { sendOrderConfirmation } = await import('@/lib/notifications')
+          const fullOrderData = {
+            ...order,
+            total,
+            shipping_address,
+            items: verifiedItems,
+            customer_email: email,
+            customer_name: shipping_address.full_name,
+          }
+          sendOrderConfirmation(fullOrderData).catch(err => console.error('Notification error:', err))
+        } catch (notifErr) {
+          console.error('Failed to load notification module:', notifErr)
+        }
+
+        // 11.2. Decrement stock
+        try {
+          for (const item of items) {
+            const product = products.find((p: any) => p.id === item.product_id)
+            if (product && product.stock !== null) {
+              const newStock = Math.max(0, product.stock - item.quantity)
+              await serviceClient
+                .from('products')
+                .update({ stock: newStock })
+                .eq('id', product.id)
+            }
+          }
+        } catch (stockErr) {
+          console.error('Stock decrement error:', stockErr)
+        }
+
+        // 11.3. Trigger automated shipping pipeline (Async - don't block response)
+        if (order.id) {
+            try {
+                const baseUrl = request.nextUrl.origin
+                fetch(`${baseUrl}/api/shipping/create-shipment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId: order.id })
+                }).catch(e => console.error('Automated shipping trigger failed:', e))
+            } catch (shipErr) {
+                console.error('Failed to trigger shipping pipeline:', shipErr)
+            }
         }
     }
 
-    // 13. Return order ID for redirect
+    // 12. Return order info for redirect/payment
     return NextResponse.json({
       success: true,
       orderId: order.id,
       orderNumber: order.order_number,
+      razorpayOrder: razorpayOrder // Will be null for COD
     })
   } catch (error: any) {
     console.error('Create order API error:', error)
