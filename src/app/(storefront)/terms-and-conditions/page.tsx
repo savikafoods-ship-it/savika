@@ -18,16 +18,15 @@ export default function TermsPage() {
                     </section>
 
                     <section>
-                        <p>The Platform is owned by <strong>9898176667</strong>, a company incorporated under the Companies Act, 1956 with its registered office at <strong>Savika Foods B-406, Siddhivinayak Homes, Solsumba, Umargam, Valsad, Gujarat - 396165, India</strong> (hereinafter referred to as 'Platform Owner', 'we', 'us', 'our').</p>
-                        <p className="mt-4">Your use of the Platform and services and tools are governed by the following terms and conditions (“Terms of Use”) as applicable to the Platform including the applicable policies which are incorporated herein by way of reference. If You transact on the Platform, You shall be subject to the policies that are applicable to the Platform for such transaction. By mere use of the Platform, You shall be contracting with the Platform Owner and these terms and conditions including the policies constitute Your binding obligations, with Platform Owner.</p>
-                        <p className="mt-4">These Terms of Use relate to your use of our website, goods (as applicable) or services (as applicable) (collectively, 'Services'). Any terms and conditions proposed by You which are in addition to or which conflict with these Terms of Use are expressly rejected by the Platform Owner and shall be of no force or effect. These Terms of Use can be modified at any time without assigning any reason. It is your responsibility to periodically review these Terms of Use to stay informed of updates.</p>
+                        <p>The Platform is owned by <strong>9898176667</strong>, a company incorporated under the Companies Act, 1956 with its registered office at <strong>Savika Foods, B-406, Siddhivinayak Homes, Solsumba, Umargam, Valsad, Gujarat - 396165, India</strong> (hereinafter referred to as ‘Platform Owner’, 'we', 'us', 'our').</p>
+                        <p className="mt-4">Your use of the Platform and services and tools are governed by the following terms and conditions (“Terms of Use”) as applicable to the Platform including the applicable policies which are incorporated herein by way of reference. If You transact on the Platform, You shall be subject to the policies that are applicable to the Platform for such transaction. By mere use of the Platform, You shall be contracting with the Platform Owner and these terms and conditions including the policies constitute Your binding obligations, with Platform Owner. These Terms of Use relate to your use of our website, goods (as applicable) or services (as applicable) (collectively, 'Services'). Any terms and conditions proposed by You which are in addition to or which conflict with these Terms of Use are expressly rejected by the Platform Owner and shall be of no force or effect. These Terms of Use can be modified at any time without assigning any reason. It is your responsibility to periodically review these Terms of Use to stay informed of updates.</p>
                         <p className="mt-4">For the purpose of these Terms of Use, wherever the context so requires ‘you’, 'your' or ‘user’ shall mean any natural or legal person who has agreed to become a user/buyer on the Platform.</p>
-                        <p className="mt-6 font-bold text-[#C17F24] tracking-tight uppercase">ACCESSING, BROWSING OR OTHERWISE USING THE PLATFORM INDICATES YOUR AGREEMENT TO ALL THE TERMS AND CONDITIONS UNDER THESE TERMS OF USE, SO PLEASE READ THE TERMS OF USE CAREFULLY BEFORE PROCEEDING.</p>
+                        <p className="mt-6 font-bold text-[#C17F24] tracking-tight uppercase border-y border-[#F0E8DC] py-4">ACCESSING, BROWSING OR OTHERWISE USING THE PLATFORM INDICATES YOUR AGREEMENT TO ALL THE TERMS AND CONDITIONS UNDER THESE TERMS OF USE, SO PLEASE READ THE TERMS OF USE CAREFULLY BEFORE PROCEEDING.</p>
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-bold text-[#2E2E2E] border-l-4 border-[#C17F24] pl-4 mb-4">Terms of Use:</h2>
-                        <ul className="list-disc pl-5 space-y-4">
+                        <h2 className="text-xl font-bold text-[#2E2E2E] border-l-4 border-[#C17F24] pl-4 mb-6">Terms of Use:</h2>
+                        <ol className="list-decimal pl-5 space-y-4">
                             <li>To access and use the Services, you agree to provide true, accurate and complete information to us during and after registration, and you shall be responsible for all acts done through the use of your registered account on the Platform.</li>
                             <li>Neither we nor any third parties provide any warranty or guarantee as to the accuracy, timeliness, performance, completeness or suitability of the information and materials offered on this website or through the Services, for any specific purpose. You acknowledge that such information and materials may contain inaccuracies or errors and we expressly exclude liability for any such inaccuracies or errors to the fullest extent permitted by law.</li>
                             <li>Your use of our Services and the Platform is solely and entirely at your own risk and discretion for which we shall not be liable to you in any manner. You are required to independently assess and ensure that the Services meet your requirements.</li>
@@ -41,11 +40,8 @@ export default function TermsPage() {
                             <li>Notwithstanding anything contained in these Terms of Use, the parties shall not be liable for any failure to perform an obligation under these Terms if performance is prevented or delayed by a force majeure event.</li>
                             <li>These Terms and any dispute or claim relating to it, or its enforceability, shall be governed by and construed in accordance with the laws of India.</li>
                             <li>All disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts in <strong>Umargam and Valsad</strong>.</li>
-                        </ul>
-                    </section>
-
-                    <section className="pt-8 border-t border-gray-100">
-                        <p className="text-center">All concerns or communications relating to these Terms must be communicated to us using the contact information provided on this website.</p>
+                            <li>All concerns or communications relating to these Terms must be communicated to us using the contact information provided on this website.</li>
+                        </ol>
                     </section>
                 </div>
             </div>
