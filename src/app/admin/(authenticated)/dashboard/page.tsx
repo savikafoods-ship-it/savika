@@ -31,7 +31,9 @@ export default async function AdminDashboardPage() {
     const revenueByMonth: Record<string, number> = {}
     
     allOrders.forEach(order => {
+        if (!order.created_at) return
         const date = new Date(order.created_at)
+        if (isNaN(date.getTime())) return
         const month = months[date.getMonth()]
         revenueByMonth[month] = (revenueByMonth[month] || 0) + (order.total || 0)
     })

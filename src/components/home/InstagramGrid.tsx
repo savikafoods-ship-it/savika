@@ -4,32 +4,32 @@ import { Camera } from 'lucide-react'
 const INSTAGRAM_POSTS = [
     { 
         id: 1, 
-        src: '/images/gallery/kashmiri_mirch.png?v=1',
+        src: '/images/gallery/kashmiri_mirch.png',
         caption: 'Sun-dried Kashmiri Mirch 🌶️ #SavikaSpices',
     },
     { 
         id: 2, 
-        src: '/images/gallery/golden_turmeric.png?v=1',
+        src: '/images/gallery/golden_turmeric.png',
         caption: 'Golden Turmeric — Pure & Lab-Tested ✨',
     },
     { 
         id: 3, 
-        src: '/images/gallery/masala_blend.png?v=1',
+        src: '/images/gallery/masala_blend.png',
         caption: 'Artisan Garam Masala Blend 🔥',
     },
     { 
         id: 4, 
-        src: '/images/gallery/farm_spices.png?v=1',
+        src: '/images/gallery/farm_spices.png',
         caption: 'Fresh from the farm 🌿 #FarmToKitchen',
     },
     { 
         id: 5, 
-        src: '/images/gallery/whole_spices.png?v=1',
+        src: '/images/gallery/whole_spices.png',
         caption: 'Exotic whole spices collection #SpiceLove',
     },
     { 
         id: 6, 
-        src: '/images/gallery/gift_packs.png?v=1',
+        src: '/images/gallery/gift_packs.png',
         caption: 'Premium Gift Packs — Handcrafted 🎁',
     },
 ]

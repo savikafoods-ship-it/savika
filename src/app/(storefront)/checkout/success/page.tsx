@@ -147,17 +147,11 @@ function SuccessContent() {
             <div className="bg-green-50 rounded-[2rem] p-8 border border-green-100 mb-6 text-center">
                 <p className="text-[10px] font-black text-green-600 uppercase tracking-[0.3em] mb-2">🎉 Order Received!</p>
                 <p className="text-sm text-green-800 font-medium leading-relaxed max-w-sm mx-auto">
-                    Your spices are being prepared with love. You will receive a **Shiprocket** tracking link via **SMS/WhatsApp** within 24 hours.
+                    Your spices are being prepared with love. We'll handpick and custom pack your order shortly.
                 </p>
             </div>
 
             <div className="space-y-4">
-                <Link href={`/orders/${orderId}`}
-                    className="w-full h-14 bg-amber-700 hover:bg-amber-800 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all shadow-xl active:scale-95 group"
-                >
-                    Track Your Order
-                    <FontAwesomeIcon icon={faChevronRight} className="text-[10px] group-hover:translate-x-1 transition-transform" />
-                </Link>
                 <Link href="/shop"
                     className="w-full h-14 bg-[#C17F24] hover:bg-[#8B5E16] text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95 group"
                 >

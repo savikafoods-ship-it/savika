@@ -76,23 +76,7 @@ export default function OrderTrackingPage() {
 
     const gst = order.gst || Math.round((order.subtotal || 0) * 5 / 105)
 
-    const steps = [
-        { key: 'pending', label: 'Order Placed', icon: faBoxOpen, desc: 'We have received your order.' },
-        { key: 'confirmed', label: 'Confirmed', icon: faCheckCircle, desc: 'Your order is being reviewed.' },
-        { key: 'shipped', label: 'En-Route', icon: faTruck, desc: 'Handed over to our courier partner.' },
-        { key: 'delivered', label: 'Delivered', icon: faHome, desc: 'Order arrived at your doorstep.' }
-    ]
 
-    const getCurrentStep = () => {
-        const s = order.status
-        if (s === 'pending') return 0
-        if (['confirmed', 'processing'].includes(s)) return 1
-        if (['shipped', 'out_for_delivery'].includes(s)) return 2
-        if (s === 'delivered') return 3
-        return 0
-    }
-
-    const currentStepIdx = getCurrentStep()
 
     return (
         <div className="min-h-screen bg-[#F5F0E8] pb-24 pt-12">
@@ -102,7 +86,7 @@ export default function OrderTrackingPage() {
                         <FontAwesomeIcon icon={faArrowLeft} />
                     </button>
                     <div className="flex-1">
-                        <h1 className="text-2xl font-black text-[#2E2E2E] tracking-tighter uppercase">Track Your Spices</h1>
+                        <h1 className="text-2xl font-black text-[#2E2E2E] tracking-tighter uppercase">Order Details</h1>
                         <div className="flex items-center gap-2 mt-0.5">
                             <p className="text-sm font-black text-amber-700 tracking-wider">{order.order_number}</p>
                             <button onClick={copyOrderCode} className={`text-[9px] px-2 py-0.5 rounded font-black uppercase tracking-widest transition-all ${copied ? 'bg-green-100 text-green-600' : 'bg-amber-50 text-amber-600 hover:bg-amber-100'}`}>
@@ -112,62 +96,7 @@ export default function OrderTrackingPage() {
                     </div>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-8 items-start">
-                    {/* Status Tracker */}
-                    <div className="bg-white rounded-[2rem] p-8 shadow-xl border border-gray-50 overflow-hidden relative">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full -mr-16 -mt-16 opacity-50" />
-                        
-                        <div className="relative z-10 flex flex-col items-center mb-10 text-center">
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Estimated Delivery</p>
-                            <h2 className="text-4xl font-black text-[#C17F24] tracking-tighter uppercase">{etaString}</h2>
-                            <div className="bg-green-100 text-green-700 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full mt-3 flex items-center gap-2">
-                                <FontAwesomeIcon icon={faClock} />
-                                Within 2 Days
-                            </div>
-                        </div>
-
-                        <div className="space-y-0 relative pl-4">
-                            {/* Vertical Line */}
-                            <div className="absolute left-[31px] top-6 bottom-6 w-[2px] bg-gray-100" />
-
-                            {steps.map((s, idx) => {
-                                const isPast = idx < currentStepIdx
-                                const isCurrent = idx === currentStepIdx
-                                const isFuture = idx > currentStepIdx
-
-                                return (
-                                    <div key={s.key} className="flex gap-6 pb-12 last:pb-0 relative">
-                                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs shadow-md border-4 border-white relative z-10 transition-all ${
-                                            isPast ? 'bg-green-500 text-white' : 
-                                            isCurrent ? 'bg-amber-600 text-white scale-110 shadow-amber-900/20' : 
-                                            'bg-gray-100 text-gray-300'
-                                        }`}>
-                                            <FontAwesomeIcon icon={isPast ? faCheckCircle : s.icon} />
-                                        </div>
-                                        <div className="flex-1 pt-1.5">
-                                            <p className={`text-sm font-black uppercase tracking-tighter ${isFuture ? 'text-gray-300' : 'text-[#2E2E2E]'}`}>{s.label}</p>
-                                            <p className={`text-[11px] font-medium mt-1 leading-relaxed ${isFuture ? 'text-gray-300' : 'text-gray-500'}`}>{s.desc}</p>
-                                            {isPast && <p className="text-[9px] font-black text-green-500 uppercase tracking-widest mt-2 underline decoration-green-200">Completed</p>}
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-
-                        {/* Courier Info (shown when shipped) */}
-                        {order.tracking_id && (
-                            <div className="mt-8 p-4 bg-indigo-50 rounded-2xl border border-indigo-100 border-dashed">
-                                <p className="text-[9px] font-black text-indigo-500 uppercase tracking-widest mb-2">Courier Tracking</p>
-                                <div className="flex items-center justify-between gap-3">
-                                    <div>
-                                        <p className="text-sm font-black text-indigo-800">{order.courier_name}</p>
-                                        <p className="text-xs text-indigo-600 font-bold mt-0.5">ID: {order.tracking_id}</p>
-                                    </div>
-                                    <FontAwesomeIcon icon={faTruck} className="text-indigo-400 text-xl" />
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                <div className="max-w-xl mx-auto items-start">
 
                     {/* Order Details */}
                     <div className="space-y-6">

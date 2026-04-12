@@ -72,8 +72,13 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                 if (res.ok) {
                     const data = await res.json()
                     setNotifications(data)
+                } else if (res.status === 401) {
+                    console.warn('Session expired, stopping notification polling.')
+                    // Optionally redirect or show a banner
                 }
-            } catch {}
+            } catch (err) {
+                console.error('Failed to poll notifications:', err)
+            }
         }
         fetchNotifications()
         const interval = setInterval(fetchNotifications, 10000) // Poll every 10s

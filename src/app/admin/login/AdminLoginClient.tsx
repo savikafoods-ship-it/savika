@@ -44,6 +44,7 @@ export default function AdminLoginClient() {
             router.push('/admin/dashboard')
             router.refresh()
         } catch (err: any) {
+            console.error('FULL LOGIN ERROR:', err) // DEBUG LOG
             let message = err?.message || 'Invalid credentials'
             if (message === 'Failed to fetch' || message.includes('fetch')) {
                 message = 'Network error: Failed to connect to Supabase. Please ensure your project is not "Paused" in the Supabase Dashboard.'
