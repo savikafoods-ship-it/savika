@@ -1,5 +1,5 @@
 import { getShiprocketAuthToken } from '@/lib/shipping/shiprocket'
-
+import { NextResponse } from 'next/server'
 export async function GET() {
     try {
         // Attempt to get a token. This verifies if credentials are correct.

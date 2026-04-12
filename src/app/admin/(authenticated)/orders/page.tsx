@@ -4,6 +4,7 @@ import { faSearch, faEye, faFilter, faDownload } from '@fortawesome/free-solid-s
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { formatCurrency } from '@/lib/utils'
+import DeleteOrderButton from './DeleteOrderButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -94,6 +95,7 @@ export default async function AdminOrdersPage() {
                                 <th className="px-6 py-4">Customer</th>
                                 <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-center">Status</th>
                                 <th className="px-6 py-4">Payment</th>
+                                <th className="px-6 py-4 text-right">Total</th>
                                 <th className="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -136,16 +138,18 @@ export default async function AdminOrdersPage() {
                                                 {order.payment_status?.toUpperCase()}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5 text-white font-bold text-base">
+                                        <td className="px-6 py-5 text-white font-bold text-base text-right">
                                             {formatCurrency(order.total)}
                                         </td>
-                                        <td className="px-6 py-5 text-right">
+                                        <td className="px-6 py-5 text-right flex justify-end gap-2">
                                             <Link 
                                                 href={`/admin/orders/${order.id}`} 
                                                 className="inline-flex items-center justify-center p-2.5 bg-amber-600/10 hover:bg-amber-600 text-amber-500 hover:text-white rounded-lg transition-all transform group-hover:scale-105"
+                                                title="View Order"
                                             >
                                                 <FontAwesomeIcon icon={faEye} className="w-4 h-4" />
                                             </Link>
+                                            <DeleteOrderButton orderId={order.id} />
                                         </td>
                                     </tr>
                                 )
@@ -175,11 +179,13 @@ export default async function AdminOrdersPage() {
                                             {new Date(order.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                                         </p>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-white font-bold">{formatCurrency(order.total)}</p>
-                                        <p className={`text-[10px] font-bold ${order.payment_status === 'paid' ? 'text-green-500' : 'text-amber-500'}`}>
-                                            {order.payment_method === 'cod' ? 'COD' : order.payment_method} • {order.payment_status?.toUpperCase()}
-                                        </p>
+                                    <div className="text-right flex flex-col items-end gap-2">
+                                        <div className="text-right">
+                                            <p className="text-white font-bold">{formatCurrency(order.total)}</p>
+                                            <p className={`text-[10px] font-bold ${order.payment_status === 'paid' ? 'text-green-500' : 'text-amber-500'}`}>
+                                                {order.payment_method === 'cod' ? 'COD' : order.payment_method} • {order.payment_status?.toUpperCase()}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </Link>

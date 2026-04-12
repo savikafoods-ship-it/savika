@@ -110,6 +110,25 @@ export default function AdminOrderDetailsPage() {
         }
     }
 
+    const handleDeleteOrder = async () => {
+        if (!confirm('Are you sure you want to permanently delete this order? This action cannot be undone.')) return
+        
+        if (!confirm('DOUBLE CHECK: Deleting an order will completely wipe it from the database. Are you absolutely sure?')) return
+
+        try {
+            setUpdating(true)
+            const res = await fetch(`/api/orders/${id}`, { method: 'DELETE' })
+            if (!res.ok) throw new Error('Failed to delete order')
+            
+            alert('Order deleted successfully.')
+            router.push('/admin/orders')
+            router.refresh()
+        } catch (err: any) {
+            alert('Error deleting order: ' + err.message)
+            setUpdating(false)
+        }
+    }
+
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
             <FontAwesomeIcon icon={faSpinner} className="w-8 h-8 animate-spin text-amber-600" />
@@ -286,6 +305,16 @@ export default function AdminOrderDetailsPage() {
                                 {updating ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : null}
                                 Update Order
                             </button>
+
+                            <div className="pt-4 mt-4 border-t border-gray-100">
+                                <button
+                                    onClick={handleDeleteOrder}
+                                    disabled={updating}
+                                    className="w-full bg-red-50 hover:bg-red-100 text-red-600 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 border border-red-200"
+                                >
+                                    Delete Order
+                                </button>
+                            </div>
 
                             {/* Shiprocket Integration */}
                             <div className="pt-4 mt-4 border-t border-gray-100">
