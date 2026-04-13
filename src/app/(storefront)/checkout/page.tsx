@@ -419,53 +419,26 @@ export default function CheckoutPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <h3 className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Choose Payment Method</h3>
+                                        <h3 className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Payment Method</h3>
                                         
-                                        {/* Online Option */}
-                                        <div 
-                                            onClick={() => setPaymentMethod('online')}
-                                            className={`p-6 rounded-2xl border-2 transition-all flex items-center gap-5 cursor-pointer hover:shadow-md ${
-                                                paymentMethod === 'online' ? 'border-amber-600 bg-amber-50 shadow-md' : 'border-gray-100 bg-white'
-                                            }`}
-                                        >
-                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-colors ${
-                                                paymentMethod === 'online' ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-400'
-                                            }`}>
+                                        {/* Unified Online Payment Option */}
+                                        <div className="p-6 rounded-2xl border-2 border-amber-600 bg-amber-50 flex items-center gap-5 shadow-md">
+                                            <div className="w-12 h-12 rounded-full bg-amber-600 text-white flex items-center justify-center shadow-lg">
                                                 <FontAwesomeIcon icon={faCreditCard} className="text-xl" />
                                             </div>
                                             <div>
-                                                <p className="font-black text-[#2E2E2E] uppercase tracking-tighter">Pay Online</p>
-                                                <p className="text-[11px] text-amber-700 font-bold uppercase tracking-widest mt-0.5">UPI, Cards, Netbanking</p>
+                                                <p className="font-black text-[#2E2E2E] uppercase tracking-tighter">Secure Online Payment</p>
+                                                <p className="text-[11px] text-amber-700 font-bold uppercase tracking-widest mt-0.5">UPI, Cards, Netbanking & Wallets</p>
                                             </div>
-                                            <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                                                paymentMethod === 'online' ? 'bg-[#C17F24] border-[#C17F24]' : 'bg-white border-gray-200'
-                                            }`}>
-                                                {paymentMethod === 'online' && <div className="w-2 h-2 rounded-full bg-white" />}
-                                            </div>
-                                        </div>
-
-                                        {/* COD Option */}
-                                        <div 
-                                            onClick={() => setPaymentMethod('cod')}
-                                            className={`p-6 rounded-2xl border-2 transition-all flex items-center gap-5 cursor-pointer hover:shadow-md ${
-                                                paymentMethod === 'cod' ? 'border-amber-600 bg-amber-50 shadow-md' : 'border-gray-100 bg-white'
-                                            }`}
-                                        >
-                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-colors ${
-                                                paymentMethod === 'cod' ? 'bg-amber-600 text-white' : 'bg-gray-100 text-gray-400'
-                                            }`}>
-                                                <FontAwesomeIcon icon={faMoneyBillWave} className="text-xl" />
-                                            </div>
-                                            <div>
-                                                <p className="font-black text-[#2E2E2E] uppercase tracking-tighter">Cash on Delivery (COD)</p>
-                                                <p className="text-[11px] text-amber-700 font-bold uppercase tracking-widest mt-0.5">Pay when your spices arrive</p>
-                                            </div>
-                                            <div className={`ml-auto w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                                                paymentMethod === 'cod' ? 'bg-[#C17F24] border-[#C17F24]' : 'bg-white border-gray-200'
-                                            }`}>
-                                                {paymentMethod === 'cod' && <div className="w-2 h-2 rounded-full bg-white" />}
+                                            <div className="ml-auto flex items-center gap-2">
+                                                <FontAwesomeIcon icon={faLock} className="text-[10px] text-amber-600" />
+                                                <span className="text-[8px] font-black uppercase text-amber-600 tracking-widest">Encrypted</span>
                                             </div>
                                         </div>
+                                        
+                                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest text-center px-4">
+                                            Transaction secured by Razorpay. No extra charges for online payment.
+                                        </p>
                                     </div>
 
                                     {error && <div className="mt-6 p-4 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-100">{error}</div>}
@@ -476,11 +449,7 @@ export default function CheckoutPage() {
                                         className="w-full mt-10 bg-[#C17F24] hover:bg-[#8B5E16] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
                                     >
                                         {loading ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faLock} />}
-                                        {loading ? 'Processing...' : (
-                                            paymentMethod === 'online' 
-                                            ? `Pay & Place Order • ${formatCurrency(finalTotal)}` 
-                                            : `Place Order • ${formatCurrency(finalTotal)} (COD)`
-                                        )}
+                                        {loading ? 'Processing...' : `Pay & Place Order • ${formatCurrency(finalTotal)}`}
                                     </button>
                                 </div>
                                 <button 
