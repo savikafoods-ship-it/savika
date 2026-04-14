@@ -93,6 +93,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
             setComment('')
             setGuestName('')
             setRating(5)
+            fetchReviews() // Refresh the list instantly
         } catch (err: any) {
             setMessage(`Error: ${err.message}`)
         } finally {
