@@ -93,7 +93,10 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
             setComment('')
             setGuestName('')
             setRating(5)
-            fetchReviews() // Refresh the list instantly
+            // Small delay to allow production DB to sync before fetching
+            setTimeout(() => {
+                fetchReviews()
+            }, 1500)
         } catch (err: any) {
             setMessage(`Error: ${err.message}`)
         } finally {
