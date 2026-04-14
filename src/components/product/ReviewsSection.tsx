@@ -60,9 +60,11 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
         }
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!user) return
+        if (!user && !guestName) {
+            setMessage('Error: Please enter your name to post a review.')
+            return
+        }
         setSubmitting(true)
         setMessage('')
 
@@ -152,7 +154,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                                         key={i} 
                                         type="button" 
                                         onClick={() => setRating(i)}
-                                        className={`text-xl transition-transform hover:scale-110 ${i <= rating ? 'text-amber-500' : 'text-gray-300'}`}
+                                        className={`text-xl transition-transform hover:scale-110 cursor-pointer ${i <= rating ? 'text-amber-500' : 'text-gray-300'}`}
                                     >
                                         <FontAwesomeIcon icon={i <= rating ? faStarFull : faStarEmpty} />
                                     </button>
@@ -168,7 +170,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                             <button 
                                 type="submit" 
                                 disabled={submitting}
-                                className="w-full bg-[#C17F24] text-white py-3 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#A66D1F] transition-all disabled:opacity-50"
+                                className="w-full bg-[#C17F24] text-white py-3 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#A66D1F] transition-all disabled:opacity-50 cursor-pointer"
                             >
                                 {submitting ? 'Submitting...' : 'Post Review'}
                             </button>

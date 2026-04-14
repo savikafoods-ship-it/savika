@@ -129,7 +129,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
                             <button
                                 key={opt.label}
                                 onClick={() => setSelectedIndex(i)}
-                                className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all whitespace-nowrap ${
+                                className={`px-4 py-2 rounded-xl border-2 text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
                                     selectedIndex === i
                                         ? 'border-[#C47F17] bg-[#C47F17] text-white'
                                         : 'border-[#e8ddd0] bg-white text-[#2E2E2E] hover:border-[#C47F17]'
@@ -156,7 +156,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
                     <button
                         onClick={handleAddToCart}
                         disabled={productData.stock === 0}
-                        className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#C17F24]/30 ${adding ? 'bg-green-500 text-white' : 'bg-white border-2 border-[#C17F24] text-[#C17F24] hover:bg-[#FFF0DC]'}`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-[#C17F24]/30 cursor-pointer ${adding ? 'bg-green-500 text-white' : 'bg-white border-2 border-[#C17F24] text-[#C17F24] hover:bg-[#FFF0DC]'}`}
                     >
                         <FontAwesomeIcon icon={faShoppingBag} className="w-5 h-5" />
                         {adding ? 'Added to Cart!' : 'Add to Cart'}
@@ -164,7 +164,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
                     <button
                         onClick={handleBuyNow}
                         disabled={productData.stock === 0}
-                        className="flex-[1.5] flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#C17F24] hover:bg-[#8B5E16] text-white font-black text-lg transition-all duration-300 hover:scale-[1.02] shadow-xl shadow-[#C17F24]/40"
+                        className="flex-[1.5] flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#C17F24] hover:bg-[#8B5E16] text-white font-black text-lg transition-all duration-300 hover:scale-[1.02] shadow-xl shadow-[#C17F24]/40 cursor-pointer"
                     >
                         Buy Now
                     </button>

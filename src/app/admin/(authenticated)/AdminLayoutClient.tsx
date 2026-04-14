@@ -173,7 +173,7 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                                 key={item.href}
                                 href={item.href}
                                 title={item.label}
-                                className={`flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                                className={`flex items-center gap-3 px-2.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer
                                     md:justify-center lg:justify-start
                                     ${isActive
                                         ? 'bg-[#C17F24] text-white'
@@ -192,7 +192,7 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
                     <button
                         onClick={handleSignOut}
                         disabled={signingOut}
-                        className="w-full flex items-center gap-2 px-2.5 py-2 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-900/20 transition-colors text-sm md:justify-center lg:justify-start"
+                        className="w-full flex items-center gap-2 px-2.5 py-2 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-900/20 transition-colors text-sm md:justify-center lg:justify-start cursor-pointer"
                     >
                         <FontAwesomeIcon icon={signingOut ? faSpinner : faRightFromBracket} className={`w-4 h-4 shrink-0 ${signingOut ? 'animate-spin' : ''}`} />
                         <span className="md:hidden lg:inline">{signingOut ? 'Signing out...' : 'Sign Out'}</span>

@@ -380,9 +380,10 @@ export default function CheckoutPage() {
                                     {error && <div className="mt-6 p-4 bg-red-50 text-red-600 text-[11px] font-black uppercase tracking-tight rounded-xl border border-red-100">{error}</div>}
 
                                     <button 
+                                        type="submit"
+                                        disabled={loading || cartItems.length === 0}
                                         onClick={handleProceedToPayment}
-                                        disabled={!validateInfo()}
-                                        className="w-full mt-10 bg-[#C17F24] hover:bg-[#8B5E16] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+                                        className="w-full mt-10 bg-[#C17F24] hover:bg-[#8B5E16] text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-3"
                                     >
                                         Review & Choose Payment
                                     </button>
