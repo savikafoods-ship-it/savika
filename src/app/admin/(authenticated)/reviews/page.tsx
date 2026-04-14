@@ -16,19 +16,25 @@ export default function ReviewModerationPage() {
         fetchReviews()
     }, [])
 
+    const [fetchError, setFetchError] = useState<string | null>(null)
+    const [debugInfo, setDebugInfo] = useState<string>('')
+
     const fetchReviews = async () => {
         setLoading(true)
+        setFetchError(null)
         try {
-            let query = supabase
+            // Simplified select to ensure we see the reviews even if joins fail
+            const { data, error } = await supabase
                 .from('reviews')
-                .select('*, products(name, image_urls), profiles(full_name)')
+                .select('*')
                 .order('created_at', { ascending: false })
 
-            const { data, error } = await query
             if (error) throw error
             setReviews(data || [])
-        } catch (err) {
+            setDebugInfo(`Total reviews in DB: ${data?.length || 0}`)
+        } catch (err: any) {
             console.error('Error fetching reviews:', err)
+            setFetchError(err.message)
         } finally {
             setLoading(false)
         }
@@ -114,6 +120,16 @@ export default function ReviewModerationPage() {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+            
+            {/* DIAGNOSTIC INFO */}
+            {(fetchError || debugInfo) && (
+                <div className="mt-8 p-4 bg-gray-900 rounded-xl border border-gray-800 font-mono text-[10px] text-gray-500 overflow-auto">
+                    <p className="font-bold text-gray-400 mb-2 uppercase tracking-widest">Diagnostic Info</p>
+                    {fetchError && <p className="text-red-400 mb-1">Status: ERROR - {fetchError}</p>}
+                    {debugInfo && <p className="text-blue-400 mb-1">Status: OK - {debugInfo}</p>}
+                    <p>Current Page: Admin Review Management</p>
                 </div>
             )}
         </div>
