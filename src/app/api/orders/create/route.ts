@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
 
     // 8. Calculate delivery fee and GST (5% included in MRP)
     const afterDiscount = subtotal - discount
-    const delivery_fee = afterDiscount >= 599 ? 0 : 60
+    const delivery_fee = afterDiscount >= 599 ? 0 : 25
     const gst = Math.round(subtotal * 5 / 105)
     const total = afterDiscount + delivery_fee
 

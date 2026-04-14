@@ -65,7 +65,7 @@ export default function CheckoutPage() {
     const subtotal = total()
     const gst = Math.round(subtotal * 5 / 105)  // 5% GST included in MRP
     const discount = appliedCoupon?.discount || 0
-    const delivery_fee = (subtotal - discount) >= 599 ? 0 : 60
+    const delivery_fee = (subtotal - discount) >= 599 ? 0 : 25
     const finalTotal = subtotal - discount + delivery_fee
 
     useEffect(() => {

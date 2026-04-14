@@ -25,7 +25,7 @@ interface StoreSettings {
 
 const DEFAULT_SETTINGS: StoreSettings = {
     store_profile: { name: 'Savika Foods', email: 'admin@savikafoods.in', phone: '+91 98981 76667' },
-    shipping_config: { free_threshold: 599, standard_rate: 50 },
+    shipping_config: { free_threshold: 599, standard_rate: 25 },
     tax_config: { include_tax: true, gst_rate: '5' },
     notification_config: { new_order_alerts: true }
 }

@@ -20,7 +20,7 @@ export default function CartPage() {
     const { items, removeItem, updateQuantity, total } = useCartStore()
     const cartTotal = total()
     const shippingThreshold = 599
-    const shipping = cartTotal >= shippingThreshold ? 0 : 60
+    const shipping = cartTotal >= shippingThreshold ? 0 : 25
     const remainingForFreeShipping = Math.max(0, shippingThreshold - cartTotal)
 
     if (items.length === 0) {
