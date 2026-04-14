@@ -185,12 +185,10 @@ export default function CheckoutPage() {
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'Failed to place order')
 
-            if (paymentMethod === 'online' && data.razorpayOrder) {
+            if (data.razorpayOrder) {
                 initiateRazorpay(data.razorpayOrder, data.orderId, data.orderNumber)
             } else {
-                // COD Flow
-                clearCart()
-                router.push(`/checkout/success?orderId=${data.orderId}&orderNumber=${data.orderNumber}`)
+                throw new Error('Failed to initiate online payment')
             }
         } catch (err: any) {
             setError(err.message)

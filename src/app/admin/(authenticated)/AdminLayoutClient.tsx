@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -50,6 +50,13 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
     const pathname = usePathname()
     const router = useRouter()
     const supabase = createClient()
+    const prevCountRef = useRef<number>(0)
+    const audioRef = useRef<HTMLAudioElement | null>(null)
+
+    // Initialize audio on mount
+    useEffect(() => {
+        audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3')
+    }, [])
 
     // Close mobile sidebar on route change
     useEffect(() => {
@@ -84,6 +91,15 @@ export default function AdminLayoutClient({ children, user }: AdminLayoutClientP
         const interval = setInterval(fetchNotifications, 10000) // Poll every 10s
         return () => clearInterval(interval)
     }, [])
+
+    // Play chime when new orders arrive
+    useEffect(() => {
+        if (notifications.length > prevCountRef.current && prevCountRef.current > 0) {
+            // New order detected!
+            audioRef.current?.play().catch(err => console.warn('Audio playback failed:', err))
+        }
+        prevCountRef.current = notifications.length
+    }, [notifications])
 
     const unreadCount = notifications.filter(n => !seenIds.has(n.id)).length
 

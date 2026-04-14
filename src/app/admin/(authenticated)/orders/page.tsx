@@ -25,6 +25,7 @@ export default async function AdminOrdersPage() {
         const { data, error } = await supabase
             .from('orders')
             .select('*')
+            .eq('payment_status', 'paid')
             .order('created_at', { ascending: false })
             .limit(100)
             

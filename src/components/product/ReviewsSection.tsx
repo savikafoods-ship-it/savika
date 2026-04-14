@@ -12,6 +12,7 @@ interface Review {
     comment: string
     created_at: string
     user_id: string
+    user_name?: string
     profiles?: {
         full_name: string
     }
@@ -28,6 +29,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
     const [user, setUser] = useState<any>(null)
     const [rating, setRating] = useState(5)
     const [comment, setComment] = useState('')
+    const [guestName, setGuestName] = useState('')
     const [message, setMessage] = useState('')
     const supabase = createClient()
 
@@ -65,19 +67,29 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
         setMessage('')
 
         try {
+            const reviewData: any = {
+                product_id: productId,
+                rating,
+                comment,
+                is_approved: false // Moderation required
+            }
+
+            if (user) {
+                reviewData.user_id = user.id
+            } else {
+                // For guests, we can store the name in the user_name column 
+                // and leave user_id null (assuming schema allows)
+                reviewData.user_name = guestName || 'Anonymous Lover'
+            }
+
             const { error } = await supabase
                 .from('reviews')
-                .insert({
-                    product_id: productId,
-                    user_id: user.id,
-                    rating,
-                    comment,
-                    is_approved: false // Moderation required
-                })
+                .insert(reviewData)
 
             if (error) throw error
             setMessage('Success! Your review has been submitted for moderation.')
             setComment('')
+            setGuestName('')
             setRating(5)
         } catch (err: any) {
             setMessage(`Error: ${err.message}`)
@@ -121,51 +133,53 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                     </div>
 
                     {/* Submit Form */}
-                    {user ? (
-                        <div className="mt-8">
-                            <h3 className="text-sm font-black text-[#2E2E2E] uppercase tracking-widest mb-4">Leave a Review</h3>
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="flex gap-2">
-                                    {[1, 2, 3, 4, 5].map(i => (
-                                        <button 
-                                            key={i} 
-                                            type="button" 
-                                            onClick={() => setRating(i)}
-                                            className={`text-xl transition-transform hover:scale-110 ${i <= rating ? 'text-amber-500' : 'text-gray-300'}`}
-                                        >
-                                            <FontAwesomeIcon icon={i <= rating ? faStarFull : faStarEmpty} />
-                                        </button>
-                                    ))}
-                                </div>
-                                <textarea 
-                                    className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-[#C17F24] focus:border-transparent outline-none transition-all placeholder:text-gray-300 min-h-[120px]"
-                                    placeholder="Tell us about your experience with these spices..."
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
+                    <div className="mt-8">
+                        <h3 className="text-sm font-black text-[#2E2E2E] uppercase tracking-widest mb-4">Leave a Review</h3>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {!user && (
+                                <input 
+                                    type="text"
+                                    placeholder="Your Full Name"
+                                    className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#C17F24] focus:border-transparent outline-none transition-all placeholder:text-gray-300"
+                                    value={guestName}
+                                    onChange={(e) => setGuestName(e.target.value)}
                                     required
                                 />
-                                <button 
-                                    type="submit" 
-                                    disabled={submitting}
-                                    className="w-full bg-[#C17F24] text-white py-3 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#A66D1F] transition-all disabled:opacity-50"
-                                >
-                                    {submitting ? 'Submitting...' : 'Post Review'}
-                                </button>
-                                {message && (
-                                    <p className={`text-[11px] font-black uppercase text-center mt-2 ${message.includes('Error') ? 'text-red-500' : 'text-green-600'}`}>
-                                        <FontAwesomeIcon icon={faCircleCheck} className="mr-2" />
-                                        {message}
-                                    </p>
-                                )}
-                            </form>
-                        </div>
-                    ) : (
-                        <div className="mt-8 p-6 bg-white border border-dashed border-gray-300 rounded-3xl text-center">
-                            <FontAwesomeIcon icon={faMessage} className="text-gray-300 text-2xl mb-3" />
-                            <p className="text-xs font-bold text-gray-500 mb-4 italic">Only verified customers can leave reviews.</p>
-                            <button className="text-[10px] font-black text-amber-600 uppercase tracking-widest underline underline-offset-4">Sign In to Post</button>
-                        </div>
-                    )}
+                            )}
+                            <div className="flex gap-2">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                    <button 
+                                        key={i} 
+                                        type="button" 
+                                        onClick={() => setRating(i)}
+                                        className={`text-xl transition-transform hover:scale-110 ${i <= rating ? 'text-amber-500' : 'text-gray-300'}`}
+                                    >
+                                        <FontAwesomeIcon icon={i <= rating ? faStarFull : faStarEmpty} />
+                                    </button>
+                                ))}
+                            </div>
+                            <textarea 
+                                className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-[#C17F24] focus:border-transparent outline-none transition-all placeholder:text-gray-300 min-h-[120px]"
+                                placeholder="Tell us about your experience with these spices..."
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                required
+                            />
+                            <button 
+                                type="submit" 
+                                disabled={submitting}
+                                className="w-full bg-[#C17F24] text-white py-3 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-[#A66D1F] transition-all disabled:opacity-50"
+                            >
+                                {submitting ? 'Submitting...' : 'Post Review'}
+                            </button>
+                            {message && (
+                                <p className={`text-[11px] font-black uppercase text-center mt-2 ${message.includes('Error') ? 'text-red-500' : 'text-green-600'}`}>
+                                    <FontAwesomeIcon icon={faCircleCheck} className="mr-2" />
+                                    {message}
+                                </p>
+                            )}
+                        </form>
+                    </div>
                 </div>
 
                 {/* Right: Reviews List */}
@@ -181,7 +195,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                                 <div key={review.id} className="bg-white p-6 rounded-[2rem] border border-gray-50 shadow-sm transition-all hover:shadow-md">
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
-                                            <p className="text-sm font-black text-[#2E2E2E] uppercase">{review.profiles?.full_name || 'Anonymous Lover'}</p>
+                                            <p className="text-sm font-black text-[#2E2E2E] uppercase">{review.profiles?.full_name || review.user_name || 'Anonymous Lover'}</p>
                                             <div className="flex gap-0.5 mt-1">
                                                 {renderStars(review.rating)}
                                             </div>

@@ -45,7 +45,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
     const [selectedIndex, setSelectedIndex] = useState(0)
     const [adding, setAdding] = useState(false)
     const router = useRouter()
-    const { addItem } = useCartStore()
+    const { addItem, clearCart } = useCartStore()
 
     const selectedVariant = weightOptions[selectedIndex] || { label: '100g', price: productData.price }
     const displayPrice = selectedVariant.price
@@ -80,7 +80,10 @@ export default function ProductCommercePanel({ productData }: { productData: any
     }
 
     const handleBuyNow = () => {
-        // Add to cart first - showCart: false to prevent drawer from opening
+        // Clear cart first for "Buy Now" to buy ONLY the selected item
+        clearCart()
+
+        // Add to cart - showCart: false to prevent drawer from opening
         const cartProduct: Product = {
             id: productData.id || productData.slug,
             name: `${productData.name} - ${selectedVariant.label}`,

@@ -41,6 +41,7 @@ export default function ReviewModerationPage() {
     const handleAction = async (id: string, action: 'approve' | 'delete' | 'hide') => {
         try {
             if (action === 'delete') {
+                if (!window.confirm('Are you sure you want to permanently delete this review?')) return
                 const { error } = await supabase.from('reviews').delete().eq('id', id)
                 if (error) throw error
             } else {
@@ -104,7 +105,7 @@ export default function ReviewModerationPage() {
                                 </div>
                                 <div className="min-w-0">
                                     <p className="text-[10px] font-black text-[#C17F24] uppercase tracking-widest truncate">{review.products?.name}</p>
-                                    <p className="text-[9px] font-bold text-gray-500 uppercase truncate">By {review.profiles?.full_name || 'Guest User'}</p>
+                                    <p className="text-[9px] font-bold text-gray-500 uppercase truncate">By {review.profiles?.full_name || review.user_name || 'Guest User'}</p>
                                 </div>
                             </div>
 

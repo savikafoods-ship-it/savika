@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse request body
     const body = await request.json()
-    const { items, shipping_address, coupon_code, notes, email, payment_method = 'cod' } = body
+    const { items, shipping_address, coupon_code, notes, email } = body
+    const payment_method = 'online' // Force online, no COD allowed
 
     // 3. Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest) {
       total,
       total_amount: total,  // Legacy column - same as total
       status: 'pending',
-      payment_method: payment_method,
+      payment_method: 'online',
       payment_status: 'pending',
       shipping_address,
       customer_email: email,
@@ -173,9 +174,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order: ' + (insertError?.message || 'Unknown error') }, { status: 500 })
     }
 
-    // 10.5 Handle Razorpay Order Creation for Online Payments
+    // 10.5 Handle Razorpay Order Creation
     let razorpayOrder = null
-    if (payment_method === 'online') {
+    if (true) { // Always create Razorpay order now
       try {
         const { razorpay } = await import('@/lib/razorpay')
         razorpayOrder = await razorpay.orders.create({
@@ -198,55 +199,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 11. Post-process (Notifications & Stock) - ONLY for COD
-    // For online payments, these happen after payment verification
-    if (payment_method === 'cod') {
-        // 11.1. Trigger Notifications (Async - don't block the response)
-        try {
-          const { sendOrderConfirmation } = await import('@/lib/notifications')
-          const fullOrderData = {
-            ...order,
-            total,
-            shipping_address,
-            items: verifiedItems,
-            customer_email: email,
-            customer_name: shipping_address.full_name,
-          }
-          sendOrderConfirmation(fullOrderData).catch(err => console.error('Notification error:', err))
-        } catch (notifErr) {
-          console.error('Failed to load notification module:', notifErr)
-        }
-
-        // 11.2. Decrement stock
-        try {
-          for (const item of items) {
-            const product = products.find((p: any) => p.id === item.product_id)
-            if (product && product.stock !== null) {
-              const newStock = Math.max(0, product.stock - item.quantity)
-              await serviceClient
-                .from('products')
-                .update({ stock: newStock })
-                .eq('id', product.id)
-            }
-          }
-        } catch (stockErr) {
-          console.error('Stock decrement error:', stockErr)
-        }
-
-        // 11.3. Trigger automated shipping pipeline (Async - don't block response)
-        if (order.id) {
-            try {
-                const baseUrl = request.nextUrl.origin
-                fetch(`${baseUrl}/api/shipping/create-shipment`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orderId: order.id })
-                }).catch(e => console.error('Automated shipping trigger failed:', e))
-            } catch (shipErr) {
-                console.error('Failed to trigger shipping pipeline:', shipErr)
-            }
-        }
-    }
+    // COD logic removed (now prepaid only)
 
     // 12. Return order info for redirect/payment
     return NextResponse.json({

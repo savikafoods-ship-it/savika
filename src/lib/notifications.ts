@@ -89,7 +89,7 @@ export async function sendOrderConfirmation(order: any) {
                 </div>
             </div>
 
-            <p style="font-size: 14px; color: #666;"><strong>Payment Method:</strong> Cash on Delivery (COD)</p>
+            <p style="font-size: 14px; color: #666;"><strong>Payment Method:</strong> Prepaid (Online)</p>
             <p style="font-size: 14px; color: #666;"><strong>Delivery Address:</strong> ${shipping_address.street}, ${shipping_address.city}, ${shipping_address.state} - ${shipping_address.pincode}</p>
             
 
@@ -126,7 +126,7 @@ export async function sendOrderConfirmation(order: any) {
             return
         }
 
-        const adminEmail = process.env.ADMIN_EMAIL
+        const adminEmail = process.env.ADMIN_EMAIL || 'savikafoods@gmail.com'
         if (adminEmail) {
             console.log(`[Email] Preparing admin notification for ${adminEmail}`)
             const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://savikafoods.in'
@@ -162,7 +162,7 @@ export async function sendOrderConfirmation(order: any) {
     } catch (err) {
         console.error('[Email] Error checking notification settings or sending admin alert:', err)
         // Fallback: Try to send anyway if we can't check settings, to be safe
-        const adminEmail = process.env.ADMIN_EMAIL
+        const adminEmail = process.env.ADMIN_EMAIL || 'savikafoods@gmail.com'
         if (adminEmail) {
             await sendEmail({
                 to: adminEmail,

@@ -117,6 +117,7 @@ export interface Review {
   productId: string
   userId: string
   userName: string
+  user_name?: string
   rating: number // 1-5
   comment?: string
   isVerifiedBuyer: boolean
