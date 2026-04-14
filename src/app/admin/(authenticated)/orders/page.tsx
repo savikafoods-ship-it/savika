@@ -132,8 +132,8 @@ export default async function AdminOrdersPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <div className="text-xs font-semibold text-gray-300 uppercase tracking-tighter">
-                                                {order.payment_method === 'cod' ? 'Cash on Delivery' : order.payment_method}
+                                            <div className={`text-xs font-black uppercase tracking-widest ${order.payment_method === 'online' ? 'text-blue-400' : 'text-gray-400'}`}>
+                                                {order.payment_method === 'online' ? 'Prepaid (Razorpay)' : 'Legacy (COD)'}
                                             </div>
                                             <div className={`text-[10px] mt-0.5 font-bold ${order.payment_status === 'paid' ? 'text-green-500' : 'text-amber-500'}`}>
                                                 {order.payment_status?.toUpperCase()}

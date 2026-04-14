@@ -44,7 +44,7 @@ export default function CartDrawer() {
                         <h2 className="text-lg font-bold text-[#2E2E2E]">Your Cart</h2>
                         <p className="text-xs text-[#8E562E]">{items.length} item{items.length !== 1 ? 's' : ''}</p>
                     </div>
-                    <button onClick={closeCart} className="p-2 rounded-lg hover:bg-[#F9F4EE] text-[#2E2E2E] transition-colors">
+                    <button onClick={closeCart} className="p-2 rounded-lg hover:bg-[#F9F4EE] text-[#2E2E2E] transition-colors cursor-pointer">
                         <FontAwesomeIcon icon={faXmark} className="w-5 h-5" />
                     </button>
                 </div>
@@ -60,7 +60,7 @@ export default function CartDrawer() {
                                 <p className="font-semibold text-[#2E2E2E]">Your cart is empty</p>
                                 <p className="text-sm text-gray-500 mt-1">Add some premium spices to get started!</p>
                             </div>
-                            <button onClick={closeCart} className="bg-[#C17F24] hover:bg-[#8B5E16] text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors">
+                            <button onClick={closeCart} className="bg-[#C17F24] hover:bg-[#8B5E16] text-white px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors cursor-pointer">
                                 Explore Spices
                             </button>
                         </div>
@@ -91,20 +91,20 @@ export default function CartDrawer() {
                                             <div className="flex items-center gap-2 mt-2">
                                                 <button
                                                     onClick={() => updateQuantity(item.productId, item.quantity - 1, item.weight)}
-                                                    className="w-7 h-7 rounded-lg border border-[#C47F17]/40 flex items-center justify-center text-[#C47F17] hover:bg-[#C47F17] hover:text-white transition-colors"
+                                                    className="w-7 h-7 rounded-lg border border-[#C47F17]/40 flex items-center justify-center text-[#C47F17] hover:bg-[#C47F17] hover:text-white transition-colors cursor-pointer"
                                                 >
                                                     <FontAwesomeIcon icon={faMinus} className="w-3 h-3" />
                                                 </button>
                                                 <span className="text-sm font-bold text-[#2E2E2E] w-6 text-center">{item.quantity}</span>
                                                 <button
                                                     onClick={() => updateQuantity(item.productId, item.quantity + 1, item.weight)}
-                                                    className="w-7 h-7 rounded-lg border border-[#C47F17]/40 flex items-center justify-center text-[#C47F17] hover:bg-[#C47F17] hover:text-white transition-colors"
+                                                    className="w-7 h-7 rounded-lg border border-[#C47F17]/40 flex items-center justify-center text-[#C47F17] hover:bg-[#C47F17] hover:text-white transition-colors cursor-pointer"
                                                 >
                                                     <FontAwesomeIcon icon={faPlus} className="w-3 h-3" />
                                                 </button>
                                                 <button
                                                     onClick={() => removeItem(item.productId, item.weight)}
-                                                    className="ml-auto p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors"
+                                                    className="ml-auto p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors cursor-pointer"
                                                 >
                                                     <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
                                                 </button>
@@ -129,14 +129,14 @@ export default function CartDrawer() {
                             <Link
                                 href="/checkout"
                                 onClick={closeCart}
-                                className="block w-full text-center bg-[#C17F24] hover:bg-[#8B5E16] text-white py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-[1.02]"
+                                className="block w-full text-center bg-[#C17F24] hover:bg-[#8B5E16] text-white py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                             >
                                 Proceed to Checkout
                             </Link>
                             <Link
                                 href="/cart"
                                 onClick={closeCart}
-                                className="block w-full text-center border border-[#C17F24] text-[#C17F24] py-3 rounded-lg font-semibold hover:bg-[#F9F4EE] transition-colors"
+                                className="block w-full text-center border border-[#C17F24] text-[#C17F24] py-3 rounded-lg font-semibold hover:bg-[#F9F4EE] transition-colors cursor-pointer"
                             >
                                 View Cart
                             </Link>
