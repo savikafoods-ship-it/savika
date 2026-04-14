@@ -21,7 +21,7 @@ export default function ReviewModerationPage() {
         try {
             let query = supabase
                 .from('reviews')
-                .select('*, products(name, image_urls), profiles(full_name)')
+                .select('*')
                 .order('created_at', { ascending: false })
 
             const { data, error } = await query
@@ -80,8 +80,8 @@ export default function ReviewModerationPage() {
                                     />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[10px] font-black text-[#C17F24] uppercase tracking-widest truncate">{review.products?.name}</p>
-                                    <p className="text-[9px] font-bold text-gray-500 uppercase truncate">By {review.profiles?.full_name || review.user_name || 'Guest User'}</p>
+                                    <p className="text-[10px] font-black text-[#C17F24] uppercase tracking-widest truncate">{review.product_id}</p>
+                                    <p className="text-[9px] font-bold text-gray-500 uppercase truncate">By {review.user_name || 'Guest User'}</p>
                                 </div>
                             </div>
 
