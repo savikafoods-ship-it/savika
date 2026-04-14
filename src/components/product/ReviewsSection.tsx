@@ -46,7 +46,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
         try {
             const { data, error } = await supabase
                 .from('reviews')
-                .select('*')
+                .select('*, profiles(full_name)')
                 .eq('product_id', productId)
                 .order('created_at', { ascending: false })
 
@@ -197,7 +197,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                                 <div key={review.id} className="bg-white p-6 rounded-[2rem] border border-gray-50 shadow-sm transition-all hover:shadow-md">
                                     <div className="flex justify-between items-start mb-4">
                                         <div>
-                                            <p className="text-sm font-black text-[#2E2E2E] uppercase">{review.user_name || 'Anonymous User'}</p>
+                                            <p className="text-sm font-black text-[#2E2E2E] uppercase">{review.profiles?.full_name || review.user_name || 'Anonymous User'}</p>
                                             <div className="flex gap-0.5 mt-1">
                                                 {renderStars(review.rating)}
                                             </div>
