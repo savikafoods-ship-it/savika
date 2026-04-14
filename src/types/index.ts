@@ -114,13 +114,12 @@ export interface SiteContent {
 // Review (collection: reviews)
 export interface Review {
   id: string
-  productId: string
-  userId: string
-  userName: string
+  product_id: string
+  user_id?: string
   user_name?: string
-  rating: number // 1-5
-  comment?: string
-  isVerifiedBuyer: boolean
+  rating: number
+  comment: string
+  is_approved: boolean
   created_at: string
 }
 

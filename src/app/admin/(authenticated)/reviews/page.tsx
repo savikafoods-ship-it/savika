@@ -10,12 +10,11 @@ import { getProductImageUrl } from '@/lib/supabase/imageUrl'
 export default function ReviewModerationPage() {
     const [reviews, setReviews] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
-    const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('pending')
     const supabase = createClient()
 
     useEffect(() => {
         fetchReviews()
-    }, [filter])
+    }, [])
 
     const fetchReviews = async () => {
         setLoading(true)
@@ -24,9 +23,6 @@ export default function ReviewModerationPage() {
                 .from('reviews')
                 .select('*, products(name, image_urls), profiles(full_name)')
                 .order('created_at', { ascending: false })
-
-            if (filter === 'pending') query = query.eq('is_approved', false)
-            if (filter === 'approved') query = query.eq('is_approved', true)
 
             const { data, error } = await query
             if (error) throw error
@@ -38,17 +34,11 @@ export default function ReviewModerationPage() {
         }
     }
 
-    const handleAction = async (id: string, action: 'approve' | 'delete' | 'hide') => {
+    const handleAction = async (id: string, action: 'delete') => {
         try {
             if (action === 'delete') {
                 if (!window.confirm('Are you sure you want to permanently delete this review?')) return
                 const { error } = await supabase.from('reviews').delete().eq('id', id)
-                if (error) throw error
-            } else {
-                const { error } = await supabase
-                    .from('reviews')
-                    .update({ is_approved: action === 'approve' })
-                    .eq('id', id)
                 if (error) throw error
             }
             setReviews(reviews.filter(r => r.id !== id))
@@ -61,22 +51,8 @@ export default function ReviewModerationPage() {
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-black text-white uppercase tracking-tighter">Review Moderation</h1>
+                    <h1 className="text-2xl font-black text-white uppercase tracking-tighter">Review Management</h1>
                     <p className="text-xs text-gray-500 mt-1 uppercase tracking-widest font-bold">Manage customer feedback & social proof</p>
-                </div>
-
-                <div className="flex bg-[#1A1A1A] rounded-xl p-1 border border-white/5">
-                    {(['pending', 'approved', 'all'] as const).map((f) => (
-                        <button
-                            key={f}
-                            onClick={() => setFilter(f)}
-                            className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
-                                filter === f ? 'bg-[#C17F24] text-white' : 'text-gray-500 hover:text-white'
-                            }`}
-                        >
-                            {f}
-                        </button>
-                    ))}
                 </div>
             </div>
 
@@ -128,26 +104,9 @@ export default function ReviewModerationPage() {
 
                             {/* Actions */}
                             <div className="flex items-center gap-2">
-                                {!review.is_approved ? (
-                                    <button 
-                                        onClick={() => handleAction(review.id, 'approve')}
-                                        className="h-10 px-4 bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
-                                    >
-                                        <FontAwesomeIcon icon={faCheck} />
-                                        Approve
-                                    </button>
-                                ) : (
-                                    <button 
-                                        onClick={() => handleAction(review.id, 'hide')}
-                                        className="h-10 px-4 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
-                                    >
-                                        <FontAwesomeIcon icon={faXmark} />
-                                        Hide
-                                    </button>
-                                )}
                                 <button 
                                     onClick={() => handleAction(review.id, 'delete')}
-                                    className="h-10 w-10 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all flex items-center justify-center"
+                                    className="h-10 w-10 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all flex items-center justify-center p-2.5 cursor-pointer shadow-lg active:scale-95"
                                     title="Delete Review"
                                 >
                                     <FontAwesomeIcon icon={faTrash} />

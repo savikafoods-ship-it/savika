@@ -48,7 +48,6 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                 .from('reviews')
                 .select('*, profiles(full_name)')
                 .eq('product_id', productId)
-                .eq('is_approved', true)
                 .order('created_at', { ascending: false })
 
             if (error) throw error
@@ -74,7 +73,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                 product_id: productId,
                 rating,
                 comment,
-                is_approved: false // Moderation required
+                is_approved: true // Auto-approved
             }
 
             if (user) {
@@ -90,7 +89,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                 .insert(reviewData)
 
             if (error) throw error
-            setMessage('Success! Your review has been submitted for moderation.')
+            setMessage('Success! Your review has been posted.')
             setComment('')
             setGuestName('')
             setRating(5)
