@@ -60,6 +60,7 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
         }
     }
 
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!user && !guestName) {
             setMessage('Error: Please enter your name to post a review.')
