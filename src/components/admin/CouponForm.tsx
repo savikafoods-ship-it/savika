@@ -40,16 +40,25 @@ export default function CouponForm({ initialData }: { initialData?: any }) {
             }
 
             if (initialData?.id) {
-                const { error } = await supabase
-                    .from('coupons')
-                    .update(dataToSave)
-                    .eq('id', initialData.id)
-                if (error) throw error
+                const res = await fetch('/api/admin/coupons', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: initialData.id, ...dataToSave }),
+                })
+                if (!res.ok) {
+                    const errorData = await res.json()
+                    throw new Error(errorData.error || 'Failed to update coupon')
+                }
             } else {
-                const { error } = await supabase
-                    .from('coupons')
-                    .insert([{ ...dataToSave, usage_count: 0 }])
-                if (error) throw error
+                const res = await fetch('/api/admin/coupons', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...dataToSave, usage_count: 0 }),
+                })
+                if (!res.ok) {
+                    const errorData = await res.json()
+                    throw new Error(errorData.error || 'Failed to create coupon')
+                }
             }
 
             router.push('/admin/coupons')

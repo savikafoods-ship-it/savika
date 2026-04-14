@@ -78,6 +78,8 @@ export async function createShiprocketOrder(orderData: any, token: string) {
         weight: orderData.items.reduce((acc: number, item: any) => acc + (parseWeight(item.weight) * item.quantity), 0)
     }
 
+    console.log('Shiprocket API Payload:', JSON.stringify(payload, null, 2))
+
     const res = await fetch(SHIPROCKET_CREATE_ORDER_URL, {
         method: 'POST',
         headers: {
@@ -87,10 +89,12 @@ export async function createShiprocketOrder(orderData: any, token: string) {
         body: JSON.stringify(payload)
     })
 
+    const data = await res.json().catch(() => ({}))
+    console.log('Shiprocket API Response:', JSON.stringify(data, null, 2))
+
     if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}))
-        throw new Error(errorData.message || JSON.stringify(errorData) || 'Failed to create order on Shiprocket')
+        throw new Error(data.message || JSON.stringify(data) || 'Failed to create order on Shiprocket')
     }
 
-    return await res.json()
+    return data
 }

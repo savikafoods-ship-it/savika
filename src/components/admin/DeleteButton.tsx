@@ -29,12 +29,14 @@ export default function DeleteButton({ table, id, onDelete, redirectPath, classN
 
         setLoading(true)
         try {
-            const { error } = await supabase
-                .from(table)
-                .delete()
-                .eq('id', id)
+            const res = await fetch(`/api/admin/${table}?id=${id}`, {
+                method: 'DELETE',
+            })
 
-            if (error) throw error
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData.error || `Failed to delete from ${table}`)
+            }
 
             if (onDelete) onDelete()
             if (redirectPath) {

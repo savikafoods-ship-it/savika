@@ -137,12 +137,18 @@ export default function AdminSettingsPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key, value }),
             })
+            
+            const data = await res.json()
+            
             if (res.ok) {
                 setSaved(true)
                 setTimeout(() => setSaved(false), 3000)
+            } else {
+                alert(`Failed to save settings: ${data.error || 'Unknown error'}`)
             }
         } catch (err) {
-            alert('Failed to save settings')
+            console.error('Save settings error:', err)
+            alert('Failed to save settings: Network error')
         } finally {
             setSaving(false)
         }

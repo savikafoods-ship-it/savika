@@ -156,16 +156,25 @@ export default function ProductForm({ initialData }: { initialData?: any }) {
             }
 
             if (initialData?.id) {
-                const { error } = await supabase
-                    .from('products')
-                    .update(dataToSave)
-                    .eq('id', initialData.id)
-                if (error) throw error
+                const res = await fetch('/api/admin/products', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: initialData.id, ...dataToSave }),
+                })
+                if (!res.ok) {
+                    const errorData = await res.json()
+                    throw new Error(errorData.error || 'Failed to update product')
+                }
             } else {
-                const { error } = await supabase
-                    .from('products')
-                    .insert(dataToSave)
-                if (error) throw error
+                const res = await fetch('/api/admin/products', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToSave),
+                })
+                if (!res.ok) {
+                    const errorData = await res.json()
+                    throw new Error(errorData.error || 'Failed to create product')
+                }
             }
             
             router.push('/admin/products')

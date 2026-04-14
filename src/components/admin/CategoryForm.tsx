@@ -80,16 +80,25 @@ export default function CategoryForm({ initialData }: { initialData?: any }) {
             }
 
             if (initialData?.id) {
-                const { error } = await supabase
-                    .from('categories')
-                    .update(dataToSave)
-                    .eq('id', initialData.id)
-                if (error) throw error
+                const res = await fetch('/api/admin/categories', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: initialData.id, ...dataToSave }),
+                })
+                if (!res.ok) {
+                    const errorData = await res.json()
+                    throw new Error(errorData.error || 'Failed to update category')
+                }
             } else {
-                const { error } = await supabase
-                    .from('categories')
-                    .insert([dataToSave])
-                if (error) throw error
+                const res = await fetch('/api/admin/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToSave),
+                })
+                if (!res.ok) {
+                    const errorData = await res.json()
+                    throw new Error(errorData.error || 'Failed to create category')
+                }
             }
 
             router.push('/admin/categories')

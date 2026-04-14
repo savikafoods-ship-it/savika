@@ -32,9 +32,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to connect to shipping provider' }, { status: 500 })
         }
 
-        // 3. Create order via Shiprocket
-        try {
+            console.log('Sending order to Shiprocket:', order)
             const shiprocketResponse = await createShiprocketOrder(order, token)
+            console.log('Shiprocket response:', shiprocketResponse)
             
             // Shiprocket response structure for adhoc order:
             // { order_id: 123, shipment_id: 456, ... }
@@ -42,7 +42,11 @@ export async function POST(request: NextRequest) {
             const shipmentId = shiprocketResponse.shipment_id
             const status = 'processing'
 
-            // 4. Update order in Supabase
+            // 4. Update order in Sumabase
+            console.log('Updating order in database with shipment info:', {
+                shipping_tracking_id: shipmentId?.toString() || '',
+                shipment_id: shipmentId?.toString() || '',
+            })
             const { error: updateError } = await supabase
                 .from('orders')
                 .update({
