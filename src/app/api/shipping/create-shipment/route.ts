@@ -32,6 +32,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to connect to shipping provider' }, { status: 500 })
         }
 
+        // 3. Create order via Shiprocket
+        try {
             console.log('Sending order to Shiprocket:', order)
             const shiprocketResponse = await createShiprocketOrder(order, token)
             console.log('Shiprocket response:', shiprocketResponse)
