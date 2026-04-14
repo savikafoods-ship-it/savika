@@ -109,38 +109,66 @@ export async function sendOrderConfirmation(order: any) {
     })
     console.log('[Email] Customer notification result:', customerResult.success ? 'SUCCESS' : 'FAILED')
 
-    // 2. Send notification to Admin
-    const adminEmail = process.env.ADMIN_EMAIL
-    if (adminEmail) {
-        console.log(`[Email] Preparing admin notification for ${adminEmail}`)
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://savikafoods.in'
-        const adminHtml = `
-            <div style="font-family: sans-serif; padding: 25px; border: 1px solid #eee; border-radius: 12px;">
-                <h2 style="color: #C17F24; margin-top: 0;">🚨 New Order Received!</h2>
-                <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
-                    <tr><td style="padding: 6px 0; font-weight: bold; width: 140px;">Order Number:</td><td>${order_number}</td></tr>
-                    <tr><td style="padding: 6px 0; font-weight: bold;">Customer:</td><td>${shipping_address.full_name}</td></tr>
-                    <tr><td style="padding: 6px 0; font-weight: bold;">Phone:</td><td>${shipping_address.mobile}</td></tr>
-                    <tr><td style="padding: 6px 0; font-weight: bold;">Email:</td><td>${to}</td></tr>
-                    <tr><td style="padding: 6px 0; font-weight: bold;">Total:</td><td style="color: #C17F24; font-weight: bold;">₹${total}</td></tr>
-                    <tr><td style="padding: 6px 0; font-weight: bold;">Address:</td><td>${shipping_address.street}, ${shipping_address.city}, ${shipping_address.pincode}</td></tr>
-                </table>
-                <div style="margin-top: 20px;">
-                    <a href="${appUrl}/admin/orders" style="display: inline-block; padding: 10px 24px; background: #C17F24; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold;">View in Admin Dashboard</a>
-                </div>
-            </div>
-        `
-        const adminResult = await sendEmail({
-            to: adminEmail,
-            subject: `🚨 New Order: ${order_number} — ₹${total}`,
-            html: adminHtml,
-            idempotencyKey: `order-admin/${order_number}`
-        })
-        console.log('[Email] Admin notification result:', adminResult.success ? 'SUCCESS' : 'FAILED')
-        if (!adminResult.success) {
-            console.error('[Email] Admin notification failed details:', JSON.stringify(adminResult.error, null, 2))
+    // 2. Send notification to Admin (if enabled)
+    try {
+        const { createServiceClient } = await import('@/lib/supabase/server')
+        const serviceClient = await createServiceClient()
+        const { data: settingsData } = await serviceClient
+            .from('site_settings')
+            .select('value')
+            .eq('id', 'notification_config')
+            .single()
+
+        const alertsEnabled = settingsData?.value?.new_order_alerts ?? true
+        
+        if (!alertsEnabled) {
+            console.log('[Email] Admin alerts are disabled in settings. Skipping.')
+            return
         }
-    } else {
-        console.warn('[Email] Skipping admin notification: ADMIN_EMAIL is not set in environment variables.')
+
+        const adminEmail = process.env.ADMIN_EMAIL
+        if (adminEmail) {
+            console.log(`[Email] Preparing admin notification for ${adminEmail}`)
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://savikafoods.in'
+            const adminHtml = `
+                <div style="font-family: sans-serif; padding: 25px; border: 1px solid #eee; border-radius: 12px;">
+                    <h2 style="color: #C17F24; margin-top: 0;">🚨 New Order Received!</h2>
+                    <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+                        <tr><td style="padding: 6px 0; font-weight: bold; width: 140px;">Order Number:</td><td>${order_number}</td></tr>
+                        <tr><td style="padding: 6px 0; font-weight: bold;">Customer:</td><td>${shipping_address.full_name}</td></tr>
+                        <tr><td style="padding: 6px 0; font-weight: bold;">Phone:</td><td>${shipping_address.mobile}</td></tr>
+                        <tr><td style="padding: 6px 0; font-weight: bold;">Email:</td><td>${to}</td></tr>
+                        <tr><td style="padding: 6px 0; font-weight: bold;">Total:</td><td style="color: #C17F24; font-weight: bold;">₹${total}</td></tr>
+                        <tr><td style="padding: 6px 0; font-weight: bold;">Address:</td><td>${shipping_address.street}, ${shipping_address.city}, ${shipping_address.pincode}</td></tr>
+                    </table>
+                    <div style="margin-top: 20px;">
+                        <a href="${appUrl}/admin/orders" style="display: inline-block; padding: 10px 24px; background: #C17F24; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold;">View in Admin Dashboard</a>
+                    </div>
+                </div>
+            `
+            const adminResult = await sendEmail({
+                to: adminEmail,
+                subject: `🚨 New Order: ${order_number} — ₹${total}`,
+                html: adminHtml,
+                idempotencyKey: `order-admin/${order_number}`
+            })
+            console.log('[Email] Admin notification result:', adminResult.success ? 'SUCCESS' : 'FAILED')
+            if (!adminResult.success) {
+                console.error('[Email] Admin notification failed details:', JSON.stringify(adminResult.error, null, 2))
+            }
+        } else {
+            console.warn('[Email] Skipping admin notification: ADMIN_EMAIL is not set.')
+        }
+    } catch (err) {
+        console.error('[Email] Error checking notification settings or sending admin alert:', err)
+        // Fallback: Try to send anyway if we can't check settings, to be safe
+        const adminEmail = process.env.ADMIN_EMAIL
+        if (adminEmail) {
+            await sendEmail({
+                to: adminEmail,
+                subject: `🚨 New Order: ${order_number} (Fallback)`,
+                html: `<p>A new order was received but there was an error checking notification settings.</p>`,
+            })
+        }
     }
 }

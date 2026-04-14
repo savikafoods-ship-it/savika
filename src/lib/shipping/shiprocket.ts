@@ -42,9 +42,11 @@ export async function createShiprocketOrder(orderData: any, token: string) {
     // Current date in YYYY-MM-DD format
     const orderDate = new Date().toISOString().split('T')[0]
 
+    const cleanPhone = (phone: string) => phone.replace(/\D/g, '').slice(-10)
+
     // Map Savika order data to Shiprocket format
     const payload = {
-        order_id: orderData.order_number.replace('#', 'SAV-'),
+        order_id: orderData.order_number, // Use the raw order number (e.g., SAV-12345)
         order_date: orderDate,
         pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || 'Primary',
         billing_customer_name: orderData.shipping_address.full_name.split(' ')[0],
@@ -55,7 +57,7 @@ export async function createShiprocketOrder(orderData: any, token: string) {
         billing_state: orderData.shipping_address.state,
         billing_country: 'India',
         billing_email: orderData.customer_email,
-        billing_phone: orderData.shipping_address.mobile,
+        billing_phone: cleanPhone(orderData.shipping_address.mobile),
         shipping_is_billing: true,
         order_items: orderData.items.map((item: any) => ({
             name: item.name,

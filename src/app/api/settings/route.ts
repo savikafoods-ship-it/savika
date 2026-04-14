@@ -10,13 +10,32 @@ export async function GET() {
 
     if (error) throw error
 
-    // Convert array to object
+    // Convert array to object, handling both 'id' and potential 'key' column
     const settings = data.reduce((acc: any, item: any) => {
-      acc[item.key] = item.value
+      const id = item.id || item.key
+      acc[id] = item.value
       return acc
     }, {})
 
-    return NextResponse.json(settings)
+    // Compatibility layer: Map old IDs to the names expected by the new frontend
+    const mappedSettings = {
+      ...settings,
+      store_profile: settings.store_profile || (settings.general ? {
+          name: settings.general.storeName,
+          email: settings.general.supportEmail,
+          phone: settings.general.supportPhone
+      } : null),
+      shipping_config: settings.shipping_config || (settings.shipping ? {
+          standard_rate: settings.shipping.standardShippingRate,
+          free_threshold: settings.shipping.freeShippingThreshold
+      } : null),
+      tax_config: settings.tax_config || (settings.tax ? {
+          gst_rate: settings.tax.defaultGstRate?.toString(),
+          include_tax: settings.tax.pricesIncludeTax
+      } : null)
+    }
+
+    return NextResponse.json(mappedSettings)
   } catch (error: any) {
     console.error('Settings GET error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -53,10 +72,11 @@ export async function PATCH(request: Request) {
     }
 
     // 3. Update using service client to bypass RLS
+    // Use 'id' column as confirmed by schema inspection
     const serviceClient = await createServiceClient()
     const { error } = await serviceClient
       .from('site_settings')
-      .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
+      .upsert({ id: key, value, updated_at: new Date().toISOString() }, { onConflict: 'id' })
 
     if (error) throw error
 
