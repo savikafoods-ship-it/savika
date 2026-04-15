@@ -63,13 +63,33 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, message: 'Already paid' })
     }
 
+    // Get temporary customer data from Razorpay notes
+    const razorpayNotes = order.rzp_order_id ? await serviceClient
+      .from('razorpay_orders')
+      .select('notes')
+      .eq('order_id', orderId)
+      .single()
+      .then((res: any) => res.data?.notes) : null
+
+    let customerData: any = {}
+    if (razorpayNotes) {
+      try {
+        customerData = JSON.parse(razorpayNotes)
+      } catch (e: any) {
+        console.error('Failed to parse customer data from Razorpay notes:', e)
+      }
+    }
+
     const { error: updateError } = await serviceClient
       .from('orders')
       .update({
         payment_status: 'paid',
         rzp_payment_id: razorpay_payment_id,
         rzp_signature: razorpay_signature,
-        status: 'processing' // Move from pending once paid
+        status: 'processing', // Move from pending once paid
+        customer_email: customerData.customer_email || order.temp_customer_email,
+        customer_name: customerData.customer_name || order.temp_customer_name,
+        shipping_address: customerData.shipping_address ? JSON.parse(customerData.shipping_address) : (order.temp_shipping_address ? JSON.parse(order.temp_shipping_address) : null)
       })
       .eq('id', orderId)
 

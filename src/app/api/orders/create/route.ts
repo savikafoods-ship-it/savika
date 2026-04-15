@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     // 9. Generate unique order code (SAV-XXXXX)
     const orderCode = 'SAV-' + Math.floor(10000 + Math.random() * 90000).toString()
 
-    // 10. Insert order into database (user_id is NULL for guests)
+    // 10. Insert minimal order into database (no customer details yet)
     const orderData: any = {
       order_number: orderCode,
       items: verifiedItems,
@@ -152,9 +152,6 @@ export async function POST(request: NextRequest) {
       status: 'pending',
       payment_method: 'online',
       payment_status: 'pending',
-      shipping_address,
-      customer_email: email,
-      customer_name: shipping_address.full_name,
       notes: notes ?? null,
     }
 
@@ -184,14 +181,22 @@ export async function POST(request: NextRequest) {
           currency: 'INR',
           receipt: order.order_number,
           notes: {
-            order_id: order.id
+            order_id: order.id,
+            customer_email: email,
+            customer_name: shipping_address.full_name,
+            shipping_address: JSON.stringify(shipping_address)
           }
         })
 
-        // Update order with Razorpay Order ID
+        // Update order with Razorpay Order ID and temporary customer data
         await serviceClient
           .from('orders')
-          .update({ rzp_order_id: razorpayOrder.id })
+          .update({ 
+            rzp_order_id: razorpayOrder.id,
+            temp_customer_email: email,
+            temp_customer_name: shipping_address.full_name,
+            temp_shipping_address: JSON.stringify(shipping_address)
+          })
           .eq('id', order.id)
       } catch (rzpErr: any) {
         console.error('Razorpay order creation error:', rzpErr)
