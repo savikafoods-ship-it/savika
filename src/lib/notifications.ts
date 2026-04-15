@@ -100,14 +100,21 @@ export async function sendOrderConfirmation(order: any) {
         </div>
     `
 
-    // 1. Send email to Customer
-    const customerResult = await sendEmail({ 
-        to, 
-        subject: `Order Confirmed: ${order_number}`, 
-        html: emailHtml,
-        idempotencyKey: `order-customer/${order_number}`
-    })
-    console.log('[Email] Customer notification result:', customerResult.success ? 'SUCCESS' : 'FAILED')
+    // 1. Send email to Customer (with fallback)
+    let customerResult
+    try {
+        const { sendEmailWithFallback } = await import('./email-fallback')
+        customerResult = await sendEmailWithFallback({ 
+            to, 
+            subject: `Order Confirmed: ${order_number}`, 
+            html: emailHtml,
+            idempotencyKey: `order-customer/${order_number}`
+        })
+        console.log('[Email] Customer notification result:', customerResult.success ? 'SUCCESS' : 'FAILED', customerResult.method || '')
+    } catch (emailError) {
+        console.error('[Email] Customer notification failed:', emailError)
+        customerResult = { success: false, error: emailError }
+    }
 
     // 2. Send notification to Admin (if enabled)
     try {
@@ -146,13 +153,20 @@ export async function sendOrderConfirmation(order: any) {
                     </div>
                 </div>
             `
-            const adminResult = await sendEmail({
-                to: adminEmail,
-                subject: `🚨 New Order: ${order_number} — ₹${total}`,
-                html: adminHtml,
-                idempotencyKey: `order-admin/${order_number}`
-            })
-            console.log('[Email] Admin notification result:', adminResult.success ? 'SUCCESS' : 'FAILED')
+            let adminResult
+            try {
+                const { sendEmailWithFallback } = await import('./email-fallback')
+                adminResult = await sendEmailWithFallback({
+                    to: adminEmail,
+                    subject: `🚨 New Order: ${order_number} — ₹${total}`,
+                    html: adminHtml,
+                    idempotencyKey: `order-admin/${order_number}`
+                })
+                console.log('[Email] Admin notification result:', adminResult.success ? 'SUCCESS' : 'FAILED', adminResult.method || '')
+            } catch (adminEmailError) {
+                console.error('[Email] Admin notification failed:', adminEmailError)
+                adminResult = { success: false, error: adminEmailError }
+            }
             if (!adminResult.success) {
                 console.error('[Email] Admin notification failed details:', JSON.stringify(adminResult.error, null, 2))
             }
