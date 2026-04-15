@@ -56,6 +56,12 @@ export default function CheckoutPage() {
         notes: ''
     })
 
+    // Validation errors
+    const [fieldErrors, setFieldErrors] = useState({
+        mobile: '',
+        pincode: ''
+    })
+
     // Coupon State
     const [couponCode, setCouponCode] = useState('')
     const [appliedCoupon, setAppliedCoupon] = useState<{code: string, discount: number} | null>(null)
@@ -133,15 +139,39 @@ export default function CheckoutPage() {
         }
     }
 
+    // Enhanced India-specific validation
     const validateInfo = () => {
         const required = ['full_name', 'mobile', 'email', 'street', 'city', 'state', 'pincode']
         for (const f of required) {
             if (!(formData as any)[f]) return false
         }
-        if (!/^[6-9]\d{9}$/.test(formData.mobile)) return false
+        
+        // Phone validation: Exactly 10 digits, starts with 6-9, no +91 or spaces
+        const cleanMobile = formData.mobile.replace(/\D/g, '') // Remove all non-digits
+        if (!/^[6-9]\d{9}$/.test(cleanMobile)) return false
+        
+        // Pincode validation: Exactly 6 digits only
         if (!/^\d{6}$/.test(formData.pincode)) return false
+        
+        // Email validation
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) return false
+        
         return true
+    }
+
+    // Real-time validation functions
+    const validateMobile = (mobile: string) => {
+        const cleanMobile = mobile.replace(/\D/g, '') // Remove all non-digits
+        if (cleanMobile.length > 10) return 'Mobile must be exactly 10 digits'
+        if (!/^[6-9]/.test(cleanMobile)) return 'Mobile must start with 6-9'
+        if (cleanMobile.length === 10 && !/^[6-9]\d{9}$/.test(cleanMobile)) return 'Invalid mobile number'
+        return ''
+    }
+
+    const validatePincode = (pincode: string) => {
+        if (pincode.length > 6) return 'Pincode must be exactly 6 digits'
+        if (!/^\d{6}$/.test(pincode)) return 'Pincode must be 6 digits only'
+        return ''
     }
 
     const handleProceedToPayment = () => {
@@ -323,9 +353,20 @@ export default function CheckoutPage() {
                                                 <FontAwesomeIcon icon={faPhone} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs" />
                                                 <input 
                                                     type="tel" required placeholder="10-digit mobile"
-                                                    value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})}
-                                                    className="w-full h-12 pl-11 pr-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                                    value={formData.mobile} 
+                                                    onChange={e => {
+                                                        const value = e.target.value.replace(/\D/g, '') // Only allow digits
+                                                        setFormData({...formData, mobile: value})
+                                                        const error = validateMobile(value)
+                                                        setFieldErrors({...fieldErrors, mobile: error})
+                                                    }}
+                                                    className={`w-full h-12 pl-11 pr-5 bg-gray-50 border rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold ${
+                                                        fieldErrors.mobile ? 'border-red-500' : 'border-gray-100'
+                                                    }`}
                                                 />
+                                                {fieldErrors.mobile && (
+                                                    <p className="text-xs text-red-500 mt-1">{fieldErrors.mobile}</p>
+                                                )}
                                             </div>
                                         </div>
                                         <div>
@@ -343,9 +384,20 @@ export default function CheckoutPage() {
                                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Pincode *</label>
                                             <input 
                                                 type="text" required placeholder="6-digit PIN"
-                                                value={formData.pincode} onChange={e => setFormData({...formData, pincode: e.target.value})}
-                                                className="w-full h-12 px-5 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold"
+                                                value={formData.pincode} 
+                                                onChange={e => {
+                                                    const value = e.target.value.replace(/\D/g, '') // Only allow digits
+                                                    setFormData({...formData, pincode: value})
+                                                    const error = validatePincode(value)
+                                                    setFieldErrors({...fieldErrors, pincode: error})
+                                                }}
+                                                className={`w-full h-12 px-5 bg-gray-50 border rounded-xl outline-none focus:border-[#C17F24] text-sm font-bold ${
+                                                    fieldErrors.pincode ? 'border-red-500' : 'border-gray-100'
+                                                }`}
                                             />
+                                            {fieldErrors.pincode && (
+                                                <p className="text-xs text-red-500 mt-1">{fieldErrors.pincode}</p>
+                                            )}
                                         </div>
                                         <div>
                                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Landmark</label>
