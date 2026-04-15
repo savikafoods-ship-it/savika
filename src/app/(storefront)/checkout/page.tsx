@@ -208,14 +208,27 @@ export default function CheckoutPage() {
             handler: async function (response: any) {
                 try {
                     setLoading(true)
+                    
+                    // Debug log to see what response we get
+                    console.log('Razorpay response:', response)
+                    
+                    // Extract payment details with fallbacks
+                    const razorpay_order_id = response.razorpay_order_id || response.order_id
+                    const razorpay_payment_id = response.razorpay_payment_id || response.payment_id || response.razorpay_payment_id
+                    const razorpay_signature = response.razorpay_signature || response.signature
+                    
+                    if (!razorpay_payment_id) {
+                        throw new Error('Payment ID not found in response')
+                    }
+                    
                     const res = await fetch('/api/razorpay/verify', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             orderId,
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature
+                            razorpay_order_id,
+                            razorpay_payment_id,
+                            razorpay_signature
                         })
                     })
                     const verifyData = await res.json()
@@ -226,6 +239,7 @@ export default function CheckoutPage() {
                         throw new Error(verifyData.error || 'Payment verification failed')
                     }
                 } catch (err: any) {
+                    console.error('Payment handler error:', err)
                     setError(err.message)
                     setLoading(false)
                 }

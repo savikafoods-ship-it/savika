@@ -4,15 +4,30 @@ import { createServiceClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
+    const body = await request.json()
+    console.log('Razorpay verification request body:', body)
+    
     const { 
       orderId,
       razorpay_order_id, 
       razorpay_payment_id, 
       razorpay_signature 
-    } = await request.json()
+    } = body
 
-    if (!orderId || !razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return NextResponse.json({ error: 'Missing payment details' }, { status: 400 })
+    if (!orderId) {
+      return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
+    }
+    
+    if (!razorpay_order_id) {
+      return NextResponse.json({ error: 'Missing razorpay_order_id' }, { status: 400 })
+    }
+    
+    if (!razorpay_payment_id) {
+      return NextResponse.json({ error: 'Missing razorpay_payment_id' }, { status: 400 })
+    }
+    
+    if (!razorpay_signature) {
+      return NextResponse.json({ error: 'Missing razorpay_signature' }, { status: 400 })
     }
 
     // 1. Verify Signature
@@ -52,8 +67,8 @@ export async function POST(request: NextRequest) {
       .from('orders')
       .update({
         payment_status: 'paid',
-        rzp_payment_id,
-        rzp_signature,
+        rzp_payment_id: razorpay_payment_id,
+        rzp_signature: razorpay_signature,
         status: 'processing' // Move from pending once paid
       })
       .eq('id', orderId)
