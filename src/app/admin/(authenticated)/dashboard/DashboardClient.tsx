@@ -96,7 +96,11 @@ export default function DashboardClient({ stats, revenueData, topProducts, recen
                                     axisLine={false}
                                     tickLine={false}
                                     tick={{ fill: '#6B7280', fontSize: 10, fontWeight: 600 }} 
-                                    tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} 
+                                    tickFormatter={(v) => {
+                                        if (v === 0) return '₹0'
+                                        if (v >= 1000) return `₹${(v / 1000).toFixed(0)}k`
+                                        return `₹${v}`
+                                    }} 
                                 />
                                 <Tooltip 
                                     cursor={{ stroke: '#ffffff10', strokeWidth: 2 }}
