@@ -53,12 +53,7 @@ export default function ProductCommercePanel({ productData }: { productData: any
     const savings = comparePrice && comparePrice > displayPrice ? comparePrice - displayPrice : 0
     const savingsPct = savings > 0 ? Math.round((savings / comparePrice) * 100) : 0
 
-    // Debug logging
-    console.log('[CommercePanel] RAW productData.weight_options:', productData.weight_options)
-    console.log('[CommercePanel] RAW productData.weightOptions:', productData.weightOptions)
-    console.log('[CommercePanel] weightOptions PARSED:', JSON.stringify(weightOptions))
-    console.log('[CommercePanel] selectedIndex:', selectedIndex, 'selectedVariant:', JSON.stringify(selectedVariant), 'displayPrice:', displayPrice)
-
+        
     const handleAddToCart = () => {
         setAdding(true)
 

@@ -42,13 +42,9 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
         fetchReviews()
     }, [productId])
 
-    const [fetchError, setFetchError] = useState<string | null>(null)
-    const [debugInfo, setDebugInfo] = useState<string>('')
 
     const fetchReviews = async () => {
         try {
-            setFetchError(null)
-            // Use a simpler select first to ensure visibility
             const { data, error } = await supabase
                 .from('reviews')
                 .select('*') 
@@ -58,10 +54,8 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
             if (error) throw error
             
             setReviews(data || [])
-            setDebugInfo(`Found ${data?.length || 0} reviews for ID: ${productId}`)
         } catch (err: any) {
             console.error('Error fetching reviews:', err)
-            setFetchError(err.message)
         } finally {
             setLoading(false)
         }
@@ -230,15 +224,6 @@ export default function ReviewsSection({ productId }: ReviewsSectionProps) {
                 </div>
             </div>
 
-            {/* DEBUG INFO - Temp for troubleshooting production */}
-            {(fetchError || debugInfo) && (
-                <div className="mt-8 p-4 bg-gray-900 rounded-xl border border-gray-800 font-mono text-[10px] text-gray-500 overflow-auto">
-                    <p className="font-bold text-gray-400 mb-2 uppercase tracking-widest">Diagnostic Info</p>
-                    {fetchError && <p className="text-red-400 mb-1">Status: ERROR - {fetchError}</p>}
-                    {debugInfo && <p className="text-blue-400 mb-1">Status: OK - {debugInfo}</p>}
-                    <p>Browser: {typeof window !== 'undefined' ? window.location.host : 'Server'}</p>
-                </div>
-            )}
         </section>
     )
 }
