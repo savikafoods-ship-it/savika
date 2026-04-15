@@ -152,6 +152,7 @@ export async function POST(request: NextRequest) {
       status: 'pending',
       payment_method: 'online',
       payment_status: 'pending',
+      shipping_address: { full_name: 'Pending Payment', mobile: '0000000000', street: 'Pending', city: 'Pending', state: 'Pending', pincode: '000000' }, // Placeholder to satisfy NOT NULL constraint
       notes: notes ?? null,
     }
 
