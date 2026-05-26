@@ -12,8 +12,8 @@ const WHATSAPP_MESSAGE = encodeURIComponent('Hi Savika Support, I have a questio
 export default function WhatsAppFloat() {
   const pathname = usePathname()
   
-  // Hide WhatsApp button on admin routes
-  if (pathname?.startsWith('/admin')) return null
+  // Hide WhatsApp button on admin and maintenance routes
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/maintenance')) return null
 
   return (
     <div className="fixed bottom-6 right-6 z-50 group">
