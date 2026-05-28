@@ -11,7 +11,9 @@ import { NextRequest, NextResponse } from 'next/server'
  * To disable: Set MAINTENANCE_MODE=false (or remove the line), restart the server
  */
 export function middleware(request: NextRequest) {
-  const isMaintenanceMode = process.env.MAINTENANCE_MODE === 'true'
+  // Force maintenance mode to be active by default.
+  // Set this to false to reverse and bring the website back online.
+  const isMaintenanceMode = true
 
   if (!isMaintenanceMode) {
     return NextResponse.next()
