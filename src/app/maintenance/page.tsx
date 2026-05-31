@@ -32,7 +32,7 @@ export default function MaintenancePage() {
         </h1>
         <p style={styles.subtext}>
           We apologize for any inconveniences caused.<br />
-          We're almost done.
+          We&apos;re almost done.
         </p>
 
         {/* Plug & Socket Connection Illustration */}
@@ -127,7 +127,7 @@ export default function MaintenancePage() {
   )
 }
 
-const styles: Record<string, React.CSSProperties> = {
+const styles: Record<string, any> = {
   container: {
     minHeight: '100vh',
     width: '100vw',
